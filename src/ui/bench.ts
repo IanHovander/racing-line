@@ -61,12 +61,13 @@ export async function bench(secs = 6): Promise<BenchResult[]> {
   console.table(res);
   const out = $('benchOut');
   if (out)
-    out.innerHTML = res
-      .map(
-        b =>
-          `<div><b>${b.renderer}</b> <span class="m">${b.fps.toFixed(0)}</span> fps · draw <span class="m">${b.renderMean.toFixed(1)}</span> ms avg, <span class="m">${b.renderP95.toFixed(1)}</span> ms p95 · frame p95 <span class="m">${b.frameP95.toFixed(1)}</span> ms</div>`,
-      )
-      .join('') + `<div class="trk">${GS.TR.name} · ${W}×${H} · ${devicePixelRatio}x</div>`;
+    out.innerHTML =
+      res
+        .map(
+          b =>
+            `<div><b>${b.renderer}</b> <span class="m">${b.fps.toFixed(0)}</span> fps · draw <span class="m">${b.renderMean.toFixed(1)}</span> ms avg, <span class="m">${b.renderP95.toFixed(1)}</span> ms p95 · frame p95 <span class="m">${b.frameP95.toFixed(1)}</span> ms</div>`,
+        )
+        .join('') + `<div class="trk">${GS.TR.name} · ${W}×${H} · ${devicePixelRatio}x</div>`;
   return res;
 }
 export function init(): void {

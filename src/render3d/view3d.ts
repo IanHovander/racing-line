@@ -88,7 +88,13 @@ const mat = (col, extra?) =>
   new THREE.MeshLambertMaterial({ color: new THREE.Color(col), side: THREE.DoubleSide, ...extra });
 
 /** a band along the track between signed offsets a(i) .. b(i) (positive = right), lifted dz */
-function band(a: (i: number) => number, b: (i: number) => number, dz: number, col, keep?: (i: number) => boolean) {
+function band(
+  a: (i: number) => number,
+  b: (i: number) => number,
+  dz: number,
+  col,
+  keep?: (i: number) => boolean,
+) {
   const pos: number[] = [],
     idx: number[] = [];
   const N = GS.N;
@@ -146,7 +152,14 @@ function buildWorld() {
     world.add(m);
   }
   // run-off, its sides down to the ground, gravel, paint, white lines, asphalt, kerbs
-  world.add(band(i => OVR(GS.SIDES, i), i => -OVL(GS.SIDES, i), 0, TR.run));
+  world.add(
+    band(
+      i => OVR(GS.SIDES, i),
+      i => -OVL(GS.SIDES, i),
+      0,
+      TR.run,
+    ),
+  );
   for (const sg of [1, -1]) {
     const A = sg > 0 ? GS.BARR : GS.BARL;
     const pos: number[] = [],
@@ -194,8 +207,22 @@ function buildWorld() {
       });
     }
   }
-  world.add(band(() => HW + 0.45, () => -(HW + 0.45), 0.02, '#ececec'));
-  world.add(band(() => HW, () => -HW, 0.03, opts.rain ? '#35373c' : '#46484e'));
+  world.add(
+    band(
+      () => HW + 0.45,
+      () => -(HW + 0.45),
+      0.02,
+      '#ececec',
+    ),
+  );
+  world.add(
+    band(
+      () => HW,
+      () => -HW,
+      0.03,
+      opts.rain ? '#35373c' : '#46484e',
+    ),
+  );
   world.add(
     band(
       i => GS.off[i] + 1.1,
@@ -258,7 +285,12 @@ function buildWorld() {
     lineGeo.setIndex(idx);
     const m = new THREE.Mesh(
       lineGeo,
-      new THREE.MeshBasicMaterial({ vertexColors: true, transparent: true, depthWrite: false, side: THREE.DoubleSide }),
+      new THREE.MeshBasicMaterial({
+        vertexColors: true,
+        transparent: true,
+        depthWrite: false,
+        side: THREE.DoubleSide,
+      }),
     );
     m.frustumCulled = false;
     world.add(m);
