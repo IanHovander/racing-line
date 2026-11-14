@@ -349,6 +349,15 @@ Playable build: https://matthewtorgerson.github.io/racing-line/ (GitHub Pages, b
 - Build: `dist/index.html` loads `main.js` / `main.css` with a `?v=<content hash>` so a fresh page never runs a stale cached bundle (GitHub Pages caches for ~10 min).
 - Coach: a personal-best sector shows "Best sector 2 · 22.56" with the gain on your previous best (purple dot when it is also the fastest of anyone).
 
+## v17.7 — three.js renderer (beta), one music theme
+
+- **Renderer switch** (Settings → Display → Renderer: Canvas / 3D three.js beta; or `?three` / `?canvas` in the URL; stored as `r3d`). `render3d/switch.ts` loads `render3d/view3d.ts` (and three.js, ~530 KB) on demand into its own chunk (esbuild `splitting`), so canvas players don't download it.
+  - Same framing as the canvas: the canvas projection `P()` is written as one affine camera matrix, so HUD, minimap and touch layout are unchanged. Depth runs along the view direction.
+  - Draws: ground, water, run-off (with skirts down to the ground), gravel, painted run-off, white lines, asphalt, rubbered line, kerbs, start chequers, racing line (vertex colours updated per frame, dashed), barriers (face, top, back), buildings (extruded footprints), trees (instanced: three-cone pines, round trees with trunks), cars (extruded body/pods/cover/wings, cylinder tyres, helmet, shadow). The canvas, kept on top, draws the car markers, name tags and minimap.
+  - Not yet in 3D: flags and flag poles, sponsor boards and catch fences, sector boards and turn numbers, pit lane markings and garages' colour stripes, tunnel, bridge, Ferris wheel, sphere, skids, particles, rain, night lighting, shadows.
+- **Benchmark**: Settings → Display → Run Benchmark (or `bench()` in the console) runs the race behind the menu for 6 s with each renderer and reports fps, render() time (CPU) mean / p95 and frame-time p95 (`ui/bench.ts`, `PERF` in `game/loop.ts`).
+- **Music**: one theme for the whole game, the Ardennes Forest new beat. The other circuit themes, the drive layer and their instruments are removed.
+
 ## Model
 
 - Tracks: control points → Catmull-Rom → smoothed and resampled every 2 m (`buildTrack()`). Long straights need intermediate control points: without them the spline overshoots at the next tight corner and makes a near-cusp (a 4–7 m radius). That happened on the first Mexico and Vegas drafts.

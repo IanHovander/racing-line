@@ -2098,3 +2098,12 @@ body.touch #notes:not(.menu) {
 #lbTrackTitle:empty {
   display: none;
 }
+#benchOut {
+  margin-top: 6px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #c4c9d1;
+}
+#benchOut .m {
+  font-family: var(--mono);
+}

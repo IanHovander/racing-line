@@ -6,17 +6,7 @@ import { clamp } from '../core/dom';
 import { attract, cars, opts } from '../game/race';
 import { input } from '../input/input';
 import { GEARTOP, autoGear, isManual } from '../sim/car-model';
-export const TRACK_THEME = {
-  mexico: 'mariachi',
-  texas: 'western',
-  paulista: 'samba',
-  monte: 'baroque',
-  sakhir: 'arabic',
-  suzuka: 'japan',
-  spa: 'newbeat',
-  singapore: 'marina',
-};
-export const curTheme = () => THEMES[TRACK_THEME[GS.musId || GS.TR.id]] || THEMES.electro;
+export const curTheme = () => THEMES.newbeat;
 export function playStep(s, t) {
   if (!opts.music) return;
   curTheme().play(s, t);

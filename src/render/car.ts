@@ -228,6 +228,11 @@ export function drawCar0(c, isMe, isMate) {
     const on = !opts.rain || Math.floor(performance.now() / 220 + c.number) % 2;
     if (on) GLOWS.push([rp[0], rp[1], Math.max(4, cam.zoom * 0.9), '255,40,30', 0.9]);
   }
+  drawCarMarks(c, isMe, isMate);
+}
+
+/** flashing light on a stopped car, your car's marker (and your teammate's), name tags of other players */
+export function drawCarMarks(c, isMe, isMate) {
   if (c.out && Math.floor(performance.now() / 350) % 2) {
     const q = P(c.x, c.y, 1.3);
     ctx.fillStyle = '#ffb000';

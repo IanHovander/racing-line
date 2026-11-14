@@ -1,20 +1,17 @@
-// three.js render layer (experimental, branch three-js). Turn it on with ?three in the URL (or
-// store 'r3d' = true). It draws the same world as the canvas renderer, in WebGL, with the same
+// three.js render layer (experimental). Turned on from Settings → Display → Renderer, or ?three in
+// the URL (see switch.ts, which loads this module on demand). It draws the same world as the canvas renderer, in WebGL, with the same
 // framing: the camera matrix below is the canvas projection P(x, y, z) from render/camera.ts written
 // as one affine matrix, so the HUD, the minimap and every screen-space layout stay where they are.
 //
 // World axes are the game's: x, y on the ground, z up, in metres.
 import * as THREE from 'three';
 import { GS } from '../state';
-import { H, W, cv, store } from '../core/dom';
+import { H, W, cv } from '../core/dom';
 import { attract, cars, opts } from '../game/race';
 import { cam } from '../render/camera';
 import { BODY, COVER, FPLATE, FWING, PODS, RPLATE, RWING, WHEELS, rect } from '../render/car';
 import { liveZone, profileFor } from '../sim/profile';
 import { shade } from '../teams/teams';
-
-/** is the three.js layer on? */
-export let on3d = false;
 
 let renderer: any = null,
   scene: any = null,
@@ -25,14 +22,15 @@ let renderer: any = null,
   lineCol: Float32Array | null = null;
 const carObjs = new Map<any, any>();
 
-export function init(): void {
-  on3d = /[?&]three\b/.test(location.search) || store.get('r3d', false) === true;
-  if (!on3d) return;
+let glCanvas: HTMLCanvasElement | null = null;
+/** create the WebGL canvas (under the game canvas, which stays on top for the overlays) and the scene */
+export function start(): void {
+  if (renderer) return;
   const gl = document.createElement('canvas');
   gl.id = 'gl3';
   gl.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;display:block;';
   cv.parentNode.insertBefore(gl, cv);
-  cv.style.background = 'transparent';
+  glCanvas = gl;
   renderer = new THREE.WebGLRenderer({ canvas: gl, antialias: true });
   renderer.setPixelRatio(Math.min(2, devicePixelRatio || 1));
   scene = new THREE.Scene();
@@ -77,6 +75,10 @@ function updateCamera3d() {
     1,
   );
   camera.projectionMatrixInverse.copy(m).invert();
+}
+
+export function show(on: boolean): void {
+  if (glCanvas) glCanvas.style.display = on ? 'block' : 'none';
 }
 
 // ---------- track geometry ----------
@@ -415,7 +417,7 @@ function updateLine() {
 
 /** draw one frame; returns false when the layer is off */
 export function render3d(): boolean {
-  if (!on3d || !renderer) return false;
+  if (!renderer) return false;
   const key = GS.TR && GS.TR.id + ':' + GS.N + ':' + GS.seed;
   if (builtFor !== key) {
     builtFor = key;
