@@ -1,3 +1,4 @@
+import { startHint } from '../sim/start';
 import { GS } from '../state';
 import { $, clamp } from '../core/dom';
 import { attract, cars, goAt, opts } from '../game/race';
@@ -195,7 +196,7 @@ export function hud(dt) {
     el._zt = setTimeout(() => { el.style.zIndex = ''; }, 480);
   }
 }
-export function updateLights() { const el = $('lights'); const n = Math.min(5, Math.floor(GS.cdT)); el.style.display = GS.state === 'countdown' ? 'flex' : 'none'; ([...el.children] as HTMLElement[]).forEach((d, i) => d.classList.toggle('on', i < n && GS.cdT < goAt)); }
+export function updateLights() { const sh = $('startHint'); if (sh) { const on = GS.state === 'countdown' && !attract && GS.cdT > 0.5; sh.style.display = on ? 'block' : 'none'; if (on) sh.textContent = startHint(); } const el = $('lights'); const n = Math.min(5, Math.floor(GS.cdT)); el.style.display = GS.state === 'countdown' ? 'flex' : 'none'; ([...el.children] as HTMLElement[]).forEach((d, i) => d.classList.toggle('on', i < n && GS.cdT < goAt)); }
 /** debug/test hook: reassign a module-level binding */
 export function __set(name: string, v: any): void {
   switch (name) {

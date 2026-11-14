@@ -270,6 +270,17 @@ Playable build: https://matthewtorgerson.github.io/racing-line/ (GitHub Pages, b
   - The gear opens the same panel with only the Driving and Display & sound settings and a Done button.
 - The "Tap anywhere to start the music" hint is gone; music still starts on the first tap, click or key.
 
+## v17.2 — timing-based starts (`src/sim/start.ts`)
+- Cars stay on the grid after lights out until their driver reacts.
+- **Your launch:** press the throttle after the lights go out. In pedal modes without a GAS pad (Brake only, Auto), any tap or key launches the car. The text under the lights says which ("Hit the GAS / Tap when the lights go out").
+- **Reaction time sets the launch**, shown as a coaching message:
+  - under 0.2 s: "Perfect start", +15% drive for 2 s
+  - under 0.35 s: "Good start", +7% for 2 s
+  - over 0.6 s: "Slow start"
+- **Jump start:** holding the throttle as the lights go out costs +5 s (a warning in practice) and an orange race-control banner.
+- **Fallbacks:** if you don't react within 3 s the car goes anyway. After 8 s every car counts as launched (late join, swapped car).
+- **AI reaction:** 0.12–0.55 s, quicker for drivers with high consistency, so the field spreads off the line.
+
 ## Model
 - Tracks: control points → Catmull-Rom → smoothed and resampled every 2 m (`buildTrack()`). Long straights need intermediate control points: without them the spline overshoots at the next tight corner and makes a near-cusp (a 4–7 m radius). That happened on the first Mexico and Vegas drafts.
 - Per-track options: `hw`, `smooth`, `street`, `water`, `tunnel`, `night`, `palms`, `runoffAsphalt`, `elev`, `paint`. New in v13:

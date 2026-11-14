@@ -1,3 +1,4 @@
+import { START, launchGate, lightsOut } from './start';
 import { GS } from '../state';
 import { crashSnd } from '../audio/audio';
 import { cheer } from '../audio/crowd';
@@ -98,6 +99,10 @@ export function step(dt) {
   }
   if (GS.state === 'race' || GS.state === 'finished' || GS.state === 'menu')
     GS.raceTime += dt;
+  if (GS.state === 'race' && !START.done) {
+    START.done = true;
+    lightsOut();
+  }
   if (opts.rain)
     updateRain(dt);
   for (const c of cars) {
@@ -132,6 +137,9 @@ export function step(dt) {
       u = controlPlayer(c, dt);
     else
       u = controlAI(c, dt, c.finished ? 0.72 : c.skill);
+    // timing-based start: hold on the grid until the driver reacts to lights out
+    if (GS.state === 'race' && !c.out && !launchGate(c, !attract && i === GS.ctrl && !c.finished))
+      u = [0, 1, u[2]];
     physics(c, dt, u[0], u[1], u[2]);
     if (opts.tyres && !attract && GS.state === 'race' && !c.out) {
       const k = 0.42 / (opts.laps * GS.L), dist = c.v * dt;

@@ -180,3 +180,5 @@ body.touch #spd{bottom:auto;top:auto;bottom:110px}
   #menu .card{border-radius:22px 22px 0 0;max-height:88vh;padding-bottom:calc(18px + env(safe-area-inset-bottom));animation:sheetUp .25s ease-out}
   #menu .card::before{content:"";display:block;width:40px;height:5px;border-radius:3px;background:rgba(255,255,255,.25);margin:-6px auto 10px}
 }
+
+#startHint{position:fixed;top:122px;left:50%;transform:translateX(-50%);display:none;background:rgba(12,14,19,.85);color:#fff;font:700 13px/1 system-ui,-apple-system,sans-serif;letter-spacing:.5px;padding:8px 14px;border-radius:16px;white-space:nowrap;pointer-events:none}

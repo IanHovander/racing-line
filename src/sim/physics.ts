@@ -50,7 +50,9 @@ export function physics(c, dt, thr, brk, kd) {
   const grip = [GRIP, 31, 18, 10, 22, 19][surf] * (1 - 0.2 * c.dirt) * st.grip * c.gm * (opts.rain ? [0.72, 0.55, 0.7, 0.85, 0.7, 0.55][surf] : 1);
   const v = c.v;
   const dr = c.drs ? 1 : 0;
-  let a = thr * (13 * st.acc * (1 + 0.06 * dr) * gE * (1 - 0.25 * c.dmg) * Math.max(0, 1 - (v / (VMAX * st.top * (1 + 0.075 * c.tow + 0.055 * dr) * (1 - 0.12 * c.dmg))) ** 2) + 0.9 * c.tow * (gE > 0 ? 1 : 0));
+  if (c.boostT > 0)
+    c.boostT -= dt;   // launch boost after a quick start
+  let a = thr * (c.boostT > 0 ? c.launchBoost : 1) * (13 * st.acc * (1 + 0.06 * dr) * gE * (1 - 0.25 * c.dmg) * Math.max(0, 1 - (v / (VMAX * st.top * (1 + 0.075 * c.tow + 0.055 * dr) * (1 - 0.12 * c.dmg))) ** 2) + 0.9 * c.tow * (gE > 0 ? 1 : 0));
   if (thr < 0.05)
     a -= 2.5 + v * 0.02 + (man ? 2.2 * Math.min(1, v / GEARTOP[c.gear]) : 0); // engine braking is stronger in a lower gear
   // lock-ups: braking hard while still turning asks more of the tyres than they have -> the fronts lock, braking and steering suffer

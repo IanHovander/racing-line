@@ -1,4 +1,4 @@
-// Exposes every game binding on window (get + set) for the browser console and the Playwright tests: open the game with ?debug.
+// Exposes every game binding (add new modules to the imports and MODS below) on window (get + set) for the browser console and the Playwright tests: open the game with ?debug.
 import { GS } from './state';
 import * as m0 from './core/dom';
 import * as m1 from './track/circuits';
@@ -48,7 +48,10 @@ import * as m44 from './ui/menu';
 import * as m45 from './ui/wizard';
 import * as m46 from './game/loop';
 
-const MODS: any[] = [m0, m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12, m13, m14, m15, m16, m17, m18, m19, m20, m21, m22, m23, m24, m25, m26, m27, m28, m29, m30, m31, m32, m33, m34, m35, m36, m37, m38, m39, m40, m41, m42, m43, m44, m45, m46];
+import * as m47 from './sim/start';
+import * as m48 from './ui/home';
+
+const MODS: any[] = [m47, m48, m0, m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12, m13, m14, m15, m16, m17, m18, m19, m20, m21, m22, m23, m24, m25, m26, m27, m28, m29, m30, m31, m32, m33, m34, m35, m36, m37, m38, m39, m40, m41, m42, m43, m44, m45, m46];
 export function installDebug(): void {
   const w = window as any;
   for (const k of Object.keys(GS)) def(k, () => (GS as any)[k], (v) => { (GS as any)[k] = v; });

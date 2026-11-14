@@ -1,3 +1,4 @@
+import { START } from '../sim/start';
 import { GS } from '../state';
 import { audioStatus } from '../audio/audio';
 import { attract, cars, opts } from '../game/race';
@@ -20,6 +21,10 @@ export const KEYMAP = { ArrowUp: 'thr', KeyW: 'thr', Space: 'thr', ArrowDown: 'b
 // typing in a text box (name, room code) must not drive the car or trigger shortcuts
 export const typing = e => { const t = e.target; return !!t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable); };
 export function init(): void {
+  // any tap or key after lights out can launch the car in pedal modes without a GAS pad (capture phase: pads stop propagation)
+  const tap = () => { if (GS.state === 'race') START.tap = true; };
+  addEventListener('pointerdown', tap, true);
+  addEventListener('keydown', e => { if (!typing(e) && !e.repeat) tap(); }, true);
   addEventListener('keydown', e => {
     if (typing(e))
       return;

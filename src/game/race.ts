@@ -1,3 +1,4 @@
+import { START } from '../sim/start';
 import type { Car } from '../types';
 import { GS } from '../state';
 import { $, H, W, clamp, store } from '../core/dom';
@@ -32,6 +33,8 @@ export function prewarmFlags() { const base = clamp(Math.min(W, H) / 68, 4.6, 11
   }
 } }
 export function setupRace(isAttract, mpGrid?) {
+  START.done = false;
+  START.tap = false;
   setTimeout(prewarmFlags, 30);
   GS.LANE_SEL = 0;
   GS.SWAP = null;
