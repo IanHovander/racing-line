@@ -164,6 +164,67 @@ export function updatePads() {
   $('bSteer').textContent = ['Steer: Auto', 'Steer: Lanes', 'Steer: Manual', 'Steer: Overtake'][opts.steer];
   $('laneInd').classList.toggle('hide', (opts.steer !== 1 && opts.steer !== 3) || attract);
   renderLaneInd();
+  layoutPads();
+}
+const vis = (id: string) => !$(id).classList.contains('hide');
+/** touch layout: the speed panel sits left of the pedal pads (bottom-aligned) and Swap sits above the main pedal */
+export function layoutPads() {
+  const spd = $('spd'),
+    sw = $('pSwap');
+  spd.style.cssText = '';
+  sw.style.cssText = '';
+  spd.classList.remove('compact');
+  if (!isTouch || GS.state === 'menu') return;
+  const right = ['pThr', 'pBrk'].filter(vis).map(id => $(id).getBoundingClientRect());
+  const W = innerWidth,
+    H = innerHeight;
+  if (right.length) {
+    const padL = Math.min(...right.map(r => r.left)),
+      padTop = Math.min(...right.map(r => r.top)),
+      leftEdge = Math.max(10, ...['pL', 'pR', 'pDn'].filter(vis).map(id => $(id).getBoundingClientRect().right + 10));
+    const main = right.reduce((a, r) => (r.right > a.right ? r : a));
+    const bottom = H - Math.max(...right.map(r => r.bottom));
+    if (H > W) {
+      // portrait: fill the space between any left pads and the pedals
+      let w = padL - 10 - leftEdge,
+        b = bottom,
+        l = leftEdge;
+      if (w < 180) {
+        // steering pads on the left too: sit above them instead
+        const lt = Math.min(...['pL', 'pR', 'pDn'].filter(vis).map(id => $(id).getBoundingClientRect().top));
+        l = 10;
+        w = padL - 20;
+        b = H - lt + 10;
+      }
+      spd.style.left = l + 'px';
+      spd.style.width = w + 'px';
+      spd.style.transform = 'none';
+      spd.style.bottom = b + 'px';
+      spd.classList.toggle('compact', w < 250);
+    } else {
+      const w = 262;
+      spd.style.left = Math.max(leftEdge, padL - 12 - w) + 'px';
+      spd.style.width = w + 'px';
+      spd.style.transform = 'none';
+      spd.style.bottom = bottom + 'px';
+    }
+    // Swap: centred above the main pedal, and above the gear-up / DRS pads if they are there
+    if (vis('pSwap')) {
+      const sr = sw.getBoundingClientRect();
+      let top = padTop;
+      for (const id of ['pUp', 'pDRS'])
+        if (vis(id)) {
+          const r = $(id).getBoundingClientRect();
+          if (r.right > main.left && r.left < main.right) top = Math.min(top, r.top);
+        }
+      sw.style.left = main.left + main.width / 2 - sr.width / 2 + 'px';
+      sw.style.right = 'auto';
+      sw.style.bottom = H - top + 12 + 'px';
+    }
+  }
+}
+export function init(): void {
+  addEventListener('resize', () => setTimeout(layoutPads, 50));
 }
 /** debug/test hook: reassign a module-level binding */
 export function __set(name: string, v: any): void {

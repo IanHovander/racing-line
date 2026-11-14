@@ -32,7 +32,11 @@ export function hud(dt) {
   $('hLap').textContent = GS.PRACTICE
     ? 'PRACTICE · LAP ' + Math.max(1, c.cross)
     : 'LAP ' + clamp(c.cross, 1, opts.laps) + '/' + opts.laps + (c.finished ? ' ✓' : '');
-  $('hTime').textContent = GS.state === 'countdown' ? 'Get ready…' : fmt(GS.raceTime);
+  {
+    // no race clock in the panel; only "Get ready…" before the start
+    const t = GS.state === 'countdown' ? 'Get ready…' : '';
+    if ($('hTime').textContent !== t) $('hTime').textContent = t;
+  }
   const kmh = Math.round(c.v * 3.6);
   const gear = isManual(c) ? c.gear : c.v < 1 ? 'N' : autoGear(c.v);
   {

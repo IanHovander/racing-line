@@ -339,6 +339,8 @@ Playable build: https://matthewtorgerson.github.io/racing-line/ (GitHub Pages, b
 - Lap complete is now one line: laps done and the gap to the leader ("Lap 2 of 5 · 3.4 s behind Vance", or "Leading by 1.8 s"); the dot colour still grades the lap. The big lap card, the old centre toast and the race-control banner are gone.
 - Timing panel: no Last / Best lines. Time penalties are a yellow "+5" / "+10" badge floating just right of the panel on that driver's row. Your teammate's row is outlined instead of filled grey.
 - Race-control notes: a black-and-white track-limits flag icon for track-limits warnings, a warning-triangle icon (and orange outline) for time penalties.
+- Touch layout (`layoutPads()` in `ui/controls.ts`, run by `updatePads` and on resize): the speed panel sits left of the pedal pads, bottom-aligned (compact: no pedal bars, when narrower than 250 px; above the steering pads when those take the left side); Swap sits centred above the main pedal (above the gear-up / DRS pads if present). The big throttle-only GAS pad is `min(40vw, 190px)` wide.
+- Timing panel: no race clock (only "Get ready…" before the start).
 - Coach: a personal-best sector shows "Best sector 2 · 22.56" with the gain on your previous best (purple dot when it is also the fastest of anyone).
 
 ## Model
