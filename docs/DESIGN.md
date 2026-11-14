@@ -344,6 +344,7 @@ Playable build: https://matthewtorgerson.github.io/racing-line/ (GitHub Pages, b
 - Timing panel gaps are relative to your car: −x.x for cars ahead, +x.x behind, ±nL when lapped; your own row has no gap.
 - Fonts: **Geist** (sans, SIL OFL, `public/fonts/Geist-Variable.woff2`, CSS `--sans`) for all text, Geist Mono (`--mono`) for numbers; canvas labels use Geist too.
 - Circuit picker: a row of host-nation flag buttons at the top jumps straight to a circuit (replaces the dots). In landscape the map takes the full height on the left; flags, name and details are on the right. Monaco and Bahrain flags added.
+- Panels: no step headings (the tabs say it); the title carries a breadcrumb once the session type is known ("Single Player › Practice", "Multiplayer › Race · Room CODE"). Circuit place line is one line ("· Night · Street", ellipsis if still too long).
 - Coach: a personal-best sector shows "Best sector 2 · 22.56" with the gain on your previous best (purple dot when it is also the fastest of anyone).
 
 ## Model

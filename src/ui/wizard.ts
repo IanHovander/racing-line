@@ -54,16 +54,20 @@ export function wzGo(n) {
     .querySelectorAll<HTMLElement>('#sMode .g-mp')
     .forEach(e => (e.style.display = g === 'mp' ? '' : 'none'));
   $('mpNote').style.display = g === 'mp' ? '' : 'none';
-  $('wz0T').textContent = g === 'mp' ? 'Start a Room or Join One' : 'What kind of session?';
   $('wzNav').style.display = g === 'solo' ? '' : 'none';
   document
     .querySelectorAll<HTMLElement>('#menu .wz[data-s="3"] .sect')
     .forEach(
       e => (e.style.display = prefs && (e.dataset.grp === 'race' || e.dataset.grp === 'rules') ? 'none' : ''),
     );
-  document.querySelector<HTMLElement>('#menu .wz[data-s="3"] .wzT').textContent = prefs
-    ? 'Settings'
-    : 'Race Settings';
+  // title with a breadcrumb once the session type is picked: "Single Player › Practice"
+  $('pnlTitle').innerHTML =
+    g === 'solo'
+      ? 'Single Player' +
+        (WZ.picked ? `<span class="crumb">›</span><span class="crumb2">${WZ.mode === 'practice' ? 'Practice' : 'Race'}</span>` : '')
+      : g === 'mp'
+        ? 'Multiplayer'
+        : 'Settings';
   $('wzBar').style.display = g === 'mp' ? 'none' : '';
   const last = n === 3;
   $('helpTxt').style.display = last && !prefs ? '' : 'none';

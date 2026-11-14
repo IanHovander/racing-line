@@ -118,7 +118,7 @@ export function syncCircuit() {
   const cols = CIRCUIT_COLS[t.id] || [];
   $('trkInfo').innerHTML =
     `<div class="tname"><span class="cb">${cols.map(c => `<i style="background:${c}"></i>`).join('')}</span>${t.name}</div>` +
-    `<div class="tplace">${CIRCUIT_PLACE[t.id] || ''}${t.night ? ' · Night Race' : ''}${t.street ? ' · Street Circuit' : ''}</div>`;
+    `<div class="tplace">${CIRCUIT_PLACE[t.id] || ''}${t.night ? ' · Night' : ''}${t.street ? ' · Street' : ''}</div>`;
   const tiles: [string, string][] = [
     [(GS.L / 1000).toFixed(2) + ' km', 'Length'],
     [String(GS.CORNERS.length), 'Corners'],

@@ -1687,6 +1687,9 @@ body.touch #spd {
   font-size: 12px;
   color: #9aa1aa;
   margin-top: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 #trkElev svg {
   display: block;
@@ -2081,4 +2084,17 @@ body.touch #notes:not(.menu) {
     grid-row: 3;
     min-height: 0;
   }
+}
+/* breadcrumb in the panel titles: "Single Player › Practice" */
+.crumb {
+  margin: 0 7px;
+  opacity: 0.45;
+  font-weight: 600;
+}
+.crumb2 {
+  font-weight: 600;
+  opacity: 0.8;
+}
+#lbTrackTitle:empty {
+  display: none;
 }

@@ -225,11 +225,7 @@ export function renderLobbySettings(cfg) {
       }),
     );
   }
-  $('lbTrackTitle').textContent = MP.host
-    ? 'Choose a Circuit'
-    : cfg
-      ? 'Circuit — Chosen by the Host'
-      : 'Circuit — Waiting for the Host';
+  $('lbTrackTitle').textContent = MP.host ? '' : cfg ? 'Chosen by the host' : 'Waiting for the host…';
 }
 // ---- every player races a different team: earlier arrivals keep their pick, later ones move to a free team
 export function lobbyOrder() {
@@ -326,6 +322,9 @@ export function renderLobby() {
     ? `${TRACKS[clamp(cfg.track | 0, 0, TRACKS.length - 1)].name} · ${cfg.laps | 0} Laps · ${cfg.rain ? 'Rain' : 'Dry'}${cfg.practice ? ' · Practice' : ''}`
     : 'Waiting for the host…';
   $('lbRoomTag').textContent = MP.code ? '· Room ' + MP.code.toUpperCase() : '';
+  $('lbCrumb').innerHTML = cfg
+    ? `<span class="crumb">›</span><span class="crumb2">${cfg.practice ? 'Practice' : 'Race'}</span>`
+    : '';
   // guests follow the host's circuit so the map they see is the one they'll race on
   if (!MP.host && cfg && MP.phase === 'lobby') {
     const ti = clamp(cfg.track | 0, 0, TRACKS.length - 1);
