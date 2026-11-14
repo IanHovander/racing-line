@@ -15,7 +15,7 @@ import { raceTrackStarted } from '../track/active';
 import { TRACKS } from '../track/circuits';
 import { WX } from '../track/track';
 import { CIRCUIT_PLACE, bindTrackMap, drawTrackMap, elevProfile } from './circuit-map';
-import { CIRCUIT_COLS } from './circuits';
+import { CIRCUIT_COLS, CIRCUIT_FLAG } from './circuits';
 import { showToast, syncCtrlMenu, updatePads } from './controls';
 import { fmt, updateLights } from './hud';
 import { segInit, syncAllSegs } from './widgets';
@@ -97,13 +97,13 @@ export function placeCircuitPicker(slotId: string) {
   const ro = inLobby() && !MP.host;
   el.classList.toggle('ro', ro);
   ['trkPrev', 'trkNext'].forEach(id => ($(id).disabled = ro));
-  ([...$('trkDots').children] as HTMLButtonElement[]).forEach(b => (b.disabled = ro));
+  ([...$('trkFlags').children] as HTMLButtonElement[]).forEach(b => (b.disabled = ro));
   syncCircuit();
 }
 export function syncCircuit() {
   const t = TRACKS[GS.trackIdx];
   const best = store.get('best_' + t.id, 0);
-  ([...$('trkDots').children] as HTMLElement[]).forEach((b, i) =>
+  ([...$('trkFlags').children] as HTMLElement[]).forEach((b, i) =>
     b.classList.toggle('sel', i === GS.trackIdx),
   );
   $('trkMap').innerHTML = drawTrackMap();
@@ -146,12 +146,15 @@ function pickCircuit(i: number) {
   }
 }
 function initCircuitPicker() {
-  const dots = $('trkDots');
+  // a row of host-nation flags at the top: jump straight to a circuit
+  const row = $('trkFlags');
   TRACKS.forEach((t, i) => {
     const b = document.createElement('button');
     b.setAttribute('aria-label', t.name);
+    b.title = t.name;
+    b.innerHTML = flag(CIRCUIT_FLAG[t.id], 16);
     b.onclick = () => pickCircuit(i);
-    dots.appendChild(b);
+    row.appendChild(b);
   });
   $('trkPrev').onclick = () => pickCircuit(GS.trackIdx - 1);
   $('trkNext').onclick = () => pickCircuit(GS.trackIdx + 1);

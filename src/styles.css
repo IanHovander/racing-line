@@ -1716,32 +1716,32 @@ body.touch #spd {
   font-size: 10px;
   color: #9aa1aa;
 }
-#trkDots {
+#trkFlags {
   display: flex;
-  justify-content: center;
-  gap: 2px;
+  gap: 4px;
 }
-#trkDots button {
-  width: 22px;
-  height: 22px;
+#trkFlags button {
+  flex: 1;
+  min-width: 0;
+  height: 32px;
   padding: 0;
-  border: 0;
-  background: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1.5px solid transparent;
 }
-#trkDots button::after {
-  content: '';
-  width: 6px;
-  height: 6px;
-  border-radius: 3px;
-  background: rgba(255, 255, 255, 0.3);
-  transition: width 0.15s;
+#trkFlags button .flag {
+  display: block;
+  border-radius: 2px;
+  opacity: 0.75;
 }
-#trkDots button.sel::after {
-  width: 16px;
-  background: #fff;
+#trkFlags button.sel {
+  border-color: #fff;
+  background: rgba(255, 255, 255, 0.12);
+}
+#trkFlags button.sel .flag {
+  opacity: 1;
 }
 
 /* ---- the panel fills its height so the team and circuit steps fit without scrolling ---- */
@@ -1869,7 +1869,7 @@ body.touch #spd {
   opacity: 0.55;
 }
 #circuitPicker.ro .carr,
-#circuitPicker.ro #trkDots button:not(.sel) {
+#circuitPicker.ro #trkFlags button:not(.sel) {
   opacity: 0.35;
 }
 .lbname {
@@ -2051,4 +2051,34 @@ body.touch #notes:not(.menu) {
 #hLap i {
   font-style: normal;
   opacity: 0.55;
+}
+/* landscape circuit step: map on the left at full height; flags, name and details on the right */
+@media (max-height: 520px) and (orientation: landscape) {
+  :is(#menu, #lobby) .wz[data-s='2'] #circuitPicker {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    grid-template-rows: auto auto minmax(0, 1fr);
+    column-gap: 18px;
+    row-gap: 8px;
+  }
+  #circuitPicker .cmain {
+    display: contents;
+  }
+  #circuitPicker #trkFlags {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  #circuitPicker .chead {
+    grid-column: 2;
+    grid-row: 2;
+  }
+  #circuitPicker #trkMap {
+    grid-column: 1;
+    grid-row: 1 / 4;
+  }
+  #circuitPicker .cside {
+    grid-column: 2;
+    grid-row: 3;
+    min-height: 0;
+  }
 }

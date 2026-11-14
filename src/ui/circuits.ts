@@ -25,6 +25,17 @@ export const CIRCUIT_ICON = {
  <path d="M8 38V26h4v12zM18 38V25h4v13zM28 38V26h4v12z" fill="#2a3550"/><path d="M6 25.5h28l-1 1.5H7z" fill="#2a3550"/><path d="M0 38h40v2H0z" fill="#3a7bd5"/>`,
 };
 // host-country colours for the bar under each circuit name
+/** host-nation flag code (teams.ts FLAGS) for each circuit */
+export const CIRCUIT_FLAG = {
+  mexico: 'MX',
+  texas: 'US',
+  paulista: 'BR',
+  monte: 'MC',
+  sakhir: 'BH',
+  suzuka: 'JP',
+  spa: 'BE',
+  singapore: 'SG',
+};
 export const CIRCUIT_COLS = {
   mexico: ['#006847', '#ffffff', '#ce1126'],
   texas: ['#bf0a30', '#ffffff', '#002868'],
