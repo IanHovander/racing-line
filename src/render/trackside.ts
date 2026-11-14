@@ -222,8 +222,7 @@ export function drawTunnelFloor(z) {
 // tunnel portals: two pillars and a lintel across the road at each end (depth-sorted with the cars)
 export function queuePortals(objs) {
   if (!GS.TUN || TUN_STYLE !== 2) return;
-  const z = cam.zoom,
-    hz = z * cam.hz;
+  const z = cam.zoom;
   for (const i of [GS.TUN[0], GS.TUN[1]]) {
     const d = depth(GS.cx[i], GS.cy[i]);
     objs.push([
@@ -231,7 +230,6 @@ export function queuePortals(objs) {
       7,
       () => {
         if (!onScr(GS.TSX[i], GS.TSY[i], 80 * z)) return;
-        const P2 = (o, zz) => [GS.TSX[i] + GS.NSX[i] * o, GS.TSY[i] + GS.NSY[i] * o - zz * hz];
         const a = GS.BARR[i] + 1.2,
           b = -(GS.BARL[i] + 1.2);
         const quad = (p, col) => {
@@ -241,8 +239,7 @@ export function queuePortals(objs) {
           ctx.closePath();
           ctx.fill();
         };
-        const ex = GS.tx[i] * 0,
-          thick = 1.2;
+        const thick = 1.2;
         const sh = (o, zz, dd) => {
           const x = GS.cx[i] + GS.nx[i] * o + GS.tx[i] * dd,
             y = GS.cy[i] + GS.ny[i] * o + GS.ty[i] * dd;

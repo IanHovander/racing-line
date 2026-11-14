@@ -25,7 +25,6 @@ import * as m21 from './render/car';
 import * as m22 from './render/scenery';
 import * as m23 from './render/trackside';
 import * as m24 from './render/effects';
-import * as m25 from './render/stands';
 import * as m26 from './render/buildings';
 import * as m27 from './render/render';
 import * as m28 from './ui/hud';
@@ -79,7 +78,7 @@ const MODS: any[] = [
   m22,
   m23,
   m24,
-  m25,
+ 
   m26,
   m27,
   m28,

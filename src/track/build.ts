@@ -1,4 +1,4 @@
-import type { Box, Tree } from '../types';
+import type { Tree } from '../types';
 import { GS } from '../state';
 import { clamp } from '../core/dom';
 import { DS, GIN, WALL } from '../sim/car-model';
@@ -26,7 +26,7 @@ export function buildTrack(T) {
   pts = resample(pts, DS);
   for (let it = 0; it < (T.smooth || 40); it++) {
     const n = pts.length,
-      np = new Array(n);
+      np = Array.from({ length: n });
     for (let i = 0; i < n; i++) {
       const a = pts[(i - 1 + n) % n],
         b = pts[(i + 1) % n],
@@ -184,16 +184,6 @@ export function buildTrack(T) {
         for (let k = -6; k <= 6; k++) s += raw[(i + k + GS.N) % GS.N];
         GS.BAR[i] = GS.HW + s / 13;
       }
-    }
-  }
-  if (T.stadium && false) {
-    const k0 = GS.cpIdx(T.stadium[0]),
-      k1 = GS.cpIdx(T.stadium[1]),
-      len = (k1 - k0 + GS.N) % GS.N;
-    for (let u = -20; u <= len + 20; u++) {
-      const q = (k0 + u + GS.N) % GS.N,
-        e = u < 0 ? -u : u > len ? u - len : 0;
-      GS.BAR[q] = Math.min(GS.BAR[q], GS.HW + 5 + e * 0.6);
     }
   }
   GS.BRIDGE = null;
@@ -561,7 +551,7 @@ export function buildTrack(T) {
     };
     let rs = runs();
     for (let k = 0; k + 1 < rs.length; k++) {
-      const [a0, b0, s0] = rs[k],
+      const [, b0, s0] = rs[k],
         [a1, , s1] = rs[k + 1];
       if (s0 === s1 && a1 - b0 <= Math.ceil(16 / GS.SEG)) {
         for (let i = b0; i < a1; i++) {
@@ -751,71 +741,6 @@ export function buildTrack(T) {
     }
     return true;
   };
-  // grandstands round the outside of the biggest corners, like the real circuits
-  const placeStands = (mk, gapIn) => {
-    const runs = [];
-    for (let i = 0; i < GS.N;) {
-      if (Math.abs(GS.ccurv[i]) < 1 / 90) {
-        i++;
-        continue;
-      }
-      let j = i,
-        pk = i;
-      while (
-        j < GS.N &&
-        Math.abs(GS.ccurv[j]) >= 1 / 90 &&
-        Math.sign(GS.ccurv[j]) === Math.sign(GS.ccurv[i])
-      ) {
-        if (Math.abs(GS.ccurv[j]) > Math.abs(GS.ccurv[pk])) pk = j;
-        j++;
-      }
-      runs.push([pk, Math.abs(GS.ccurv[pk])]);
-      i = j + 1;
-    }
-    runs.sort((a, b) => b[1] - a[1]);
-    let made = 0;
-    const used = [];
-    for (const [m] of runs) {
-      if (made >= (T.stands || 7)) break;
-      if (m < 60 || m > GS.N - 80 || used.some(u => Math.abs(u - m) < 90)) continue;
-      const sg = GS.ccurv[m] > 0 ? -1 : 1;
-      let any = 0;
-      for (let k = -21; k < 21; k += 6) {
-        const a = (m + k + GS.N) % GS.N,
-          b = (m + k + 6 + GS.N) % GS.N;
-        for (const [r0, r1, h] of [
-          [gapIn, gapIn + 6, 4.5],
-          [gapIn + 6, gapIn + 12, 8],
-        ]) {
-          const bx = mk(
-            a,
-            b,
-            sg * (GS.BAR[a] + r0),
-            sg * (GS.BAR[a] + r1),
-            h,
-            '#9aa3ad',
-            h > 5 ? '#59616c' : '#6b737e',
-            true,
-          );
-          bx.cx = (bx.pts[0][0] + bx.pts[2][0]) / 2;
-          bx.cy = (bx.pts[0][1] + bx.pts[2][1]) / 2;
-          bx.stand = true;
-          if (
-            bx.pts.every(p => clear(p[0], p[1], 1)) &&
-            !inWater(bx.cx, bx.cy) &&
-            !GS.boxes.some(o => Math.hypot(o.cx - bx.cx, o.cy - bx.cy) < 8)
-          ) {
-            GS.boxes.push(bx);
-            any++;
-          }
-        }
-      }
-      if (any > 3) {
-        made++;
-        used.push(m);
-      }
-    }
-  };
   GS.WATER = (T.water || []).map(p => p.map(q => [q[0] * T.sc, q[1] * T.sc]));
   GS.TUN = null;
   if (T.tunnel) {
@@ -942,48 +867,6 @@ export function buildTrack(T) {
   }
   GS.STAD = null;
   if (!T.wheelXY) GS.WHEEL = null;
-  if (T.stadium && false) {
-    const ks = T.stadium.map(GS.cpIdx);
-    let sx = 0,
-      sy = 0,
-      n = 0;
-    for (let i = ks[0]; i !== ks[1]; i = (i + 1) % GS.N) {
-      sx += GS.cx[i];
-      sy += GS.cy[i];
-      n++;
-    }
-    sx /= n;
-    sy /= n;
-    let rr = 0;
-    for (let i = ks[0]; i !== ks[1]; i = (i + 1) % GS.N)
-      rr = Math.max(rr, Math.hypot(GS.cx[i] - sx, GS.cy[i] - sy) + GS.HW + 6);
-    const r1 = rr + 4,
-      r2 = rr + 26;
-    GS.STAD = { x: sx, y: sy, r1, r2 };
-    const nseg = Math.ceil((2 * Math.PI * r1) / 9);
-    for (let k = 0; k < nseg; k++) {
-      const a0 = (k / nseg) * Math.PI * 2,
-        a1 = ((k + 0.92) / nseg) * Math.PI * 2;
-      const pts = [
-        [sx + Math.cos(a0) * r1, sy + Math.sin(a0) * r1],
-        [sx + Math.cos(a1) * r1, sy + Math.sin(a1) * r1],
-        [sx + Math.cos(a1) * r2, sy + Math.sin(a1) * r2],
-        [sx + Math.cos(a0) * r2, sy + Math.sin(a0) * r2],
-      ];
-      if (!pts.every(p => clear(p[0], p[1], 2))) continue;
-      const b: Box = {
-        pts,
-        h: 10 + (k % 2) * 0.01,
-        top: '#b7bcc4',
-        side: k % 3 ? '#8a929c' : '#7c848e',
-        crowd: true,
-        stad: true,
-      };
-      b.cx = (pts[0][0] + pts[2][0]) / 2;
-      b.cy = (pts[0][1] + pts[2][1]) / 2;
-      GS.boxes.push(b);
-    }
-  }
   if (T.wheel) {
     const i = T.wheel[0] % GS.N,
       o = outSide * (GS.BAR[i] + T.wheel[1]);

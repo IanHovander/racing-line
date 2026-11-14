@@ -12,7 +12,7 @@ import { TEAMS, flag, teamLogo } from '../teams/teams';
 import { buildTrack } from '../track/build';
 import { TRACKS } from '../track/circuits';
 import { WX } from '../track/track';
-import { CIRCUIT_PLACE, bindTrackMap, drawTrackMap, layoutPath, trackLayout } from './circuit-map';
+import { CIRCUIT_PLACE, bindTrackMap, drawTrackMap } from './circuit-map';
 import { showToast, syncCtrlMenu, updatePads } from './controls';
 import { fmt, updateLights } from './hud';
 import { POSTERS } from './posters';
@@ -98,7 +98,6 @@ export function init(): void {
     TRACKS.forEach((t, i) => {
       const b = document.createElement('button');
       b.dataset.v = String(i);
-      const lp = layoutPath(trackLayout(t), 120, 46, 3);
       b.innerHTML = `<span class="pst">${POSTERS[t.id] || ''}</span>`;
       b.title = t.name;
       b.setAttribute('aria-label', t.name);

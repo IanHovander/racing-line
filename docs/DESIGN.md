@@ -295,6 +295,11 @@ Playable build: https://matthewtorgerson.github.io/racing-line/ (GitHub Pages, b
 - **Fallbacks:** if you don't react within 3 s the car goes anyway. After 8 s every car counts as launched (late join, swapped car).
 - **AI reaction:** 0.12–0.55 s, quicker for drivers with high consistency, so the field spreads off the line.
 
+## v17.3 — tooling and font
+- **oxfmt** formats the whole project (`.oxfmtrc.json`: 110 columns, single quotes, trailing commas). **oxlint** lints it (`.oxlintrc.json`: correctness errors, suspicious warnings, zero warnings allowed). CI runs both before typecheck/build/tests.
+- Lint clean-up: removed dead code left from the single-file days (the grandstand styles, stadium bowl and `placeStands`, unused locals).
+- **Digital Numbers** (Stephan Ahlf, SIL OFL 1.1) is the font for every monospaced readout: HUD timing, standings, speed and gear, lap card, live line, room codes. It's self-hosted in `public/fonts/` with its licence, through the `--mono` CSS variable, with the system monospace font as fallback.
+
 ## Model
 
 - Tracks: control points → Catmull-Rom → smoothed and resampled every 2 m (`buildTrack()`). Long straights need intermediate control points: without them the spline overshoots at the next tight corner and makes a near-cusp (a 4–7 m radius). That happened on the first Mexico and Vegas drafts.

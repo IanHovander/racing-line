@@ -36,7 +36,7 @@ export function mpPeers(ch) {
       if (p.sameTab) continue;
       const pr = p.presence || {};
       if (Array.isArray(pr.me)) {
-        const c = cars.find(c => c.owner === p.peer && c.human);
+        const c = cars.find(o => o.owner === p.peer && o.human);
         if (c) netSet(c, pr.me);
       }
       if (hp && p.peer === hp.peer && !MP.host) mpSyncClock(pr.clk);

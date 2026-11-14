@@ -30,8 +30,8 @@ export function startFireworks() {
   FW.last = performance.now();
 }
 export function drawFireworks() {
-  const ctx = FWC();
-  ctx.clearRect(0, 0, W, H);
+  const fctx = FWC();
+  fctx.clearRect(0, 0, W, H);
   const now = performance.now(),
     dt = Math.min(0.05, (now - FW.last) / 1000);
   FW.last = now;
@@ -39,7 +39,7 @@ export function drawFireworks() {
   if (FW.t > 14) {
     FW.on = FW.p.length > 0;
     if (!FW.on) {
-      ctx.clearRect(0, 0, W, H);
+      fctx.clearRect(0, 0, W, H);
       return;
     }
   }
@@ -61,8 +61,8 @@ export function drawFireworks() {
         nz(AC.currentTime, 0.25, 0.05, 'bandpass', 900, 1);
       } catch (e) {}
   }
-  ctx.save();
-  ctx.globalCompositeOperation = 'lighter';
+  fctx.save();
+  fctx.globalCompositeOperation = 'lighter';
   for (let i = FW.p.length - 1; i >= 0; i--) {
     const q = FW.p[i];
     q.life -= dt;
@@ -71,8 +71,8 @@ export function drawFireworks() {
     q.vy += (q.rocket ? H * 0.55 : H * 0.18) * dt;
     q.vx *= q.rocket ? 1 : 0.985;
     if (q.rocket) {
-      ctx.fillStyle = `hsla(${q.hue},90%,80%,0.9)`;
-      ctx.fillRect(q.x - 1.5, q.y - 1.5, 3, 3);
+      fctx.fillStyle = `hsla(${q.hue},90%,80%,0.9)`;
+      fctx.fillRect(q.x - 1.5, q.y - 1.5, 3, 3);
       if (q.life <= 0 || q.vy > -H * 0.08) {
         FW.p.splice(i, 1);
         const n = 60 + Math.floor(Math.random() * 40),
@@ -103,13 +103,13 @@ export function drawFireworks() {
       continue;
     }
     const a = Math.min(1, q.life / 1.0);
-    ctx.fillStyle = `hsla(${q.hue},95%,${55 + 20 * a}%,${a.toFixed(3)})`;
+    fctx.fillStyle = `hsla(${q.hue},95%,${55 + 20 * a}%,${a.toFixed(3)})`;
     const r = 2 + 2.6 * a;
-    ctx.beginPath();
-    ctx.arc(q.x, q.y, r, 0, 7);
-    ctx.fill();
+    fctx.beginPath();
+    fctx.arc(q.x, q.y, r, 0, 7);
+    fctx.fill();
   }
-  ctx.restore();
+  fctx.restore();
 }
 // the marshal waving the chequered flag at the line once the leader starts the last lap
 export function queueFlagMarshal(objs) {

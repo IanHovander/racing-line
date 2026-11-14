@@ -1,3 +1,12 @@
+/* Digital Numbers (Stephan Ahlf, SIL OFL 1.1 — public/fonts/DigitalNumbers-OFL.txt): the LCD-style font for every number and monospaced readout */
+@font-face {
+  font-family: 'Digital Numbers';
+  src: url('../fonts/DigitalNumbers-Regular.woff') format('woff');
+  font-display: swap;
+}
+:root {
+  --mono: 'Digital Numbers', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
 html,
 body {
   margin: 0;
@@ -66,7 +75,7 @@ canvas {
   opacity: 0.75;
   font-size: 11px;
   font-variant-numeric: tabular-nums;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-family: var(--mono);
   white-space: pre;
 }
 #tl .hdr {
@@ -79,7 +88,7 @@ canvas {
   letter-spacing: 0.5px;
 }
 #tl .hdr span {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-family: var(--mono);
   font-size: 12px;
   opacity: 0.85;
 }
@@ -112,13 +121,13 @@ canvas {
 #board .nm {
   width: 24px;
   font-weight: 700;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-family: var(--mono);
   font-size: 10.5px;
 }
 #board .gap {
   width: 36px;
   text-align: right;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-family: var(--mono);
   font-size: 10px;
   opacity: 0.85;
 }
@@ -152,7 +161,7 @@ canvas {
   padding: 7px 14px 8px;
   text-align: center;
   pointer-events: none;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-family: var(--mono);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
   animation: lapIn 0.25s ease-out;
 }
@@ -305,7 +314,7 @@ body #pThr.big {
   margin-top: 2px;
 }
 #resAw .aw .v {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-family: var(--mono);
   opacity: 0.85;
 }
 #board div.hum {
@@ -526,7 +535,7 @@ body #pThr.big {
   align-items: center;
 }
 #spd .sp {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-family: var(--mono);
   font-size: 28px;
   font-weight: 800;
   line-height: 1;
@@ -562,7 +571,7 @@ body #pThr.big {
   background: #ff4d4d;
 }
 #spd .gbx {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-family: var(--mono);
   font-size: 24px;
   font-weight: 900;
   width: 34px;
@@ -1188,7 +1197,7 @@ svg.logo {
   font-weight: 900;
   letter-spacing: 2px;
   margin: 2px 0 8px;
-  font-family: ui-monospace, Menlo, monospace;
+  font-family: var(--mono);
 }
 .card input {
   width: 100%;
@@ -1836,11 +1845,7 @@ body.touch #spd {
   margin: 6px 0 0;
   text-align: center;
   font:
-    500 12px/1.4 ui-monospace,
-    SFMono-Regular,
-    Menlo,
-    Consolas,
-    monospace;
+    500 12px/1.4 var(--mono);
   color: #c4c9d1;
   min-height: 17px;
 }
@@ -1910,11 +1915,7 @@ body.touch #spd {
   background: #0c0e13;
   color: #fff;
   font:
-    700 20px/1 ui-monospace,
-    SFMono-Regular,
-    Menlo,
-    Consolas,
-    monospace;
+    700 20px/1 var(--mono);
   letter-spacing: 4px;
   padding: 0 12px;
   text-transform: uppercase;

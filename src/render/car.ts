@@ -1,5 +1,5 @@
 import { GS } from '../state';
-import { clamp, ctx } from '../core/dom';
+import { ctx } from '../core/dom';
 import { attract, opts } from '../game/race';
 import { P, cam } from './camera';
 import { prism } from './primitives';
@@ -154,7 +154,6 @@ export function drawCar0(c, isMe, isMate) {
   });
   ctx.closePath();
   ctx.fill();
-  const steerA = clamp(c.v > 1 ? 0 : 0, 0, 0);
   // wheels on the far side first, the body, then the near-side wheels in front of it
   const latC = -sh * GS.cC + ch * GS.cS;
   const nearW = w => Math.sign(w[1]) * latC < 0;

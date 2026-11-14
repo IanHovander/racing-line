@@ -3,7 +3,6 @@ import { ctx } from '../core/dom';
 import { FDT } from '../game/loop';
 import { P, cam, depth } from './camera';
 import { onScr, prism } from './primitives';
-import { STAND_STYLE, drawStand } from './stands';
 import { TEAMS } from '../teams/teams';
 import { NEONQ } from '../track/track';
 export function drawBox(b) {
@@ -51,10 +50,6 @@ export function drawBox0(b) {
   const Z0 = (b.z0 || 0) * sk;
   const bh = (b.tall ? b.h * GS.HMUL : b.h) * sk;
   if (bh < 0.3 && !b.z0) return;
-  if (b.crowd && STAND_STYLE > 0 && !b.z0 && bh >= 0.3) {
-    drawStand(b, bh, STAND_STYLE);
-    return;
-  }
   prism(b.pts, b.z0 || 0, Z0 + bh, b.top, b.side);
   if (b.garage) {
     const A0 = b.pts[0],

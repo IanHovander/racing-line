@@ -12,20 +12,25 @@ are about feel and look, so check changes visually (screenshots via Playwright) 
 ```sh
 npm install
 npm run dev         # esbuild dev server on http://localhost:5173 with live rebuild
+npm run fmt         # oxfmt: format everything (config: .oxfmtrc.json)
+npm run lint        # oxlint (config: .oxlintrc.json); must stay at 0 errors and 0 warnings
 npm run typecheck   # tsc, must stay at 0 errors
-npm run build       # minified bundle in dist/ (index.html, assets/main.js|css, vendor/, .nojekyll)
+npm run build       # minified bundle in dist/ (index.html, assets/main.js|css, vendor/, fonts/, .nojekyll)
 npm test            # Playwright smoke tests against dist/ — run `npm run build` first
-npm run check       # all three
+npm run check       # fmt:check + lint + typecheck + build + test, what CI runs
 ```
+
+Run `npm run fmt` and `npm run lint` before committing; CI fails on unformatted code or any lint warning.
 
 `CHROME_PATH=/path/to/chrome npm test` uses an installed Chrome instead of Playwright's Chromium.
 Never edit `dist/`; it is generated and git-ignored.
 
 ## Deploying
 
-`.github/workflows/deploy.yml` runs typecheck → build → tests on every push and PR, and deploys
+`.github/workflows/deploy.yml` runs format check → lint → typecheck → build → tests on every push and PR, and deploys
 `dist/` to GitHub Pages on pushes to `main` (Pages source must be "GitHub Actions" in the repo settings).
-There's no `package-lock.json` yet; commit the one `npm install` creates.
+`.github/workflows/format.yml` (run it from the Actions tab) formats the code, applies oxlint's safe fixes
+and commits the result, for when there's no local Node to run them.
 
 ## How the code is organised
 
@@ -78,9 +83,11 @@ contacts and time off track before and after, as the existing tests do.
   `s` the distance along the lap, `lat` the signed offset from the centre line.
 - The simulation runs at a fixed `STEP` (1/120 s); rendering is separate.
 - UI style: monochrome (white/grey) menus; colour only where it means something (brake/throttle,
-  DRS, sectors purple/green/yellow, penalties). The HUD text uses the system monospace font.
-- Everything visual is drawn in code (SVG strings or canvas): no image assets, no web fonts. Team
-  logos, flags and circuit posters are inline SVG; don't add artwork that copies real teams or brands.
+  DRS, sectors purple/green/yellow, penalties).
+- Everything visual is drawn in code (SVG strings or canvas): no image assets. Team logos, flags and
+  circuit posters are inline SVG; don't add artwork that copies real teams or brands.
+- Fonts: system UI font for text; **Digital Numbers** (LCD style, SIL OFL, self-hosted in `public/fonts/`)
+  for every number and monospaced readout, through the CSS variable `--mono`. No other web fonts.
 - Touch matters: big pads, no iOS long-press loupe (`touch-action`, `user-select: none`).
 - Multiplayer: each player simulates their own car; the host simulates the AI and its clock is the
   race clock. Contacts with a remote car only move the local car.

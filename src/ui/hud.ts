@@ -29,7 +29,6 @@ export function hud(dt) {
   hudT = 0.1;
   const c = cars[GS.ctrl];
   const st = standings();
-  const pos = st.indexOf(c) + 1;
   $('hLap').textContent = GS.PRACTICE
     ? 'PRACTICE · LAP ' + Math.max(1, c.cross)
     : 'LAP ' + clamp(c.cross, 1, opts.laps) + '/' + opts.laps + (c.finished ? ' ✓' : '');

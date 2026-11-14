@@ -88,8 +88,7 @@ export function render() {
   }
   // gravel traps
   {
-    const gp = new Path2D(),
-      ge = new Path2D();
+    const gp = new Path2D();
     for (let i = 0; i < GS.N; i++) {
       const j = (i + 1) % GS.N;
       if (!GS.gside[i] || !GS.gside[j]) continue;

@@ -6,7 +6,6 @@ import { gapT, progress } from '../sim/timing';
 import { TEAMS, flag, teamLogo } from '../teams/teams';
 import { fmt } from './hud';
 export function awardsHtml() {
-  const live = cars.filter(c => (c.stat && !c.gone) || (c.stat && c.finished));
   const all = cars.filter(c => c.stat);
   if (!all.length) return '';
   const kmh = v => Math.round(v * 3.6);
@@ -23,7 +22,6 @@ export function awardsHtml() {
     }
     return w ? [w, bv] : null;
   };
-  const fin = all.filter(c => c.finished);
   const A: [string, [any, number] | null, (v: number) => string][] = [
     ['Fastest lap', best(c => c.best || null, true), v => fmt(v)],
     ['Top speed', best(c => c.stat.vmax), v => kmh(v) + ' km/h'],
@@ -66,8 +64,6 @@ export function runStr(o, st) {
 }
 export function resRender() {
   const st = standings();
-  const c = cars[GS.ctrl];
-  const pos = st.indexOf(c) + 1;
   const best = Math.min(...cars.filter(o => o.mine).map(o => (o.out ? 99 : st.indexOf(o) + 1)));
   const bc = cars.filter(o => o.mine && !o.out).sort((a, b) => st.indexOf(a) - st.indexOf(b))[0];
   const g0 = bc ? bc.grid + 1 - (st.indexOf(bc) + 1) : 0;

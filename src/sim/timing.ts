@@ -23,7 +23,6 @@ export function secDone(c, k) {
           if (j === k && e && e.col === 'p' && o !== c) e.col = 'g';
         });
   }
-  const delta = pb ? t - pb : null;
   if (!pb || t < pb) c.secBest[k] = t;
   c.secCur[k] = { t, col };
   if (k === 2) {
