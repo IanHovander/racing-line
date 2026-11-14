@@ -4,7 +4,6 @@
 import { GS } from '../state';
 import { $ } from '../core/dom';
 import { opts } from '../game/race';
-import { TRACKS } from '../track/circuits';
 import { standings } from '../sim/step';
 import { setMusic, setSfx, unlockAudio } from '../audio/audio';
 import { SEG_SYNC, syncAllSegs } from './widgets';
@@ -54,7 +53,7 @@ function updateLive(): void {
   if (!el || $('home').classList.contains('hide')) return;
   const lead = standings()[0];
   const lap = lead ? Math.max(1, lead.cross) : 1;
-  el.textContent = `LIVE · ${TRACKS[GS.trackIdx].name} · Lap ${lap}`;
+  el.textContent = `LIVE · ${GS.TR.name} · Lap ${lap}`;
 }
 
 function syncSound(): void {

@@ -14,6 +14,11 @@ export function init(): void {
   buildTrack(TRACKS[GS.trackIdx]);
   GS.musId = TRACKS[GS.trackIdx].id;
 }
+/** build the selected circuit if the one behind the menu is a different one (the picker doesn't swap it) */
+export function buildSelectedTrack(): void {
+  const T = TRACKS[GS.trackIdx];
+  if (GS.TR !== T) buildTrack(T);
+}
 /** a race starts on the current circuit: its music takes over, and the menu comes back to it next time */
 export function raceTrackStarted(): void {
   GS.musId = TRACKS[GS.trackIdx].id;

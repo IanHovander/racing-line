@@ -40,4 +40,20 @@ if (dev) {
   );
 } else {
   await esbuild.build(options);
+  // cache-busting: GitHub Pages caches files for ~10 min and the bundle names don't change, so a fresh
+  // index.html could load a stale main.js (or the reverse) and break the page. Version the URLs by content.
+  const hash = (await import('node:crypto'))
+    .createHash('sha1')
+    .update(fs.readFileSync(path.join(out, 'assets/main.js')))
+    .update(fs.readFileSync(path.join(out, 'assets/main.css')))
+    .digest('hex')
+    .slice(0, 10);
+  const ix = path.join(out, 'index.html');
+  fs.writeFileSync(
+    ix,
+    fs
+      .readFileSync(ix, 'utf8')
+      .replace('./assets/main.css"', `./assets/main.css?v=${hash}"`)
+      .replace('./assets/main.js"', `./assets/main.js?v=${hash}"`),
+  );
 }

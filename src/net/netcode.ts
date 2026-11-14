@@ -94,9 +94,9 @@ export function startMpRace(grid, cfg, hostId) {
     return;
   }
   if (cfg) {
-    if ((cfg.track | 0) !== GS.trackIdx && TRACKS[cfg.track | 0]) {
+    if (TRACKS[cfg.track | 0]) {
       GS.trackIdx = cfg.track | 0;
-      buildTrack(TRACKS[GS.trackIdx]);
+      if (GS.TR !== TRACKS[GS.trackIdx]) buildTrack(TRACKS[GS.trackIdx]);
     }
     GS.PRACTICE = !!cfg.practice;
     opts.laps = clamp(cfg.laps | 0, 1, 20);

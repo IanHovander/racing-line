@@ -58,6 +58,12 @@ export function layoutPath(pts, w, h, pad) {
 }
 // circuit-step map: seen from a low angle (28°), track raised to its true height, walls beneath, ground shadow, corner numbers; drag to turn
 export let MAPYAW = 30;
+/** the circuit the map shows: its centre line, heights, sectors, DRS zones and corners, copied when the
+ *  picker shows a circuit (which need not be the one racing behind the menu) */
+let MAPD: any = null;
+export function setMapData(): void {
+  MAPD = { N: GS.N, cx: GS.cx, cy: GS.cy, HT: GS.HT, SECI: GS.SECI, DRSZ: GS.DRSZ, CORNERS: GS.CORNERS };
+}
 export function drawTrackMap() {
   return `<canvas class="big" width="720" height="440" aria-label="Circuit map — drag to turn it"></canvas><div class="lg"><div><i style="background:#ff5a5a"></i>S1</div><div><i style="background:#ffd166"></i>S2</div><div><i style="background:#5ab0ff"></i>S3</div><div><i style="background:#2ecc71"></i>DRS</div></div>`;
 }
@@ -97,6 +103,7 @@ export function elevProfile() {
   return `<svg class="prof" viewBox="0 0 ${W} ${H}"><path d="${d}L${W - 8} ${H - 6}L8 ${H - 6}Z" fill="rgba(255,255,255,.09)"/>${g}<text x="10" y="11" font-size="9" fill="#fff" opacity=".7" font-family="Geist,system-ui">Elevation · ${Math.round(rng)} m</text></svg>`;
 }
 export function renderTrackMap(cv) {
+  const M = MAPD || GS;
   if (!cv) return;
   const ctx = cv.getContext('2d'),
     W = cv.width,
@@ -104,15 +111,15 @@ export function renderTrackMap(cv) {
   ctx.clearRect(0, 0, W, H);
   const st = 4,
     idx = [];
-  for (let i = 0; i < GS.N; i += st) idx.push(i);
+  for (let i = 0; i < M.N; i += st) idx.push(i);
   const n = idx.length;
   let mx = 0,
     my = 0,
     hmin = 1e9;
   for (const i of idx) {
-    mx += GS.cx[i];
-    my += GS.cy[i];
-    hmin = Math.min(hmin, GS.HT[i]);
+    mx += M.cx[i];
+    my += M.cy[i];
+    hmin = Math.min(hmin, M.HT[i]);
   }
   mx /= n;
   my /= n;
@@ -124,16 +131,16 @@ export function renderTrackMap(cv) {
   let hmax = -1e9,
     span = 0;
   for (const i of idx) {
-    hmax = Math.max(hmax, GS.HT[i]);
-    span = Math.max(span, Math.hypot(GS.cx[i] - mx, GS.cy[i] - my));
+    hmax = Math.max(hmax, M.HT[i]);
+    span = Math.max(span, Math.hypot(M.cx[i] - mx, M.cy[i] - my));
   }
   const EX = hmax - hmin > 0.5 ? clamp((0.14 * span) / (hmax - hmin), 1.25, 3.5) : 1;
   const proj = (i, ground) => {
-    const dx = GS.cx[i] - mx,
-      dy = GS.cy[i] - my;
+    const dx = M.cx[i] - mx,
+      dy = M.cy[i] - my;
     const u = dx * Math.cos(a) - dy * Math.sin(a),
       v = dx * Math.sin(a) + dy * Math.cos(a);
-    return [u, v * sp - (ground ? 0 : GS.HT[i] - hmin) * cp * EX, v];
+    return [u, v * sp - (ground ? 0 : M.HT[i] - hmin) * cp * EX, v];
   };
   const Q = idx.map(i => proj(i, 0)),
     G = idx.map(i => proj(i, 1));
@@ -164,8 +171,8 @@ export function renderTrackMap(cv) {
   ctx.lineWidth = lw * 2.6;
   ctx.stroke();
   const SC = ['#ff5a5a', '#ffd166', '#5ab0ff'];
-  const secOf = i => (i >= GS.SECI[2] ? 2 : i >= GS.SECI[1] ? 1 : 0);
-  const inDrs = i => GS.DRSZ.some(z => (z.z0 <= z.z1 ? i >= z.z0 && i <= z.z1 : i >= z.z0 || i <= z.z1));
+  const secOf = i => (i >= M.SECI[2] ? 2 : i >= M.SECI[1] ? 1 : 0);
+  const inDrs = i => M.DRSZ.some(z => (z.z0 <= z.z1 ? i >= z.z0 && i <= z.z1 : i >= z.z0 || i <= z.z1));
   const order = [...Array(n).keys()].sort(
     (p, q) => Q[p][2] + Q[(p + 1) % n][2] - (Q[q][2] + Q[(q + 1) % n][2]),
   );
@@ -228,7 +235,7 @@ export function renderTrackMap(cv) {
   ctx.font = `700 ${Math.round(lw * 3.1)}px Geist,system-ui,sans-serif`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  for (const c of GS.CORNERS) {
+  for (const c of M.CORNERS) {
     const j = Math.round(c.apex / st) % n;
     const q = S(Q[j]);
     ctx.lineWidth = lw * 1.1;

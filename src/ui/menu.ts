@@ -11,10 +11,10 @@ import { DRIVER_STATS } from '../teams/drivers';
 import { TEAM_STATS } from '../teams/team-stats';
 import { TEAMS, flag, teamLogo } from '../teams/teams';
 import { buildTrack } from '../track/build';
-import { raceTrackStarted } from '../track/active';
+import { buildSelectedTrack, raceTrackStarted } from '../track/active';
 import { TRACKS } from '../track/circuits';
 import { WX } from '../track/track';
-import { CIRCUIT_PLACE, bindTrackMap, drawTrackMap, elevProfile } from './circuit-map';
+import { CIRCUIT_PLACE, bindTrackMap, drawTrackMap, elevProfile, setMapData } from './circuit-map';
 import { CIRCUIT_COLS, CIRCUIT_FLAG } from './circuits';
 import { showToast, syncCtrlMenu, updatePads } from './controls';
 import { fmt, updateLights } from './hud';
@@ -53,6 +53,7 @@ export function startRace() {
   $('home').classList.add('hide');
   $('results').classList.add('hide');
   $('pause').classList.add('hide');
+  buildSelectedTrack();
   setupRace(false);
   raceTrackStarted();
   ['tl', 'board', 'spd', 'btns'].forEach(id => $(id).classList.remove('hide'));
@@ -100,12 +101,28 @@ export function placeCircuitPicker(slotId: string) {
   ([...$('trkFlags').children] as HTMLButtonElement[]).forEach(b => (b.disabled = ro));
   syncCircuit();
 }
+/** build circuit i only to read its map and numbers, then put back the circuit racing behind the menu */
+function withPreview(i: number, fn: () => void) {
+  if (GS.TR === TRACKS[i]) return fn();
+  const save = { ...GS };
+  buildTrack(TRACKS[i]);
+  try {
+    fn();
+  } finally {
+    for (const k of Object.keys(GS)) if (!(k in save)) delete GS[k];
+    Object.assign(GS, save);
+  }
+}
 export function syncCircuit() {
+  withPreview(GS.trackIdx, syncCircuit0);
+}
+function syncCircuit0() {
   const t = TRACKS[GS.trackIdx];
   const best = store.get('best_' + t.id, 0);
   ([...$('trkFlags').children] as HTMLElement[]).forEach((b, i) =>
     b.classList.toggle('sel', i === GS.trackIdx),
   );
+  setMapData();
   $('trkMap').innerHTML = drawTrackMap();
   bindTrackMap();
   $('trkElev').innerHTML = elevProfile();
@@ -127,14 +144,12 @@ export function syncCircuit() {
   ];
   $('trkStats').innerHTML = tiles.map(([v, k]) => `<div><b>${v}</b><span>${k}</span></div>`).join('');
 }
-/** show circuit i (builds it and restarts the demo race behind the menu) */
+/** show circuit i in the picker; the race behind the menu keeps running on its own circuit until a race starts */
 export function showCircuit(i: number) {
   i = (i + TRACKS.length) % TRACKS.length;
   if (i === GS.trackIdx) return;
   GS.trackIdx = i;
   if (!inLobby() || MP.host) store.set('track', i);
-  buildTrack(TRACKS[i]);
-  setupRace(true);
   syncCircuit();
 }
 function pickCircuit(i: number) {
