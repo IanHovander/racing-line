@@ -263,7 +263,8 @@ export function step(dt) {
             }
             if (best / Math.max(c.v, 10) < 1.0) c.drsEl = k;
           }
-          if (c === cars[GS.ctrl] && !attract && c.drsEl === k) notify('DRS enabled', NCOL.good, { ttl: 2, pri: PRI.drs });
+          if (c === cars[GS.ctrl] && !attract && c.drsEl === k)
+            notify('DRS enabled', NCOL.good, { ttl: 2, pri: PRI.drs });
         }
       }
       if (zi < 0 || zi !== c.drsEl) c.drs = false;
@@ -282,7 +283,11 @@ export function step(dt) {
       if (outL && !c.tlOut && GS.raceTime - (c.bumpT ?? -99) < 3) {
         c.tlOut = true;
         if (!attract && c === cars[GS.ctrl])
-          notify('Forced off after contact', NCOL.warn, { sub: 'No track-limits strike', key: 'rc', pri: PRI.warn });
+          notify('Forced off after contact', NCOL.warn, {
+            sub: 'No track-limits strike',
+            key: 'rc',
+            pri: PRI.warn,
+          });
       }
       if (outL && !c.tlOut) {
         c.tlN = (c.tlN || 0) + 1;
@@ -331,7 +336,10 @@ export function step(dt) {
             pb = store.get(k, 0);
           if (!pb || lt < pb) {
             store.set(k, lt);
-            if (pb) notify('New circuit record <span class="m">' + fmt(lt) + '</span>', NCOL.best, { pri: PRI.record });
+            if (pb)
+              notify('New circuit record <span class="m">' + fmt(lt) + '</span>', NCOL.best, {
+                pri: PRI.record,
+              });
           }
         }
       }

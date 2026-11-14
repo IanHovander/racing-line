@@ -31,7 +31,11 @@ export function secDone(c, k) {
     notify(
       `Best sector ${k + 1} · <span class="m">${t.toFixed(2)}</span>`,
       col === 'p' ? NCOL.best : NCOL.good,
-      { sub: `<span class="m">−${(pb - t).toFixed(2)}</span>&#8239;s on your best`, key: 'sector', pri: PRI.sector },
+      {
+        sub: `<span class="m">−${(pb - t).toFixed(2)}</span>&#8239;s on your best`,
+        key: 'sector',
+        pri: PRI.sector,
+      },
     );
   if (k === 2) {
     c.secPrev = c.secCur;

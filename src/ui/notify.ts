@@ -35,7 +35,18 @@ export const NICON = {
 };
 /** priorities: one note shows at a time; a higher (or equal) priority note replaces the one showing,
  *  a lower one waits (up to QWAIT s) until it's gone. Penalty > warning > car out > DRS > lap > sector > coach > info. */
-export const PRI = { pen: 100, warn: 90, start: 85, out: 80, drs: 60, record: 55, lap: 50, sector: 40, coach: 30, info: 20 };
+export const PRI = {
+  pen: 100,
+  warn: 90,
+  start: 85,
+  out: 80,
+  drs: 60,
+  record: 55,
+  lap: 50,
+  sector: 40,
+  coach: 30,
+  info: 20,
+};
 const QWAIT = 3;
 interface Note {
   text: string;
@@ -71,13 +82,16 @@ function showNote(n: Note): void {
   box.prepend(el);
   NQ.cur = n;
   NQ.el = el;
-  NQ.timer = setTimeout(() => {
-    el.classList.add('out');
-    setTimeout(() => el.remove(), 300);
-    NQ.cur = null;
-    NQ.el = null;
-    next();
-  }, (o.ttl || 3) * 1000);
+  NQ.timer = setTimeout(
+    () => {
+      el.classList.add('out');
+      setTimeout(() => el.remove(), 300);
+      NQ.cur = null;
+      NQ.el = null;
+      next();
+    },
+    (o.ttl || 3) * 1000,
+  );
 }
 function next(): void {
   const now = performance.now() / 1000;
@@ -102,4 +116,3 @@ export function clearNotes(): void {
   const box = $('notes');
   if (box) box.innerHTML = '';
 }
-
