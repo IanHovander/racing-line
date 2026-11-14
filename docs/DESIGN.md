@@ -296,6 +296,7 @@ Playable build: https://matthewtorgerson.github.io/racing-line/ (GitHub Pages, b
 - **AI reaction:** 0.12–0.55 s, quicker for drivers with high consistency, so the field spreads off the line.
 
 ## v17.3 — tooling
+
 - Circuit-map height exaggeration halved: relief ≈ 7% of the layout size, 1.25–3.5× true height (was 2.5–7×).
 
 - **oxfmt** formats the whole project (`.oxfmtrc.json`: 110 columns, single quotes, trailing commas). **oxlint** lints it (`.oxlintrc.json`: correctness errors, suspicious warnings, zero warnings allowed). CI runs both before typecheck/build/tests.
