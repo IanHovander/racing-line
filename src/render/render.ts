@@ -634,8 +634,8 @@ export function render() {
     else if (o[1] === 1) drawBox(o[2]);
     else {
       const c = o[2];
-      const g = P(c.x, c.y, 0);
-      if (onScr(g[0], g[1], 60)) {
+      const g = P(c.x, c.y, (c.hz || 0) + 0.5); // at the car's own height, so cars on hills aren't culled early
+      if (onScr(g[0], g[1], 60 + 4 * cam.zoom)) {
         if (c.ghost > 0) ctx.globalAlpha = 0.45 + 0.2 * Math.sin(performance.now() / 80);
         if (c.out) {
           const left = clearTime() - c.outT;

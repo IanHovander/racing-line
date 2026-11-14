@@ -371,6 +371,13 @@ Playable build: https://matthewtorgerson.github.io/racing-line/ (GitHub Pages, b
 - HUD panels are square (timing panel and rows, speed panel, gear box, rev bars, minimap, notifications, pause button, penalty badge); touch pads stay round.
 - Settings step: no help text under Start Race, so the button sits at the bottom like the other steps.
 
+## v17.9 — more detailed car
+
+- The car (`render/car.ts`) is built from more slabs with smoother outlines: floor, undercut sidepods with dark inlets, a nose that steps down in three levels, monocoque with an open cockpit, engine cover with airbox, intake and shark fin, mirrors, suspension arms, a halo around a helmet with a visor, a two-element front wing (main plane + flaps + endplates) and a rear wing with beam wing, main plane and a flap that lifts and turns blue with DRS. Tyres have 20 sides.
+- The far wing is drawn before the hull and the near wing after it, by the car's heading relative to the camera.
+- Cars are culled at their own height (they used to be tested at ground level 0, so cars low on screen on hilly circuits could vanish early).
+- Cost: render() with all 10 cars on screen went from about 5.8 to 6.2 ms in headless desktop Chrome.
+
 ## Model
 
 - Tracks: control points → Catmull-Rom → smoothed and resampled every 2 m (`buildTrack()`). Long straights need intermediate control points: without them the spline overshoots at the next tight corner and makes a near-cusp (a 4–7 m radius). That happened on the first Mexico and Vegas drafts.

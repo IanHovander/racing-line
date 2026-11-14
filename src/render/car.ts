@@ -12,41 +12,109 @@ export const mirror = half =>
       .reverse()
       .map(p => [p[0], -p[1]]),
   );
+// Car parts as outlines in car coordinates (x forward, y to the right, metres), each drawn as a slab between
+// two heights. The hull is stacked in steps so the nose slopes down, the sidepods are undercut, and the
+// engine cover rises to an airbox and tapers to the rear.
+/** lower hull, nose tip to gearbox */
 export const BODY = mirror([
-  [2.86, -0.06],
-  [2.7, -0.11],
-  [2.4, -0.15],
-  [2.0, -0.19],
-  [1.5, -0.23],
-  [1.0, -0.27],
+  [2.9, -0.04],
+  [2.82, -0.08],
+  [2.6, -0.115],
+  [2.3, -0.145],
+  [1.95, -0.18],
+  [1.6, -0.21],
+  [1.25, -0.24],
+  [0.9, -0.275],
   [0.5, -0.3],
-  [-0.4, -0.31],
-  [-1.4, -0.29],
-  [-2.0, -0.22],
-  [-2.35, -0.12],
+  [0.0, -0.315],
+  [-0.5, -0.32],
+  [-1.0, -0.31],
+  [-1.5, -0.28],
+  [-1.9, -0.23],
+  [-2.2, -0.16],
+  [-2.38, -0.1],
+]);
+/** second nose step */
+export const NOSE2 = mirror([
+  [2.25, -0.1],
+  [1.95, -0.15],
+  [1.6, -0.19],
+  [1.25, -0.22],
+]);
+/** monocoque and engine bay, above the lower hull */
+export const TUB = mirror([
+  [1.3, -0.2],
+  [1.0, -0.25],
+  [0.6, -0.285],
+  [0.1, -0.3],
+  [-0.5, -0.3],
+  [-1.0, -0.285],
+  [-1.5, -0.24],
+  [-1.9, -0.18],
+  [-2.25, -0.09],
+]);
+export const COCKPIT = mirror([
+  [0.58, -0.12],
+  [0.42, -0.19],
+  [0.0, -0.21],
+  [-0.3, -0.2],
+  [-0.42, -0.12],
+]);
+/** floor, wider than the body between the wheels */
+export const FLOOR = mirror([
+  [1.25, -0.26],
+  [1.02, -0.72],
+  [0.8, -0.82],
+  [-1.02, -0.85],
+  [-1.1, -0.7],
+  [-2.05, -0.68],
+  [-2.3, -0.32],
+]);
+/** sidepods: an undercut lower part and a wider top */
+export const PODS_LOW = mirror([
+  [0.6, -0.3],
+  [0.52, -0.52],
+  [0.36, -0.63],
+  [0.0, -0.66],
+  [-0.5, -0.65],
+  [-1.0, -0.56],
+  [-1.5, -0.4],
+  [-2.0, -0.24],
 ]);
 export const PODS = mirror([
   [0.72, -0.3],
-  [0.62, -0.6],
-  [0.45, -0.74],
-  [0.15, -0.79],
-  [-0.45, -0.78],
-  [-0.95, -0.7],
-  [-1.4, -0.52],
-  [-1.8, -0.34],
-  [-2.05, -0.24],
+  [0.68, -0.52],
+  [0.6, -0.66],
+  [0.46, -0.75],
+  [0.2, -0.79],
+  [-0.15, -0.8],
+  [-0.5, -0.78],
+  [-0.85, -0.72],
+  [-1.2, -0.61],
+  [-1.5, -0.48],
+  [-1.8, -0.35],
+  [-2.05, -0.25],
 ]);
+/** engine cover and the airbox on top of it */
 export const COVER = mirror([
-  [0.62, -0.18],
-  [0.42, -0.3],
-  [0.1, -0.36],
-  [-0.5, -0.36],
-  [-1.1, -0.29],
-  [-1.6, -0.2],
-  [-2.05, -0.1],
+  [-0.34, -0.19],
+  [-0.48, -0.26],
+  [-0.8, -0.275],
+  [-1.2, -0.25],
+  [-1.6, -0.19],
+  [-2.0, -0.11],
+  [-2.3, -0.05],
+]);
+export const AIRBOX = mirror([
+  [-0.36, -0.12],
+  [-0.5, -0.165],
+  [-0.8, -0.165],
+  [-1.2, -0.13],
+  [-1.6, -0.085],
+  [-1.95, -0.04],
 ]);
 // a tyre as a short cylinder: tread drawn where it faces the camera, then the outer sidewall with a rim
-export const WHL_N = 14,
+export const WHL_N = 20,
   WHL_C = Array.from({ length: WHL_N }, (_, k) => {
     const a = (k / WHL_N) * Math.PI * 2;
     return [Math.cos(a), Math.sin(a)];
@@ -110,10 +178,25 @@ export const rect = (x0, x1, y0, y1) => [
   [x0, y1],
   [x0, y0],
 ];
-export const FPLATE = [rect(2.3, 2.9, -1.04, -0.96), rect(2.3, 2.9, 0.96, 1.04)],
-  RPLATE = [rect(-2.62, -2.1, -0.84, -0.76), rect(-2.62, -2.1, 0.76, 0.84)];
-export const FWING = rect(2.35, 2.85, -1.0, 1.0),
-  RWING = rect(-2.6, -2.15, -0.8, 0.8),
+export const FPLATE = [rect(2.28, 2.92, -1.05, -0.97), rect(2.28, 2.92, 0.97, 1.05)],
+  RPLATE = [rect(-2.66, -2.08, -0.85, -0.77), rect(-2.66, -2.08, 0.77, 0.85)];
+export const FWING = rect(2.42, 2.88, -0.98, 0.98),
+  /** front wing flaps, either side of the nose */
+  FFLAP = [rect(2.3, 2.56, -0.97, -0.16), rect(2.3, 2.56, 0.16, 0.97)],
+  RWING = rect(-2.62, -2.3, -0.78, 0.78),
+  RFLAP = rect(-2.4, -2.14, -0.78, 0.78),
+  BEAM = rect(-2.58, -2.34, -0.7, 0.7),
+  MIRRORS = [rect(0.42, 0.54, -0.6, -0.44), rect(0.42, 0.54, 0.44, 0.6)],
+  INLETS = [rect(0.62, 0.73, -0.7, -0.34), rect(0.62, 0.73, 0.34, 0.7)],
+  /** suspension arms: [hull x, hull y, wheel x, wheel y, z], right side (mirrored for the left) */
+  ARMS = [
+    [1.85, 0.16, 1.55, 0.76, 0.33],
+    [1.3, 0.22, 1.55, 0.76, 0.3],
+    [1.55, 0.2, 1.55, 0.76, 0.42],
+    [-1.1, 0.27, -1.5, 0.75, 0.3],
+    [-1.85, 0.2, -1.5, 0.75, 0.33],
+    [-1.5, 0.22, -1.5, 0.75, 0.44],
+  ],
   WHEELS = [
     [1.55, -0.92],
     [1.55, 0.92],
@@ -160,46 +243,109 @@ export function drawCar0(c, isMe, isMate) {
   WHEELS.forEach((w, k) => {
     if (!nearW(w)) drawWheel3(c, w, k < 2);
   });
-  const bc = c.out ? shade(c.col, 0.45) : c.col;
-  prism(
-    local(c, [
-      [1.2, -0.12],
-      [1.2, 0.12],
-      [-1.95, 0.12],
-      [-1.95, -0.12],
-    ]),
-    0.18,
-    0.3,
-    '#222',
-    '#111',
-  ); // suspension/floor line
-  prism(local(c, PODS), 0.1, 0.38, shade(c.col, 0.92), shade(c.col, c.out ? 0.28 : 0.52));
-  prism(local(c, BODY), 0.12, 0.46, bc, shade(c.col, c.out ? 0.3 : 0.6));
-  prism(local(c, COVER), 0.46, 0.78, shade(c.col, 1.12), shade(c.col, 0.7));
-  if (c.dmg < 0.35) {
-    prism(local(c, FWING), 0.05, 0.18, shade(c.col, 0.85), shade(c.col, 0.5));
-    for (const fp of FPLATE) prism(local(c, fp), 0.05, 0.3, shade(c.acc, 0.9), shade(c.acc, 0.55));
-  }
+  const k1 = c.out ? 0.45 : 1; // a stopped car is drawn darker
+  const col = (m: number) => shade(c.col, m * k1),
+    acc = (m: number) => shade(c.acc, m * k1);
+  const pr = (poly, z0, z1, top, side) => prism(local(c, poly), z0, z1, top, side);
+  const toS = (lx, ly, z) => P(c.x + lx * ch - ly * sh, c.y + lx * sh + ly * ch, z);
+  const line = (pts, w, colr) => {
+    ctx.strokeStyle = colr;
+    ctx.lineWidth = Math.max(1, w * cam.zoom);
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    pts.forEach((q, i) => {
+      const p = toS(q[0], q[1], q[2]);
+      i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]);
+    });
+    ctx.stroke();
+    ctx.lineCap = 'butt';
+  };
+  const frontWing = () => {
+    if (c.dmg >= 0.35) return; // knocked off
+    pr(FWING, 0.05, 0.11, col(0.8), col(0.5));
+    for (const fl of FFLAP) pr(fl, 0.13, 0.19, acc(0.95), acc(0.6));
+    for (const fp of FPLATE) pr(fp, 0.04, 0.3, acc(0.85), acc(0.55));
+  };
+  const rearWing = () => {
+    pr(BEAM, 0.42, 0.47, '#222', '#111');
+    pr(rect(-2.5, -2.3, -0.05, 0.05), 0.4, 0.92, '#222', '#111'); // pylon
+    pr(RWING, 0.9, 0.97, acc(1), acc(0.6));
+    if (c.drs) pr(RFLAP, 1.17, 1.23, '#2e7dff', '#1d4fb0'); // flap open
+    else pr(RFLAP, 1.0, 1.1, acc(1.08), acc(0.65));
+    for (const rp of RPLATE) pr(rp, 0.3, 1.14, col(0.8), col(0.5));
+  };
+  const hull = () => {
+    for (const a of ARMS)
+      for (const sg of [1, -1])
+        line(
+          [
+            [a[0], a[1] * sg, a[4]],
+            [a[2], a[3] * sg, 0.32],
+          ],
+          0.05,
+          '#191919',
+        );
+    pr(FLOOR, 0.06, 0.1, '#1d1d1d', '#101010');
+    pr(PODS_LOW, 0.1, 0.24, col(0.6), col(0.38));
+    pr(BODY, 0.12, 0.34, col(1), col(0.6));
+    pr(PODS, 0.24, 0.44, col(0.94), col(0.55));
+    for (const inl of INLETS) pr(inl, 0.26, 0.43, '#0c0c0c', '#0c0c0c');
+    pr(NOSE2, 0.34, 0.42, col(1.05), col(0.66));
+    pr(TUB, 0.34, 0.52, col(1.06), col(0.64));
+    pr(COCKPIT, 0.52, 0.52, '#0b0b0b', '#0b0b0b');
+    for (const m of MIRRORS) pr(m, 0.56, 0.64, acc(0.95), acc(0.6));
+    // helmet with a visor, then the engine cover behind it and the halo around it
+    const hp = toS(-0.02, 0, 0.74);
+    ctx.fillStyle = c.acc;
+    ctx.beginPath();
+    ctx.arc(hp[0], hp[1], Math.max(2, 0.23 * cam.zoom), 0, 7);
+    ctx.fill();
+    line(
+      [
+        [0.14, -0.11, 0.78],
+        [0.19, 0, 0.78],
+        [0.14, 0.11, 0.78],
+      ],
+      0.07,
+      '#111',
+    );
+    pr(COVER, 0.52, 0.74, col(1.1), col(0.68));
+    pr(AIRBOX, 0.74, 0.97, col(1.16), col(0.74));
+    pr(rect(-0.36, -0.33, -0.1, 0.1), 0.78, 0.95, '#0b0b0b', '#0b0b0b'); // air intake
+    pr(rect(-2.28, -1.5, -0.02, 0.02), 0.74, 0.92, col(0.9), col(0.6)); // shark fin
+    line(
+      [
+        [-0.34, -0.25, 0.6],
+        [-0.2, -0.26, 0.86],
+        [0.3, -0.22, 0.86],
+        [0.52, 0, 0.86],
+        [0.3, 0.22, 0.86],
+        [-0.2, 0.26, 0.86],
+        [-0.34, 0.25, 0.6],
+      ],
+      0.05,
+      '#17181b',
+    );
+    line(
+      [
+        [0.52, 0, 0.86],
+        [0.64, 0, 0.52],
+      ],
+      0.045,
+      '#17181b',
+    );
+  };
+  // far end first: fd > 0 means the front of the car points away from the camera
+  const fd = ch * GS.cC + sh * GS.cS;
+  if (fd > 0) frontWing();
+  else rearWing();
+  hull();
   WHEELS.forEach((w, k) => {
     if (nearW(w)) drawWheel3(c, w, k < 2);
   });
-  prism(local(c, rect(-2.5, -2.3, -0.06, 0.06)), 0.4, 0.95, '#222', '#111');
-  if (c.drs) {
-    prism(local(c, RWING), 0.9, 0.97, c.acc, shade(c.acc, 0.6));
-    prism(local(c, RWING), 1.13, 1.18, '#2e7dff', '#1d4fb0');
-  } else prism(local(c, RWING), 0.9, 1.08, c.acc, shade(c.acc, 0.6));
-  for (const rp of RPLATE) prism(local(c, rp), 0.55, 1.12, shade(c.col, 0.8), shade(c.col, 0.5));
-  // helmet + halo
-  const hp = P(c.x + ch * -0.05, c.y + sh * -0.05, 0.85);
-  ctx.fillStyle = c.acc;
-  ctx.beginPath();
-  ctx.arc(hp[0], hp[1], Math.max(2, 0.27 * cam.zoom), 0, 7);
-  ctx.fill();
-  ctx.fillStyle = '#111';
-  const vp = P(c.x + ch * 0.12, c.y + sh * 0.12, 0.88);
-  ctx.beginPath();
-  ctx.arc(vp[0], vp[1], Math.max(1, 0.12 * cam.zoom), 0, 7);
-  ctx.fill();
+  if (fd > 0) rearWing();
+  else frontWing();
   if (c.tow > 0.2) {
     const tw = c.tow,
       tm = performance.now() / 1000;
