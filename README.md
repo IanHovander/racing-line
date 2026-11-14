@@ -1,15 +1,33 @@
 # Racing Line
 
-An overhead Formula-style racing game in a single HTML page: 8 circuits, 5 teams, AI opponents, DRS, slipstream, track limits, tyre wear, lock-ups, weather and more.
+Formula-style racing seen from a helicopter: eight circuits, five teams, AI drivers, DRS, slipstream,
+track limits, rain, practice mode and online multiplayer. Written in TypeScript, drawn with canvas 2D,
+with procedural WebAudio music. No game engine and no runtime dependencies.
 
-Play: https://matthewtorgerson.github.io/racing-line/
+**Play:** https://matthewtorgerson.github.io/racing-line/
+
+## Develop
+
+```sh
+npm install
+npm run dev        # http://localhost:5173 — rebuilds on save
+npm run typecheck
+npm run build      # production build in dist/
+npm test           # Playwright smoke tests against dist/ (build first)
+```
+
+Every push to `main` is type-checked, built, tested and deployed to GitHub Pages by
+`.github/workflows/deploy.yml`.
 
 ## Multiplayer
 
-Choose **Host multiplayer**, then share the room code, link or QR code. Friends open the link (or choose **Join multiplayer** and type the code).
+Outside claude.ai the game connects players directly with WebRTC through PeerJS (`public/vendor/peerjs.min.js`,
+MIT licence, with a jsDelivr fallback). The first browser to open a room code becomes the hub; friends join
+with the 5-character code or the invite link / QR code. Only STUN servers are configured, so a few strict
+networks (some mobile carriers, corporate firewalls) may not connect; add a TURN relay in `TURN` in
+`src/net/multiplayer.ts` if that matters. Inside a claude.ai artifact the game uses the artifact room capability instead.
 
-Players connect to the host's browser directly over WebRTC, using [PeerJS](https://peerjs.com). PeerJS's free public server only introduces the browsers to each other; the race data goes straight between them. Up to 10 cars per race: empty grid slots are filled with AI.
+## Layout
 
-Some networks (often mobile data or strict office/school Wi-Fi) block direct connections. Those need a TURN relay, which this version doesn't include yet.
-
-When the game is opened on claude.ai it uses claude.ai's own room service instead.
+See [CLAUDE.md](CLAUDE.md) for how the code is organised and [docs/DESIGN.md](docs/DESIGN.md) for the design
+notes and the history of every feature.
