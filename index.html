@@ -263,19 +263,22 @@
           <div class="wzT">Choose Your Team</div>
           <div class="stepCols">
             <div class="tlist" id="sTeam"></div>
-            <div id="teamStats"></div>
+            <div class="tcard" id="teamStats"></div>
           </div>
         </div>
         <div class="wz" data-s="2">
           <div class="wzT">Choose a Circuit</div>
-          <div class="stepCols cstep">
-            <div id="trkMap"></div>
-            <div class="cside">
+          <div id="circuitSlot" class="slot"></div>
+          <div class="stepCols cstep" id="circuitPicker">
+            <div class="cmain">
               <div class="chead">
                 <button id="trkPrev" class="carr" aria-label="Previous circuit">‹</button>
                 <div id="trkInfo"></div>
                 <button id="trkNext" class="carr" aria-label="Next circuit">›</button>
               </div>
+              <div id="trkMap"></div>
+            </div>
+            <div class="cside">
               <div id="trkElev"></div>
               <div id="trkStats"></div>
               <div id="trkDots"></div>
@@ -504,13 +507,18 @@
 
     <div id="lobby" class="ov hide">
       <div class="card">
-        <h2>Online Race Lobby</h2>
-        <div class="sub" id="lbInfo"></div>
-        <div id="lbNav">
-          <button data-s="0"><i>1</i>Team</button><button data-s="1"><i>2</i>Circuit</button
-          ><button data-s="2"><i>3</i>Settings</button>
+        <div id="lbHead">
+          <span id="lbTitle">Multiplayer <small id="lbRoomTag"></small></span
+          ><button id="bLbClose" aria-label="Leave room"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18" /></svg></button>
         </div>
-        <div data-ls="0">
+        <div id="lbNav">
+          <button data-s="0"><i>1</i>Room</button><button data-s="1"><i>2</i>Team</button
+          ><button data-s="2"><i>3</i>Circuit</button><button data-s="3"><i>4</i>Settings</button>
+        </div>
+        <div class="wz" data-s="0">
+          <div class="wzT">Invite Friends</div>
+          <div class="roomCols">
+            <div class="roomA">
           <div class="lbwrap">
             <div id="qr"></div>
             <div style="flex: 1; min-width: 0">
@@ -520,27 +528,31 @@
               <div class="trk" id="lbLink" style="word-break: break-all"></div>
             </div>
           </div>
-          <div class="sect">
-            <div class="sh">Players</div>
-            <div class="row" style="margin: 4px 0 6px">
-              <label>Your Name</label><input id="nick" maxlength="16" autocomplete="off" />
             </div>
-            <div id="lbPlayers"></div>
+            <div class="roomB">
+          <div class="row lbname"><label for="nick">Your Name</label><input id="nick" maxlength="16" autocomplete="off" /></div>
+          <div class="sh">Players</div>
+          <div id="lbPlayers"></div>
+          <div class="trk" id="lbInfo"></div>
+          <div class="help" id="lbHelp">
+            Everyone picks a team and their own controls; the host picks the circuit and race settings.
           </div>
-          <div class="sect">
-            <div class="sh">Team</div>
-            <div id="lbTeams"></div>
-            <div class="trk" id="lbTeamNote"></div>
-          </div>
-        </div>
-        <div data-ls="1">
-          <div class="sect">
-            <div class="sh">Circuit</div>
-            <div id="lbTrack"></div>
-            <div class="trk" id="lbTrackNote"></div>
+                    </div>
           </div>
         </div>
-        <div data-ls="2">
+        <div class="wz" data-s="1">
+          <div class="wzT">Choose Your Team</div>
+          <div class="stepCols">
+            <div class="tlist" id="lbTeams"></div>
+            <div class="tcard" id="lbTeamStats"></div>
+          </div>
+          <div class="trk" id="lbTeamNote"></div>
+        </div>
+        <div class="wz" data-s="2">
+          <div class="wzT" id="lbTrackTitle">Choose a Circuit</div>
+          <div id="lbCircuitSlot" class="slot"></div>
+        </div>
+        <div class="wz" data-s="3">
           <div class="sect">
             <div class="sh">Race Settings</div>
             <div class="rules" id="lbRules"></div>
@@ -555,11 +567,6 @@
         <div id="lbBar">
           <button id="lbBack">‹ Back</button><button id="lbNext" class="go">Next ›</button
           ><button class="go" id="bLbStart">Start Race</button>
-        </div>
-        <div class="seg" style="margin-top: 8px"><button id="bLbLeave">Leave Room</button></div>
-        <div class="help" id="lbHelp">
-          Friends need access to this game on claude.ai (use Share) and must be signed in. Everyone picks a
-          team and their own controls here; the host picks the circuit and race settings.
         </div>
       </div>
     </div>

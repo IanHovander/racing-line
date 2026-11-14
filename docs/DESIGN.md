@@ -320,6 +320,18 @@ Playable build: https://matthewtorgerson.github.io/racing-line/ (GitHub Pages, b
   - Phones held sideways (≤520 px tall) get a full-screen panel: the steps sit in the header row, with two columns (team list | summary, map | circuit details).
   - Checked with no overflow at 390×844, 375×667, 844×390, 667×375 and desktop.
 
+## v17.5 — multiplayer lobby works like the single-player wizard
+
+- The lobby is the same bottom-sheet panel as the single-player wizard, with four steps: **Room → Team → Circuit → Settings**, the same stepper and Back/Next bar.
+  - Room: QR code, room code, invite link, your name, players. Side by side in landscape so it doesn't scroll.
+  - Team: the same compact team list and summary card. Rows show player names ("You" for yours, "AI" for empty seats).
+  - Circuit: the same map-first picker element, moved between the wizard and the lobby. Guests see it read-only and follow the host's circuit.
+  - Settings: race rules (host) and the player's own controls; Start appears for the host on this step.
+- Team card: team name on its own line, tagline below it, a gap between the stat bars and the drivers.
+- Circuit picker: circuit name and ‹ › arrows sit above the map (in landscape, above the map column).
+- The menu shows the **last raced circuit** behind it (stored as `lastTrack`; Ardennes Forest / Spa the first time) and plays its music. Browsing circuits changes the demo race but not the music (`GS.musId`); the selected circuit's theme takes over at race start (`raceTrackStarted()` in `track/active.ts`).
+- Track limits default to **Off** (a stored choice is kept).
+
 ## Model
 
 - Tracks: control points → Catmull-Rom → smoothed and resampled every 2 m (`buildTrack()`). Long straights need intermediate control points: without them the spline overshoots at the next tight corner and makes a near-cusp (a 4–7 m radius). That happened on the first Mexico and Vegas drafts.

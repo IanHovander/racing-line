@@ -68,6 +68,8 @@ export interface State {
   HG: any;
   PZONE: any;
   trackIdx: any;
+  /** circuit id whose music theme plays (pinned to the last raced circuit until the next race start) */
+  musId: string;
   PRACTICE: any;
   RES_T: any;
   LAPC_T: any;

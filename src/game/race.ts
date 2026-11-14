@@ -186,7 +186,7 @@ export function init(): void {
     tyres: store.get('tyres', 0),
     damage: store.get('damage', 0),
     yellow: store.get('yellow', 10),
-    limits: store.get('limits', 3),
+    limits: store.get('limits', 0),
     drs: store.get('defv4', 0) ? store.get('drs', 2) : (store.set('drs', 2), 2),
     tow: store.get('tow', 1),
     turns: store.get('turns', 1),

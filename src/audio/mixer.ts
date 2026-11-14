@@ -16,7 +16,7 @@ export const TRACK_THEME = {
   spa: 'newbeat',
   singapore: 'marina',
 };
-export const curTheme = () => THEMES[TRACK_THEME[GS.TR.id]] || THEMES.electro;
+export const curTheme = () => THEMES[TRACK_THEME[GS.musId || GS.TR.id]] || THEMES.electro;
 export function playStep(s, t) {
   if (!opts.music) return;
   curTheme().play(s, t);

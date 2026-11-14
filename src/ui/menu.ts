@@ -4,12 +4,14 @@ import { cheer } from '../audio/crowd';
 import { $, clamp, isTouch, store } from '../core/dom';
 import { cars, opts, setupRace } from '../game/race';
 import { MP, leaveRoom, mpOn, mpPresence, showLobby } from '../net/multiplayer';
+import { renderLobby } from '../net/lobby';
 import { renderLaneInd } from '../sim/ai';
 import { buildProfile } from '../sim/profile';
 import { DRIVER_STATS } from '../teams/drivers';
 import { TEAM_STATS } from '../teams/team-stats';
 import { TEAMS, flag, teamLogo } from '../teams/teams';
 import { buildTrack } from '../track/build';
+import { raceTrackStarted } from '../track/active';
 import { TRACKS } from '../track/circuits';
 import { WX } from '../track/track';
 import { CIRCUIT_PLACE, bindTrackMap, drawTrackMap, elevProfile } from './circuit-map';
@@ -18,9 +20,10 @@ import { showToast, syncCtrlMenu, updatePads } from './controls';
 import { fmt, updateLights } from './hud';
 import { segInit, syncAllSegs } from './widgets';
 import { WZ, wzHost, wzJoin } from './wizard';
-export function showTeamStats() {
-  const t = TEAMS[opts.team],
-    st = TEAM_STATS[opts.team];
+/** summary card for one team: tagline, car bars in two columns, one line per driver (team step and lobby) */
+export function teamCardHtml(team: number) {
+  const t = TEAMS[team],
+    st = TEAM_STATS[team];
   const R: [string, number, number, number][] = [
     ['Top Speed', st.top, 0.96, 1.06],
     ['Acceleration', st.acc, 0.97, 1.07],
@@ -30,15 +33,18 @@ export function showTeamStats() {
     ['Durability', 2 - st.dur, 0.75, 1.2],
   ];
   // summary card: tagline, car bars in two columns, one line per driver
-  let h = `<div class="tg"><b>${t.name}</b> — ${st.tag}</div><div class="bars">`;
+  let h = `<div class="tg"><b>${t.name}</b><span>${st.tag}</span></div><div class="bars">`;
   for (const [n, v, a, b] of R) {
     const p = Math.round(clamp((v - a) / (b - a), 0.06, 1) * 100);
     h += `<div class="sr"><span>${n}</span><div class="sb"><i style="width:${p}%;background:${t.col};box-shadow:inset -3px 0 ${t.acc}"></i></div></div>`;
   }
   h += `</div><div class="drvs">`;
   for (let d = 0; d < 2; d++)
-    h += `<div class="drv">${flag(t.nat[d], 13)}<b>${t.drivers[d]}</b><span>${DRIVER_STATS[opts.team][d].tag}</span></div>`;
-  $('teamStats').innerHTML = h + '</div>';
+    h += `<div class="drv">${flag(t.nat[d], 13)}<b>${t.drivers[d]}</b><span>${DRIVER_STATS[team][d].tag}</span></div>`;
+  return h + '</div>';
+}
+export function showTeamStats() {
+  $('teamStats').innerHTML = teamCardHtml(opts.team);
 }
 export function startRace() {
   GS.PRACTICE = WZ.mode === 'practice';
@@ -48,6 +54,7 @@ export function startRace() {
   $('results').classList.add('hide');
   $('pause').classList.add('hide');
   setupRace(false);
+  raceTrackStarted();
   ['tl', 'board', 'spd', 'btns'].forEach(id => $(id).classList.remove('hide'));
   updatePads();
   updateLights();
@@ -80,54 +87,76 @@ export const backToLobby = () => {
   setupRace(true);
   showLobby();
 };
-export function init(): void {
-  // circuit step: map first, ‹ › to change circuit, elevation profile, stat tiles, dots
-  {
-    const dots = $('trkDots');
-    TRACKS.forEach((t, i) => {
-      const b = document.createElement('button');
-      b.setAttribute('aria-label', t.name);
-      b.onclick = () => pick(i);
-      dots.appendChild(b);
-    });
-    const sync = () => {
-      const t = TRACKS[GS.trackIdx];
-      const best = store.get('best_' + t.id, 0);
-      ([...dots.children] as HTMLElement[]).forEach((b, i) => b.classList.toggle('sel', i === GS.trackIdx));
-      $('trkMap').innerHTML = drawTrackMap();
-      bindTrackMap();
-      $('trkElev').innerHTML = elevProfile();
-      let hmin = 1e9,
-        hmax = -1e9;
-      for (let i = 0; i < GS.N; i++) {
-        hmin = Math.min(hmin, GS.HT[i]);
-        hmax = Math.max(hmax, GS.HT[i]);
-      }
-      const cols = CIRCUIT_COLS[t.id] || [];
-      $('trkInfo').innerHTML =
-        `<div class="tname"><span class="cb">${cols.map(c => `<i style="background:${c}"></i>`).join('')}</span>${t.name}</div>` +
-        `<div class="tplace">${CIRCUIT_PLACE[t.id] || ''}${t.night ? ' · Night Race' : ''}${t.street ? ' · Street Circuit' : ''}</div>`;
-      const tiles: [string, string][] = [
-        [(GS.L / 1000).toFixed(2) + ' km', 'Length'],
-        [String(GS.CORNERS.length), 'Corners'],
-        [String(GS.DRSZ.length), GS.DRSZ.length === 1 ? 'DRS Zone' : 'DRS Zones'],
-        [best ? fmt(best) : Math.round(hmax - hmin) + ' m', best ? 'Your Best' : 'Climb'],
-      ];
-      $('trkStats').innerHTML = tiles.map(([v, k]) => `<div><b>${v}</b><span>${k}</span></div>`).join('');
-    };
-    const pick = (i: number) => {
-      i = (i + TRACKS.length) % TRACKS.length;
-      if (i === GS.trackIdx) return;
-      GS.trackIdx = i;
-      store.set('track', i);
-      buildTrack(TRACKS[i]);
-      setupRace(true);
-      sync();
-    };
-    $('trkPrev').onclick = () => pick(GS.trackIdx - 1);
-    $('trkNext').onclick = () => pick(GS.trackIdx + 1);
-    sync();
+// ---- circuit picker (map first, ‹ › to change circuit): one set of elements, moved between the
+// single-player wizard and the multiplayer lobby. In the lobby only the host can change the circuit.
+const inLobby = () => !!MP.room && MP.phase === 'lobby';
+export function placeCircuitPicker(slotId: string) {
+  const el = $('circuitPicker'),
+    slot = $(slotId);
+  if (el.parentElement !== slot) slot.appendChild(el);
+  const ro = inLobby() && !MP.host;
+  el.classList.toggle('ro', ro);
+  ['trkPrev', 'trkNext'].forEach(id => ($(id).disabled = ro));
+  ([...$('trkDots').children] as HTMLButtonElement[]).forEach(b => (b.disabled = ro));
+  syncCircuit();
+}
+export function syncCircuit() {
+  const t = TRACKS[GS.trackIdx];
+  const best = store.get('best_' + t.id, 0);
+  ([...$('trkDots').children] as HTMLElement[]).forEach((b, i) => b.classList.toggle('sel', i === GS.trackIdx));
+  $('trkMap').innerHTML = drawTrackMap();
+  bindTrackMap();
+  $('trkElev').innerHTML = elevProfile();
+  let hmin = 1e9,
+    hmax = -1e9;
+  for (let i = 0; i < GS.N; i++) {
+    hmin = Math.min(hmin, GS.HT[i]);
+    hmax = Math.max(hmax, GS.HT[i]);
   }
+  const cols = CIRCUIT_COLS[t.id] || [];
+  $('trkInfo').innerHTML =
+    `<div class="tname"><span class="cb">${cols.map(c => `<i style="background:${c}"></i>`).join('')}</span>${t.name}</div>` +
+    `<div class="tplace">${CIRCUIT_PLACE[t.id] || ''}${t.night ? ' · Night Race' : ''}${t.street ? ' · Street Circuit' : ''}</div>`;
+  const tiles: [string, string][] = [
+    [(GS.L / 1000).toFixed(2) + ' km', 'Length'],
+    [String(GS.CORNERS.length), 'Corners'],
+    [String(GS.DRSZ.length), GS.DRSZ.length === 1 ? 'DRS Zone' : 'DRS Zones'],
+    [best ? fmt(best) : Math.round(hmax - hmin) + ' m', best ? 'Your Best' : 'Climb'],
+  ];
+  $('trkStats').innerHTML = tiles.map(([v, k]) => `<div><b>${v}</b><span>${k}</span></div>`).join('');
+}
+/** show circuit i (builds it and restarts the demo race behind the menu) */
+export function showCircuit(i: number) {
+  i = (i + TRACKS.length) % TRACKS.length;
+  if (i === GS.trackIdx) return;
+  GS.trackIdx = i;
+  if (!inLobby() || MP.host) store.set('track', i);
+  buildTrack(TRACKS[i]);
+  setupRace(true);
+  syncCircuit();
+}
+function pickCircuit(i: number) {
+  if (inLobby() && !MP.host) return;
+  showCircuit(i);
+  if (inLobby()) {
+    mpPresence();
+    renderLobby();
+  }
+}
+function initCircuitPicker() {
+  const dots = $('trkDots');
+  TRACKS.forEach((t, i) => {
+    const b = document.createElement('button');
+    b.setAttribute('aria-label', t.name);
+    b.onclick = () => pickCircuit(i);
+    dots.appendChild(b);
+  });
+  $('trkPrev').onclick = () => pickCircuit(GS.trackIdx - 1);
+  $('trkNext').onclick = () => pickCircuit(GS.trackIdx + 1);
+  placeCircuitPicker('circuitSlot');
+}
+export function init(): void {
+  initCircuitPicker();
   $('sTeam').addEventListener('click', () => setTimeout(showTeamStats, 0));
   showTeamStats();
   segInit('sPedals', 'pedals', Number);

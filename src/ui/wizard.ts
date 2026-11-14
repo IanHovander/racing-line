@@ -2,6 +2,7 @@ import { GS } from '../state';
 import { setMusic, setSfx, unlockAudio } from '../audio/audio';
 import { $, clamp, store } from '../core/dom';
 import { opts } from '../game/race';
+import { placeCircuitPicker } from './menu';
 import { ARTIFACT_URL, MP, enterRoom, leaveRoom, mpCode, mpPresence, normCode } from '../net/multiplayer';
 import { hostStart } from '../net/netcode';
 import {
@@ -79,6 +80,7 @@ export function wzGo(n) {
         : WZ.mode === 'practice'
           ? 'START PRACTICE'
           : 'START RACE';
+  if (n === 2) placeCircuitPicker('circuitSlot');
   const c = $('menu');
   c.scrollTop = 0;
   const cd = c.querySelector('.card');
@@ -142,7 +144,7 @@ export function init(): void {
     enterRoom(c, false);
   };
   $('bLbStart').onclick = hostStart;
-  $('bLbLeave').onclick = () => leaveRoom();
+  $('bLbClose').onclick = () => leaveRoom();
   $('bCopy').onclick = () => {
     const t = ARTIFACT_URL + '#' + MP.code;
     try {

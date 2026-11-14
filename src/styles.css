@@ -627,70 +627,14 @@ body #pThr.big {
 #btns button:active {
   background: rgba(255, 255, 255, 0.25);
 }
-#lbTrack {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(78px, 1fr));
-  gap: 6px;
-  margin-top: 4px;
-}
-#lbTrack button {
-  padding: 0 !important;
-  border: 0 !important;
-  background: none !important;
-  opacity: 0.6;
-  border-radius: 3px;
-}
-#lbTrack button.sel {
-  opacity: 1;
-  outline: 2px solid #fff;
-  outline-offset: 2px;
-}
-#lbTrack button:disabled {
-  cursor: default;
-}
-#lbTrack svg {
-  display: block;
-  width: 100%;
-  height: auto;
-}
+
 #lobby .rules button:disabled {
   cursor: default;
 }
 #lobby .rules button:disabled:not(.sel) {
   opacity: 0.45;
 }
-#lbTeams {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 6px;
-}
-#lbTeams button {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 3px;
-  padding: 7px 3px !important;
-  font-size: 10.5px;
-  line-height: 1.15;
-  min-height: 74px;
-}
-#lbTeams button.sel {
-  background: #f2f4f7 !important;
-  color: #111 !important;
-  border-color: #fff !important;
-}
-#lbTeams button:disabled {
-  opacity: 0.45;
-  cursor: default;
-}
-#lbTeams button small {
-  font-size: 9.5px;
-  opacity: 0.8;
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
+
 #rcb {
   position: fixed;
   top: auto;
@@ -1600,26 +1544,26 @@ body.touch #spd {
 }
 
 /* ---- setup panel: bottom sheet on phones, centred card on wider screens ---- */
-#menu {
+:is(#menu, #lobby) {
   background: rgba(6, 7, 10, 0.55);
 }
-#menu .card {
+:is(#menu, #lobby) .card {
   background: #14171d;
 }
 #menu[data-group='prefs'] .wz[data-s='3'] .wzT {
   display: none;
 }
-#pnlHead {
+:is(#pnlHead, #lbHead) {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin: 0 0 12px;
 }
-#pnlTitle {
+:is(#pnlTitle, #lbTitle) {
   font-size: 20px;
   font-weight: 800;
 }
-#pnlClose {
+:is(#pnlClose, #bLbClose) {
   width: 40px;
   height: 40px;
   border-radius: 20px;
@@ -1686,17 +1630,17 @@ body.touch #spd {
   }
 }
 @media (max-width: 640px) {
-  #menu {
+  :is(#menu, #lobby) {
     align-items: flex-end;
     padding: 0;
   }
-  #menu .card {
+  :is(#menu, #lobby) .card {
     border-radius: 22px 22px 0 0;
     max-height: 88vh;
     padding-bottom: calc(18px + env(safe-area-inset-bottom));
     animation: sheetUp 0.25s ease-out;
   }
-  #menu .card::before {
+  :is(#menu, #lobby) .card::before {
     content: '';
     display: block;
     width: 40px;
@@ -1774,7 +1718,7 @@ body.touch #spd {
   align-items: center;
   gap: 4px;
 }
-#teamStats {
+.tcard {
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -1782,21 +1726,28 @@ body.touch #spd {
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.04);
 }
-#teamStats .tg {
+.tcard .tg {
   font-size: 13px;
   line-height: 1.35;
   color: #dde1e6;
 }
-#teamStats .tg b {
+.tcard .tg b {
+  display: block;
   color: #fff;
+  font-size: 14px;
 }
-#teamStats .bars {
+.tcard .tg span {
+  display: block;
+  margin-top: 2px;
+  color: #b4bac3;
+}
+.tcard .bars {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   column-gap: 16px;
   row-gap: 4px;
 }
-#teamStats .sr {
+.tcard .sr {
   display: grid;
   grid-template-columns: 82px 1fr;
   align-items: center;
@@ -1804,33 +1755,34 @@ body.touch #spd {
   font-size: 11.5px;
   color: #c4c9d1;
 }
-#teamStats .sb {
+.tcard .sb {
   height: 6px;
   border-radius: 3px;
   background: rgba(255, 255, 255, 0.1);
   overflow: hidden;
 }
-#teamStats .sb i {
+.tcard .sb i {
   display: block;
   height: 100%;
   border-radius: 3px;
 }
-#teamStats .drvs {
+.tcard .drvs {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  margin-top: 6px;
 }
-#teamStats .drv {
+.tcard .drv {
   display: flex;
   align-items: center;
   gap: 7px;
   font-size: 13px;
   min-width: 0;
 }
-#teamStats .drv b {
+.tcard .drv b {
   white-space: nowrap;
 }
-#teamStats .drv span {
+.tcard .drv span {
   color: #9aa1aa;
   font-size: 12px;
   white-space: nowrap;
@@ -1877,10 +1829,12 @@ body.touch #spd {
   border-radius: 2px;
   display: block;
 }
+.cmain,
 .cside {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  min-height: 0;
 }
 .chead {
   display: flex;
@@ -1985,32 +1939,32 @@ body.touch #spd {
 }
 
 /* ---- the panel fills its height so the team and circuit steps fit without scrolling ---- */
-#menu .card {
+:is(#menu, #lobby) .card {
   display: flex;
   flex-direction: column;
 }
-#menu .wz.on {
+:is(#menu, #lobby) .wz.on {
   display: flex;
   flex-direction: column;
   flex: 1;
   min-height: 0;
 }
-#menu .wz[data-s='1'].on,
-#menu .wz[data-s='2'].on {
+:is(#menu, #lobby) .wz[data-s='1'].on,
+:is(#menu, #lobby) .wz[data-s='2'].on {
   overflow: hidden;
 }
-#menu .wz[data-s='0'].on,
-#menu .wz[data-s='3'].on {
+:is(#menu, #lobby) .wz[data-s='0'].on,
+:is(#menu, #lobby) .wz[data-s='3'].on {
   overflow: auto;
 }
-#menu .wz[data-s='2'] .stepCols {
+:is(#menu, #lobby) .wz[data-s='2'] .stepCols {
   flex: 1;
 }
-#menu .wz[data-s='2'] #trkMap {
+:is(#menu, #lobby) .wz[data-s='2'] :is(.cmain, #trkMap) {
   flex: 1;
 }
 @media (max-width: 640px) {
-  #menu .card {
+  :is(#menu, #lobby) .card {
     height: 88vh;
     overflow: hidden;
   }
@@ -2018,11 +1972,11 @@ body.touch #spd {
 
 /* ---- phones held sideways: full-screen panel, two columns ---- */
 @media (max-height: 520px) and (orientation: landscape) {
-  #menu {
+  :is(#menu, #lobby) {
     padding: 0;
     align-items: stretch;
   }
-  #menu .card {
+  :is(#menu, #lobby) .card {
     max-width: none;
     height: 100vh;
     height: 100dvh;
@@ -2034,25 +1988,25 @@ body.touch #spd {
     position: relative;
     animation: none;
   }
-  #menu .card::before {
+  :is(#menu, #lobby) .card::before {
     display: none;
   }
-  #pnlHead {
+  :is(#pnlHead, #lbHead) {
     margin: 0 0 8px;
   }
-  #wzNav {
+  :is(#wzNav, #lbNav) {
     position: absolute;
     top: 10px;
     left: 190px;
     right: 76px;
     margin: 0;
   }
-  #menu .wz .wzT {
+  :is(#menu, #lobby) .wz .wzT {
     font-size: 15px;
     margin: 0 0 6px;
   }
-  #menu .wz[data-s='1'] .stepCols,
-  #menu .wz[data-s='2'] .stepCols {
+  :is(#menu, #lobby) .wz[data-s='1'] .stepCols,
+  :is(#menu, #lobby) .wz[data-s='2'] .stepCols {
     flex-direction: row;
     flex: 1;
     gap: 18px;
@@ -2064,18 +2018,19 @@ body.touch #spd {
   .tlist button {
     height: 38px;
   }
-  #teamStats {
+  .tcard {
     flex: 1;
     min-width: 0;
   }
-  #menu .wz[data-s='2'] #trkMap {
+  :is(#menu, #lobby) .wz[data-s='2'] .cmain {
     flex: 1.15;
+    min-width: 0;
   }
   .cside {
     flex: 1;
     min-width: 0;
   }
-  #wzBar {
+  :is(#wzBar, #lbBar) {
     padding-top: 6px;
   }
 }
@@ -2088,11 +2043,76 @@ body.touch #spd {
   .tlist button {
     height: 40px;
   }
-  #teamStats {
+  .tcard {
     padding: 9px 11px;
     gap: 6px;
   }
-  #menu .wz .wzT {
+  :is(#menu, #lobby) .wz .wzT {
     margin-bottom: 6px;
+  }
+}
+
+/* ---- multiplayer lobby: same panel and steps as single player ---- */
+.slot {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.tlist .tdc .ai {
+  opacity: 0.55;
+}
+#circuitPicker.ro .carr,
+#circuitPicker.ro #trkDots button:not(.sel) {
+  opacity: 0.35;
+}
+.lbname {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 10px 0;
+}
+.lbname label {
+  margin: 0;
+  white-space: nowrap;
+}
+.lbname input {
+  flex: 1;
+  min-width: 0;
+}
+#lbRoomTag {
+  font: 600 13px/1 var(--mono);
+  color: #9aa1aa;
+  margin-left: 6px;
+}
+.roomCols {
+  display: flex;
+  flex-direction: column;
+}
+.tlist .tdc {
+  min-width: 0;
+  max-width: 150px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.tlist .tdc span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+@media (max-height: 520px) and (orientation: landscape) {
+  #lbRoomTag {
+    display: none;
+  }
+  .roomCols {
+    flex-direction: row;
+    gap: 18px;
+  }
+  .roomA,
+  .roomB {
+    flex: 1;
+    min-width: 0;
+  }
+  .roomB .lbname {
+    margin-top: 0;
   }
 }

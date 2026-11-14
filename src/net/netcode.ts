@@ -1,5 +1,6 @@
 import { GS } from '../state';
 import { setMusic, setSfx, unlockAudio } from '../audio/audio';
+import { raceTrackStarted } from '../track/active';
 import { cheer } from '../audio/crowd';
 import { $, clamp, store, wrapA } from '../core/dom';
 import { cars, goAt, opts, setupRace } from '../game/race';
@@ -105,7 +106,7 @@ export function startMpRace(grid, cfg, hostId) {
     opts.diff = clamp(cfg.diff | 0, 0, 2);
     opts.rain = cfg.rain ? 1 : 0;
     if (cfg.tow !== undefined) opts.tow = cfg.tow ? 1 : 0;
-    if (cfg.limits !== undefined) opts.limits = [0, 2, 3].includes(cfg.limits) ? cfg.limits : 3;
+    if (cfg.limits !== undefined) opts.limits = [0, 2, 3].includes(cfg.limits) ? cfg.limits : 0;
     opts.drs = cfg.drsOn === 0 ? 0 : store.get('drs', 2) || 2;
     WX.rain = opts.rain;
     buildProfile();
@@ -120,6 +121,7 @@ export function startMpRace(grid, cfg, hostId) {
     false,
     grid.map(e => ({ p: e.p, t: clamp(e.t | 0, 0, 4), d: e.d ? 1 : 0, n: e.n, owner: e.p || hostId })),
   );
+  raceTrackStarted();
   ['tl', 'board', 'spd', 'btns'].forEach(id => $(id).classList.remove('hide'));
   updatePads();
   updateLights();

@@ -1,15 +1,13 @@
 import { GS } from '../state';
 import { $, clamp, store } from '../core/dom';
-import { opts, setupRace } from '../game/race';
+import { opts } from '../game/race';
 import { MP, hostPeer, mpCfg, mpPresence } from './multiplayer';
 import { qrSvg } from './qr';
 import { TEAMS, teamLogo } from '../teams/teams';
-import { buildTrack } from '../track/build';
 import { TRACKS } from '../track/circuits';
-import { CIRCUIT_PLACE } from '../ui/circuit-map';
 import { showToast } from '../ui/controls';
-import { POSTERS } from '../ui/posters';
 import { syncAllSegs } from '../ui/widgets';
+import { placeCircuitPicker, showCircuit, teamCardHtml } from '../ui/menu';
 // ---- lobby: circuit (host), race settings (host), controls (each player)
 export const LB_RULES: [string, string, [number, string][]][] = [
   [
@@ -171,24 +169,23 @@ export function segRow(label, list, cur, dis, onPick) {
   return d;
 }
 export const LBS = { s: 0 };
+// the lobby is the multiplayer version of the setup wizard: Room -> Team -> Circuit -> Settings
 export function lbGo(n) {
-  LBS.s = clamp(n, 0, 2);
+  LBS.s = clamp(n, 0, 3);
   document
-    .querySelectorAll<HTMLElement>('#lobby [data-ls]')
-    .forEach(d => d.classList.toggle('hide', +d.dataset.ls !== LBS.s));
+    .querySelectorAll<HTMLElement>('#lobby .wz')
+    .forEach(d => d.classList.toggle('on', +d.dataset.s === LBS.s));
   ([...$('lbNav').children] as HTMLElement[]).forEach((b, i) => {
     b.classList.toggle('cur', i === LBS.s);
     b.classList.toggle('done', i < LBS.s);
   });
-  const last = LBS.s === 2;
+  if (LBS.s === 2) placeCircuitPicker('lbCircuitSlot');
+  const last = LBS.s === 3;
   $('lbBack').style.visibility = LBS.s === 0 ? 'hidden' : 'visible';
   $('lbNext').style.display = last ? 'none' : '';
   $('bLbStart').style.display = last && MP.host ? '' : 'none';
-  $('lbNext').textContent = LBS.s === 0 ? 'Next: Circuit ›' : 'Next: Settings ›';
-  $('lbWait').style.display = last || !MP.host ? '' : 'none';
-  const c = $('lobby');
-  c.scrollTop = 0;
-  const cd = c.querySelector('.card');
+  $('lbWait').style.display = last ? '' : 'none';
+  const cd = $('lobby').querySelector('.card');
   if (cd) cd.scrollTop = 0;
 }
 export function renderLobbySettings(cfg) {
@@ -228,38 +225,7 @@ export function renderLobbySettings(cfg) {
       }),
     );
   }
-  const tr = $('lbTrack');
-  if (!tr.children.length)
-    TRACKS.forEach((t, i) => {
-      const b = document.createElement('button');
-      b.title = t.name;
-      b.dataset.v = String(i);
-      b.innerHTML = (POSTERS[t.id] || t.name)
-        .replace(/id="([^"]+)"/g, 'id="lb$1"')
-        .replace(/url\(#([^)]+)\)/g, 'url(#lb$1)');
-      b.onclick = () => {
-        if (!MP.host) return;
-        GS.trackIdx = i;
-        store.set('track', i);
-        buildTrack(TRACKS[i]);
-        setupRace(true);
-        mpPresence();
-        renderLobby();
-      };
-      tr.appendChild(b);
-    });
-  const ti = MP.host ? GS.trackIdx : cfg ? clamp(cfg.track | 0, 0, TRACKS.length - 1) : -1;
-  ([...tr.children] as HTMLButtonElement[]).forEach((b, i) => {
-    b.classList.toggle('sel', i === ti);
-    b.disabled = !MP.host;
-  });
-  $('lbTrackNote').textContent =
-    ti >= 0
-      ? TRACKS[ti].name +
-        ' · ' +
-        (CIRCUIT_PLACE[TRACKS[ti].id] || '') +
-        (MP.host ? '' : ' — chosen by the host')
-      : 'Waiting for the host…';
+  $('lbTrackTitle').textContent = MP.host ? 'Choose a Circuit' : cfg ? 'Circuit — Chosen by the Host' : 'Circuit — Waiting for the Host';
 }
 // ---- every player races a different team: earlier arrivals keep their pick, later ones move to a free team
 export function lobbyOrder() {
@@ -305,9 +271,11 @@ export function renderLobbyTeams() {
   TEAMS.forEach((t, i) => {
     const b = document.createElement('button');
     const l = (own[i] || []).filter(p => !p.sameTab);
-    const names = l.map(p => String(p.presence.nick).replace(/[<>&]/g, '')).join(', ');
+    const names = l.map(p => String(p.presence.nick).replace(/[<>&]/g, ''));
+    if (i === opts.team && !MP.full) names.unshift('You');
     b.innerHTML =
-      teamLogo(i, 26) + '<span>' + t.name + '</span>' + (names ? '<small>' + names + '</small>' : '');
+      teamLogo(i, 30) +
+      `<span class="tn">${t.name}</span><span class="tdc">${names.length ? names.map(n => `<span>${n}</span>`).join('') : '<span class="ai">AI</span>'}</span>`;
     b.classList.toggle('sel', i === opts.team && !MP.full);
     b.disabled = l.length >= 2 && i !== opts.team;
     b.onclick = () => {
@@ -319,9 +287,10 @@ export function renderLobbyTeams() {
     };
     el.appendChild(b);
   });
+  $('lbTeamStats').innerHTML = teamCardHtml(opts.team);
   $('lbTeamNote').textContent = MP.full
     ? 'All ten seats are taken — this race is full, so you can watch the lobby but not race.'
-    : 'Up to two players per team — race as teammates, or pick your own team. Empty seats are driven by the AI.';
+    : 'Up to two players per team. Empty seats are driven by the AI.';
 }
 export function renderLobby() {
   if (!MP.room) return;
@@ -344,14 +313,21 @@ export function renderLobby() {
       String(pr.nick || 'Joining…').slice(0, 16) + (p.sameTab ? ' (you)' : '') + (p.guest ? ' · guest' : '');
     d.appendChild(n);
     const r = document.createElement('small');
-    r.textContent = pr.role === 'host' ? 'HOST' : pr.phase === 'race' ? 'racing' : 'ready';
+    r.textContent = pr.role === 'host' ? 'Host' : pr.phase === 'race' ? 'Racing' : 'Ready';
     d.appendChild(r);
     list.appendChild(d);
   }
   const cfg = MP.host ? mpCfg() : (hp && hp.presence.cfg) || null;
   $('lbInfo').textContent = cfg
-    ? `${TRACKS[clamp(cfg.track | 0, 0, TRACKS.length - 1)].name} · ${cfg.laps | 0} laps · ${cfg.rain ? 'rain' : 'dry'}`
+    ? `${TRACKS[clamp(cfg.track | 0, 0, TRACKS.length - 1)].name} · ${cfg.laps | 0} Laps · ${cfg.rain ? 'Rain' : 'Dry'}${cfg.practice ? ' · Practice' : ''}`
     : 'Waiting for the host…';
+  $('lbRoomTag').textContent = MP.code ? '· Room ' + MP.code.toUpperCase() : '';
+  // guests follow the host's circuit so the map they see is the one they'll race on
+  if (!MP.host && cfg && MP.phase === 'lobby') {
+    const ti = clamp(cfg.track | 0, 0, TRACKS.length - 1);
+    if (ti !== GS.trackIdx) showCircuit(ti);
+  }
+  if (LBS.s === 2) placeCircuitPicker('lbCircuitSlot');
   $('bLbStart').classList.toggle('hide', !MP.host);
   renderLobbySettings(cfg);
   const n = MP.peers.filter(p => p.kind === 'viewer').length;
