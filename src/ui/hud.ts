@@ -167,7 +167,9 @@ export function hud(dt) {
         const d = progress(a) - progress(b);
         const gt = gapT(a, b);
         gap =
-          d > GS.L ? sg + Math.floor(d / GS.L) + 'L' : sg + (gt !== null ? gt : d / Math.max(a.v, 30)).toFixed(1);
+          d > GS.L
+            ? sg + Math.floor(d / GS.L) + 'L'
+            : sg + (gt !== null ? gt : d / Math.max(a.v, 30)).toFixed(1);
       }
     }
     if (o.out) gap = '<b style="color:#ff6b5e">OUT</b>';
