@@ -384,6 +384,11 @@ Playable build: https://matthewtorgerson.github.io/racing-line/ (GitHub Pages, b
 - Lettering is painted in the board's own plane (an affine transform along the board's bottom edge, vertical kept upright, clipped to the face), so it shears and foreshortens with the board instead of floating as rotated text. No lettering on boards seen nearly edge-on (under 22% of their true length).
 - Boards have thickness (a light top edge), are shaded darker the more they turn from the camera, and have a back: seen from behind they show a dark panel above the wall with posts and braces, instead of disappearing.
 
+## v17.11 — pause bottom left, minimap without a panel
+
+- Pause button in the bottom left corner (44 px). With steering or gear-down pads (and the speed panel above them) in that corner it sits above them (`layoutPads`).
+- Minimap has no dark panel behind it; the track line is white with a faded black edge (6 px at 45%) for contrast. It moves up to the top right corner, since only the desktop Swap button is left in `#btns`.
+
 ## Model
 
 - Tracks: control points → Catmull-Rom → smoothed and resampled every 2 m (`buildTrack()`). Long straights need intermediate control points: without them the spline overshoots at the next tight corner and makes a near-cusp (a 4–7 m radius). That happened on the first Mexico and Vegas drafts.

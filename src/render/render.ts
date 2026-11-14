@@ -670,12 +670,7 @@ export function minimap() {
   const sc = s / Math.max(GS.maxX - GS.minX, GS.maxY - GS.minY);
   const ox = x0 + (s - (GS.maxX - GS.minX) * sc) / 2,
     oy = y0 + (s - (GS.maxY - GS.minY) * sc) / 2;
-  ctx.fillStyle = 'rgba(10,12,18,0.55)';
-  ctx.beginPath();
-  ctx.rect(x0 - 6, y0 - 6, s + 12, s + 12); // square, like the other HUD panels
-  ctx.fill();
-  ctx.strokeStyle = '#ddd';
-  ctx.lineWidth = 3;
+  // no panel behind the map: the track line has a faded black edge for contrast on any background
   ctx.lineJoin = 'round';
   ctx.beginPath();
   GS.MM.forEach((p, i) => {
@@ -684,6 +679,11 @@ export function minimap() {
     i ? ctx.lineTo(X, Y) : ctx.moveTo(X, Y);
   });
   ctx.closePath();
+  ctx.strokeStyle = 'rgba(0,0,0,0.45)';
+  ctx.lineWidth = 6;
+  ctx.stroke();
+  ctx.strokeStyle = '#eee';
+  ctx.lineWidth = 3;
   ctx.stroke();
   const sl = [ox + (GS.cx[0] - GS.minX) * sc, oy + (GS.cy[0] - GS.minY) * sc];
   ctx.fillStyle = '#fff';

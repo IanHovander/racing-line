@@ -176,6 +176,8 @@ export function layoutPads() {
   sw.style.cssText = '';
   spd.classList.remove('compact');
   document.body.style.removeProperty('--notesB');
+  const pz = $('bPause');
+  pz.style.bottom = '';
   if (!isTouch || GS.state === 'menu') return;
   // throttle only, no steering pads: everything on the right thumb. GAS bottom right, Swap to its left at the
   // same height, the speed panel above them centred on the screen, notifications above that.
@@ -261,6 +263,12 @@ export function layoutPads() {
       sw.style.bottom = H - top + 12 + 'px';
     }
   }
+  // steering / gear-down pads (and the speed panel above them) take the bottom left corner: pause goes above
+  const lp = ['pL', 'pR', 'pDn', 'spd', 'laneInd']
+    .filter(id => vis(id))
+    .map(id => $(id).getBoundingClientRect())
+    .filter(r => r.width && r.left < 70);
+  if (lp.length) pz.style.bottom = innerHeight - Math.min(...lp.map(r => r.top)) + 10 + 'px';
 }
 export function init(): void {
   addEventListener('resize', () => setTimeout(layoutPads, 50));

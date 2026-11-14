@@ -2129,3 +2129,12 @@ body.touch #notes:not(.menu) {
 #revs b {
   border-radius: 0 !important;
 }
+/* pause: bottom left corner */
+#btns #bPause {
+  position: fixed;
+  left: 10px;
+  bottom: calc(12px + env(safe-area-inset-bottom));
+  min-width: 44px;
+  height: 44px;
+  z-index: 6;
+}
