@@ -935,7 +935,7 @@ button:disabled {
 :is(#wzNav, #lbNav) {
   display: flex;
   gap: 4px;
-  margin: 10px 0 4px;
+  margin: 10px 0 14px;
 }
 :is(#wzNav, #lbNav) button {
   flex: 1;
