@@ -2984,7 +2984,9 @@ let NICK=store.get('nick','')||('Driver-'+Math.floor(100+Math.random()*900));
 // Same interface as claude.ai's room service (join -> room.onPeers / presence / leave), built on PeerJS.
 // The first browser to open a room code becomes its hub (the host); everyone else connects to the hub.
 // Each player's presence object is merged into the hub's list, and the hub sends the whole list to everyone ~15 times a second.
-const P2P={prefix:'racingline-mt-',ice:[{urls:['stun:stun.l.google.com:19302','stun:stun.cloudflare.com:3478']}]};
+// TURN relay (optional): fill in your own relay login (e.g. a free Metered account) to let players on strict networks / mobile data connect.
+const TURN={urls:[],username:'',credential:''};
+const P2P={prefix:'racingline-mt-',ice:[{urls:['stun:stun.l.google.com:19302','stun:stun.cloudflare.com:3478']}].concat(TURN.urls.length?[TURN]:[])};
 function loadPeerJS(){return new Promise((res,rej)=>{if(window.Peer)return res();const s=document.createElement('script');s.src='vendor/peerjs.min.js';s.onload=()=>window.Peer?res():rej();
   s.onerror=()=>{const t=document.createElement('script');t.src='https://cdn.jsdelivr.net/npm/peerjs@1.5.5/dist/peerjs.min.js';t.onload=()=>window.Peer?res():rej();t.onerror=rej;document.head.appendChild(t);};document.head.appendChild(s);});}
 function makeP2PApi(PeerCls){PeerCls=PeerCls||window.Peer;const opt=()=>({debug:0,config:{iceServers:P2P.ice}});
@@ -3030,7 +3032,7 @@ function mpAvail(){const ok=!!MP.api;$('bHost').disabled=!ok;$('bJoin').disabled
 const mpCode=()=>'gp-'+Array.from({length:5},()=>'abcdefghjkmnpqrstuvwxyz23456789'[Math.floor(Math.random()*31)]).join('');
 async function enterRoom(code,asHost){
   if(!MP.api)return;try{if(MP.room)await leaveRoom(true);
-    MP.room=await MP.api.join(code);}catch(e){showToast('Could not join '+code);MP.room=null;return;}
+    MP.room=await MP.api.join(code);}catch(e){const t=e&&e.type;showToast(t==='peer-unavailable'?'No race found with code '+code:t==='timeout'?'Couldn\'t reach the host for '+code+' — their network may block direct connections':t==='network'||t==='server-error'||t==='socket-error'?'Can\'t reach the matchmaking server right now':'Could not join '+code);MP.room=null;return;}
   MP.code=code;MP.host=asHost;MP.phase='lobby';MP.lastStart=null;try{location.hash=code;}catch(e){}
   MP.unsub=MP.room.onPeers(ch=>{MP.peers=ch.peers;const me=ch.peers.find(p=>p.sameTab);if(me)MP.me=me.peer;mpPeers(ch);},()=>{showToast('Lost connection to the room');leaveRoom();});
   mpPresence(true);showLobby();}
