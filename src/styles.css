@@ -2007,13 +2007,14 @@ body.touch #notes:not(.menu) {
 /* time penalty badge, floating just right of the timing panel on the driver's row */
 #board .pb {
   position: absolute;
-  left: calc(100% + 9px);
+  /* flush against the panel's right edge (row margin 4 px + panel padding 8 px), like a tab */
+  left: calc(100% + 4px);
   top: 50%;
   transform: translateY(-50%);
-  padding: 0 4px;
-  height: 14px;
-  line-height: 14px;
-  border-radius: 4px;
+  padding: 0 5px 0 4px;
+  height: 15px;
+  line-height: 15px;
+  border-radius: 0 4px 4px 0;
   background: #ffd60a;
   color: #111;
   font: 700 10px var(--mono);

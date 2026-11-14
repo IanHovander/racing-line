@@ -172,6 +172,14 @@ export function hud(dt) {
             : sg + (gt !== null ? gt : d / Math.max(a.v, 30)).toFixed(1);
       }
     }
+    // refresh each gap once a second (or at once when the car changes side of you)
+    const side = o === c ? 0 : st.indexOf(o) < st.indexOf(c) ? -1 : 1;
+    if (o.gapSh === undefined || now - o.gapAt >= 1000 || o.gapSide !== side) {
+      o.gapSh = gap;
+      o.gapAt = now;
+      o.gapSide = side;
+    }
+    gap = o.gapSh;
     if (o.out) gap = '<b style="color:#ff6b5e">OUT</b>';
     const ln =
       (o.name.split(' ').pop() || o.name)

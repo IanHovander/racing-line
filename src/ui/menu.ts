@@ -1,7 +1,7 @@
 import { GS } from '../state';
 import { setMusic, setSfx, unlockAudio } from '../audio/audio';
 import { cheer } from '../audio/crowd';
-import { $, clamp, isTouch, store } from '../core/dom';
+import { $, clamp, store } from '../core/dom';
 import { cars, opts, setupRace } from '../game/race';
 import { MP, leaveRoom, mpOn, mpPresence, showLobby } from '../net/multiplayer';
 import { renderLobby } from '../net/lobby';
@@ -256,9 +256,6 @@ export function init(): void {
     });
     segInit('sTeam', 'team', Number);
   }
-  $('helpTxt').innerHTML = isTouch
-    ? '<b>Touch:</b> GAS and BRAKE buttons on the right, ◀ ▶ on the left for Lanes or Manual steering. The Swap button switches between your two cars; pedals, steering, camera and sound are set here in the menu.<br>Watch the red braking zones on the racing line — overcook a corner and you run wide.'
-    : '<b>Keys:</b> ↑/W/Space gas · ↓/S brake · ←→/A D steer or change lane · <b>Tab/C swap to teammate</b> · R reset car · P/Esc pause<br>Throttle only: lift before the red braking zones and the car brakes itself — stay flat too long and you run wide.';
   $('bStart').onclick = () => (WZ.mode === 'host' ? wzHost() : WZ.mode === 'join' ? wzJoin() : startRace());
   $('bAgain').onclick = () => (mpOn() ? backToLobby() : startRace());
   $('bRestart').onclick = () => (mpOn() ? backToLobby() : startRace());

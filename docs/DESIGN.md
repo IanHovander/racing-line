@@ -361,6 +361,14 @@ Playable build: https://matthewtorgerson.github.io/racing-line/ (GitHub Pages, b
 - **Audio off while hidden**: on `visibilitychange` (and `pagehide`) the audio context is suspended and the silent keep-alive element paused; both resume when the page is visible again.
 - **Music**: one theme for the whole game, the Ardennes Forest new beat. The other circuit themes, the drive layer and their instruments are removed.
 
+## v17.8 — one alert at a time
+
+- Notifications show **one at a time** by priority (`PRI` in `ui/notify.ts`): penalty 100 > track-limits / jump-start warning 90 > Go! 85 > car out 80 > DRS 60 > circuit record 55 > lap 50 > sector 40 > coach 30 > info 20. A note of equal or higher priority (or the same `key`) replaces the one showing; a lower one waits up to 3 s for it to finish, else is dropped.
+- "Nice move on X" only once the pass sticks: X still behind 3 s later (`PASS_HOLD`); repassed means no message.
+- Timing panel gaps refresh once a second per car (immediately when a car changes side of you).
+- Penalty badge sits flush against the timing panel's right edge, like a tab.
+- Settings step: no help text under Start Race, so the button sits at the bottom like the other steps.
+
 ## Model
 
 - Tracks: control points → Catmull-Rom → smoothed and resampled every 2 m (`buildTrack()`). Long straights need intermediate control points: without them the spline overshoots at the next tight corner and makes a near-cusp (a 4–7 m radius). That happened on the first Mexico and Vegas drafts.

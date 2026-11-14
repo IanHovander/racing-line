@@ -72,7 +72,6 @@ export function wzGo(n) {
         : 'Settings';
   $('wzBar').style.display = g === 'mp' ? 'none' : '';
   const last = n === 3;
-  $('helpTxt').style.display = last && !prefs ? '' : 'none';
   $('wzBack').style.visibility = n === 0 ? 'hidden' : 'visible';
   $('wzBack').style.display = prefs ? 'none' : '';
   $('wzNext').style.display = last || n === 0 ? 'none' : '';

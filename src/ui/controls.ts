@@ -1,5 +1,5 @@
 import { GS } from '../state';
-import { NCOL, notify } from './notify';
+import { NCOL, PRI, notify } from './notify';
 import { AC, sfxG } from '../audio/audio';
 import { $, clamp, isTouch, store } from '../core/dom';
 import { attract, cars, opts } from '../game/race';
@@ -28,6 +28,7 @@ export function rcBanner(type: 'warn' | 'pen', title: string, sub: string) {
     sub,
     ttl: 4,
     key: 'rc',
+    pri: type === 'pen' ? PRI.pen : PRI.warn,
     strong: type === 'pen',
     icon: type === 'pen' ? 'pen' : title.startsWith('Track limits') ? 'flag' : undefined,
   });

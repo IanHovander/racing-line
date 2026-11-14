@@ -3,15 +3,16 @@ import { cars, opts } from '../game/race';
 import { PROF } from '../sim/profile';
 import { standings } from '../sim/step';
 import { gapT, progress } from '../sim/timing';
-import { NCOL, notify } from './notify';
+import { NCOL, PRI, notify } from './notify';
 import { cornerAt } from '../track/track';
 // coaching: short comments on notably good or poor corners and on passes made or lost (your car only)
 GS.FB_LAST = -99;
 export function feedback(txt, col) {
   if (GS.raceTime - GS.FB_LAST < 2.5) return;
   GS.FB_LAST = GS.raceTime;
-  notify(txt, col, { key: 'coach' });
+  notify(txt, col, { key: 'coach', pri: PRI.coach });
 }
+const PASS_HOLD = 3;
 export function coach(c, dt) {
   if (!GS.CORNERS.length || c.v < 1) return;
   const kmh = v => Math.round(v * 3.6);
@@ -88,9 +89,17 @@ export function coach(c, dt) {
     r.t = GS.raceTime;
     if (!flip || o.out || GS.raceTime < 8) continue;
     const at = cornerAt(c.idx);
-    if (side < 0) feedback('Nice move on ' + nm(o) + (at ? ' into ' + at : ''), NCOL.best);
+    // a pass is only praised once it sticks: still ahead PASS_HOLD s later (checked below)
+    if (side < 0) (c.passPend || (c.passPend = [])).push({ o, t: GS.raceTime, at });
     else feedback(nm(o) + ' gets past' + (at ? ' at ' + at : ''), NCOL.lost);
   }
+  if (c.passPend && c.passPend.length)
+    c.passPend = c.passPend.filter(p => {
+      if (p.o.gone || progress(p.o) > progress(c)) return false; // repassed (or gone): no praise
+      if (GS.raceTime - p.t < PASS_HOLD) return true;
+      feedback('Nice move on ' + nm(p.o) + (p.at ? ' into ' + p.at : ''), NCOL.best);
+      return false;
+    });
 }
 /** lap complete: laps done and the gap to the leader (or, when leading, the margin over P2).
  *  The dot is purple for the fastest lap of anyone, green for your best (or close), yellow for slower. */
@@ -118,5 +127,5 @@ export function lapCard(c) {
     : left <= 0
       ? 'Finished'
       : `Lap ${done} of ${opts.laps}` + (left === 1 ? ' · Final lap' : '');
-  notify(GS.PRACTICE || !gap ? lab : `${lab} · ${gap}`, col, { key: 'lap', ttl: 4 });
+  notify(GS.PRACTICE || !gap ? lab : `${lab} · ${gap}`, col, { key: 'lap', ttl: 4, pri: PRI.lap });
 }
