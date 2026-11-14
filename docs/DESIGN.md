@@ -296,10 +296,11 @@ Playable build: https://matthewtorgerson.github.io/racing-line/ (GitHub Pages, b
 - **AI reaction:** 0.12–0.55 s, quicker for drivers with high consistency, so the field spreads off the line.
 
 ## v17.3 — tooling
+- Circuit-map height exaggeration halved: relief ≈ 7% of the layout size, 1.25–3.5× true height (was 2.5–7×).
 
 - **oxfmt** formats the whole project (`.oxfmtrc.json`: 110 columns, single quotes, trailing commas). **oxlint** lints it (`.oxlintrc.json`: correctness errors, suspicious warnings, zero warnings allowed). CI runs both before typecheck/build/tests.
 - Lint clean-up: removed dead code left from the single-file days (the grandstand styles, stadium bowl and `placeStands`, unused locals).
-- All monospaced readouts use the `--mono` CSS variable (system monospace for now; a Geist Mono / Martian Mono / Reddit Mono comparison is at https://claude.ai/artifact/6E13K89Tqfcytor9NAnZqp).
+- **Geist Mono** (Vercel, SIL OFL 1.1) is the font for every monospaced readout (HUD timing, standings, lap card, live line, room codes). It's self-hosted in `public/fonts/` with its licence, via the `--mono` CSS variable, and was picked over Martian Mono and Reddit Mono (https://claude.ai/artifact/6E13K89Tqfcytor9NAnZqp).
 
 ## Model
 

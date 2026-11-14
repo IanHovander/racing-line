@@ -120,14 +120,14 @@ export function renderTrackMap(cv) {
     pr = (28 * Math.PI) / 180,
     sp = Math.sin(pr),
     cp = Math.cos(pr);
-  // exaggerate height so climbs read clearly: relief scaled to ~14% of the layout's size (between 2.5x and 7x true height)
+  // exaggerate height so climbs read clearly: relief scaled to ~7% of the layout's size (between 1.25x and 3.5x true height)
   let hmax = -1e9,
     span = 0;
   for (const i of idx) {
     hmax = Math.max(hmax, GS.HT[i]);
     span = Math.max(span, Math.hypot(GS.cx[i] - mx, GS.cy[i] - my));
   }
-  const EX = hmax - hmin > 0.5 ? clamp((0.28 * span) / (hmax - hmin), 2.5, 7) : 1;
+  const EX = hmax - hmin > 0.5 ? clamp((0.14 * span) / (hmax - hmin), 1.25, 3.5) : 1;
   const proj = (i, ground) => {
     const dx = GS.cx[i] - mx,
       dy = GS.cy[i] - my;

@@ -1,6 +1,12 @@
-/* monospaced readouts (timing, standings, speed, codes): one place to change the font */
+/* Geist Mono (Vercel, SIL OFL 1.1: public/fonts/GeistMono-OFL.txt) for every monospaced readout */
+@font-face {
+  font-family: 'Geist Mono';
+  src: url('../fonts/GeistMono-Variable.woff2') format('woff2');
+  font-weight: 100 900;
+  font-display: swap;
+}
 :root {
-  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --mono: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 html,
 body {
