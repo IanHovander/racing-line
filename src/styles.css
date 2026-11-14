@@ -2014,11 +2014,11 @@ body.touch #notes:not(.menu) {
   position: absolute;
   /* flush against the panel's right edge (rows span the full panel width), like a tab */
   left: 100%;
-  top: 50%;
-  transform: translateY(-50%);
+  top: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
   padding: 0 5px 0 4px;
-  height: 15px;
-  line-height: 15px;
   border-radius: 0 4px 4px 0;
   background: #ffd60a;
   color: #111;
