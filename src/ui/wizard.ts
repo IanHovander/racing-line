@@ -64,7 +64,9 @@ export function wzGo(n) {
   $('pnlTitle').innerHTML =
     g === 'solo'
       ? 'Single Player' +
-        (WZ.picked ? `<span class="crumb">›</span><span class="crumb2">${WZ.mode === 'practice' ? 'Practice' : 'Race'}</span>` : '')
+        (WZ.picked
+          ? `<span class="crumb">›</span><span class="crumb2">${WZ.mode === 'practice' ? 'Practice' : 'Race'}</span>`
+          : '')
       : g === 'mp'
         ? 'Multiplayer'
         : 'Settings';
