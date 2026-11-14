@@ -25,6 +25,7 @@ canvas{display:block;position:fixed;inset:0;width:100vw;height:100vh}
 #lbBar{display:flex;gap:8px;align-items:stretch;position:sticky;bottom:-1px;padding:10px 0 2px;background:linear-gradient(transparent,rgba(16,18,24,.96) 30%)}#lbBar .go{margin-top:0;flex:1}#lbBack{flex:0 0 auto;padding:0 16px}
 .pad{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
 #pThr.big,body #pThr.big{width:min(46vw,190px);height:94px;border-radius:47px;right:10px;bottom:12px;font-size:18px}@media (max-height:520px){#pThr.big{width:150px;height:120px;border-radius:60px}}
+#resAw{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:6px;margin:12px 0 4px}#resAw .aw{background:rgba(255,255,255,.06);border-radius:8px;padding:7px 9px;font-size:12px;line-height:1.3}#resAw .aw.me{background:#fff;color:#000}#resAw .aw .k{font-size:10px;letter-spacing:1px;font-weight:700;opacity:.6;text-transform:uppercase}#resAw .aw b{display:flex;align-items:center;gap:5px;font-size:13px;margin-top:2px}#resAw .aw .v{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;opacity:.85}
 #board div.hum{box-shadow:inset 2px 0 0 #fff;background:rgba(255,255,255,.1)}#board div.hum .nm::after{content:'●';font-size:7px;margin-left:3px;vertical-align:2px;opacity:.8}
 #board div.me{background:#ffffff;color:#000}#board div.me .gap,#board div.me .pos{opacity:1}#board div{position:relative}#board .pu{color:#1fae5b}#board .pd{color:#e0352b}#board div.me .pu{color:#0b7a3a}#board div.me .pd{color:#b3160d}#board div:not(.me):not(.mate) .pu{color:#2ecc71}#board div:not(.me):not(.mate) .pd{color:#ff5a4f}#board div.mate{background:#c4c9d1;color:#111}#board div.mate .gap,#board div.mate .pos{opacity:1}#board div.mate .pu{color:#0b7a3a}#board div.mate .pd{color:#b3160d}
 #bMode,#bSteer,#bCam,#bLine,#bSnd,#bMus,#sec,#hCorner,#secFlash{display:none!important}
@@ -272,6 +273,7 @@ body.touch #spd{bottom:auto;top:auto;bottom:110px}
 <div id="results" class="ov hide" style="background:rgba(0,0,0,.22)"><div class="card">
   <h2 id="resTitle">Results</h2>
   <table id="resTable"></table>
+  <div id="resAw"></div>
   <button class="go" id="bAgain">Race again</button>
   <div class="seg" style="margin-top:8px"><button id="bQuit2">Main menu</button></div>
 </div></div>
@@ -291,7 +293,7 @@ const store={get(k,d){try{const v=localStorage.getItem('hcgp_'+k);return v===nul
 
 // ================= Tracks =================
 const TRACKS=[
- {id:'mexico',smooth:60,paint:['#006847','#ffffff','#ce1126'],crowdCols:['#006847','#ffffff','#ce1126','#006847','#ffffff','#ce1126'],host:'MX',stadium:[24,31],elev:[[0,0],[8,2],[14,3],[20,1],[25,2],[31,0]],name:'Autódromo Azteca',sub:'Inspired by Mexico City: a huge main straight, the T1 chicane, fast esses, then through the packed stadium and round the banked final curve',sc:1.35,start:[-60,0],bg:'#3f5e2c',run:'#55803a',seed:5,
+ {id:'mexico',smooth:60,paint:['#006847','#ffffff','#ce1126'],crowdCols:['#006847','#ffffff','#ce1126','#006847','#ffffff','#ce1126'],host:'MX',stadium:[24,31],elev:[[0,0],[8,2],[14,3],[20,1],[25,2],[31,0]],name:'Autódromo Azteca',sub:'Inspired by Mexico City: a huge main straight, the T1 chicane, fast esses, the tight stadium section and the banked final curve',sc:1.35,start:[-60,0],bg:'#3f5e2c',run:'#55803a',seed:5,
   cp:[[-250,0],[0,0],[200,0],[380,0],[425,5],[450,28],[462,60],[490,84],[522,100],[536,140],[534,220],[520,262],[485,280],[445,286],[418,306],[410,336],[395,365],[358,376],[310,362],[265,386],[220,362],[175,386],[130,366],[90,366],[65,340],[60,300],[55,262],[28,242],[0,240],[-22,228],[-36,200],[-52,172],[-92,164],[-200,166],[-282,150],[-330,110],[-342,50],[-312,8]]},
  {id:'texas',paint:['#c8102e','#ffffff','#1f3fa8'],elev:[[0,0],[1,16],[3,30],[5,22],[6,16],[9,10],[12,6],[15,2],[17,3],[18,4],[20,7],[23,10],[25,9],[27,6],[29,3],[31,0]],name:'Lone Star Circuit',sub:'Inspired by COTA, Austin: uphill T1 hairpin, snaking esses, a huge back straight, the stadium and a triple-apex right',sc:1.25,start:[0,120],bg:'#4d6630',run:'#62803c',seed:11,
   cp:[[0,200],[0,-60],[2,-125],[-25,-168],[-62,-165],[-82,-128],[-110,-75],[-160,-55],[-200,-92],[-242,-55],[-288,-88],[-330,-55],[-395,-62],[-440,-105],[-462,-165],[-445,-225],[-395,-245],[-200,-268],[150,-282],[215,-268],[238,-222],[212,-172],[250,-125],[232,-72],[262,-5],[322,35],[360,105],[352,185],[302,235],[245,248],[205,292],[140,318],[62,302],[18,262]]},
@@ -368,8 +370,11 @@ let LZ=null;function liveZone(c,base){if(!c||c.out||!PROF.length)return base;if(
   for(let k=0;k<Math.round(450/SEG);k++){const i=(c.idx+k)%N,j=(i+1)%N;
     // speed limit at the next sample: you can brake from u down to v[j] only if u is no more than the braking curve allows
     const a=13*st.acc*Math.max(0,1-(u/vm)**2)-9.81*SL[i];const un=Math.min(cap,Math.sqrt(Math.max(0,u*u+2*a*SEG)));
-    if(u>v[i]+0.6){LZ[i]=1;u=Math.max(v[j],Math.sqrt(Math.max(0,u*u-2*Math.max(8,BPROF*WETB()*st.brk+9.81*SL[i])*SEG)));}
-    else if(un<=v[j]){LZ[i]=un>u+0.02||u>cap-0.5?0:2;u=un;}else{const nu=Math.min(un,v[j]);LZ[i]=(u*u-nu*nu)/(2*SEG)-9.81*SL[i]>3?1:2;u=nu;}}
+    if(u>v[i]*1.04+1.5){
+      // faster than the line allows here: only a braking zone if the limit is a corner (not the top-speed cap on a straight) and you really have to slow down
+      const capped=v[i]>cap-1.5||(base[i]!==1&&v[j]>=v[i]-0.05);if(capped||k<Math.round(6/SEG)){LZ[i]=capped?0:base[i];u=v[j];}
+      else{LZ[i]=1;u=Math.max(v[j],Math.sqrt(Math.max(0,u*u-2*Math.max(8,BPROF*WETB()*st.brk+9.81*SL[i])*SEG)));}}
+    else if(un<=v[j]){LZ[i]=un>u+0.02||u>cap-0.5?0:2;u=un;}else{const nu=Math.min(un,v[j]),uu=Math.min(u,v[i]);LZ[i]=(uu*uu-nu*nu)/(2*SEG)-9.81*SL[i]>3?1:(base[i]===0&&nu>=uu-0.05?0:2);u=nu;}}
   return LZ;}
 // back to the racing line without hurry: off the line on a straight, keep your position and ease back so you meet the line at the next turn-in
 function rejoin(c){const ZN=zone;if(Math.abs(c.lane)<0.25&&!c.hold){return 0;}
@@ -428,7 +433,7 @@ function buildTrack(T){TR=T;seed=T.seed;HW=T.hw||7;
    for(let i=0;i<N;i++){let s=0;for(let k=-12;k<=12;k++)s+=mn[(i+k+N)%N];BAR[i]=HW+s/25;}
    if(T.street){for(let i=0;i<N;i++){let m=0;for(let k=-8;k<=8;k++)m=Math.max(m,Math.abs(ccurv[(i+k+N)%N]));raw[i]=1.9+clamp((m-1/120)*120,0,2.2);}
      for(let i=0;i<N;i++){let s=0;for(let k=-6;k<=6;k++)s+=raw[(i+k+N)%N];BAR[i]=HW+s/13;}}}
-  if(T.stadium){const k0=cpIdx(T.stadium[0]),k1=cpIdx(T.stadium[1]),len=(k1-k0+N)%N;for(let u=-20;u<=len+20;u++){const q=(k0+u+N)%N,e=u<0?-u:u>len?u-len:0;BAR[q]=Math.min(BAR[q],HW+5+e*0.6);}}
+  if(T.stadium&&false){const k0=cpIdx(T.stadium[0]),k1=cpIdx(T.stadium[1]),len=(k1-k0+N)%N;for(let u=-20;u<=len+20;u++){const q=(k0+u+N)%N,e=u<0?-u:u>len?u-len:0;BAR[q]=Math.min(BAR[q],HW+5+e*0.6);}}
   BRIDGE=null;if(T.bridge){let bd=1e18,a=0,b=0;for(let i=0;i<N;i+=2)for(let j=i+150;j<N;j+=2){if(N-(j-i)<150)continue;const d=(cx[i]-cx[j])**2+(cy[i]-cy[j])**2;if(d<bd){bd=d;a=i;b=j;}}
     for(const[p,q]of[[a,b]]){let best=bd;for(let u=-3;u<=3;u++)for(let v=-3;v<=3;v++){const i=(p+u+N)%N,j=(q+v+N)%N,d=(cx[i]-cx[j])**2+(cy[i]-cy[j])**2;if(d<best){best=d;a=i;b=j;}}}
     const up=HT[a]>=HT[b]?a:b,lo=up===a?b:a;const cd=(i,j)=>{let d=i-j;if(d>N/2)d-=N;if(d<-N/2)d+=N;return d;};
@@ -482,7 +487,27 @@ function buildTrack(T){TR=T;seed=T.seed;HW=T.hw||7;
    const raw=new Int8Array(N);
    for(let i=0;i<N;i++){let any=0,sum=0;for(let k=-18;k<=2;k++){const j=(i+k+N)%N;if(strong[j]){any=1;sum+=ccurv[j];}}if(any&&i>40&&i<N-60&&!T.street)raw[i]=sum>0?-1:1;}
    for(let i=0;i<N;i++){if(!raw[i])continue;let e=0;while(e<14&&raw[(i+e+1)%N]===raw[i]&&raw[(i-e-1+N)%N]===raw[i])e++;
-     const pw=raw[i]>0?PWR[i]:PWL[i];if(pw>6)continue;const gi=pw>0?HW+1+pw+1.2:HW+GIN;const w=Math.min((raw[i]>0?BARR:BARL)[i]-3,HW+24)-gi;if(w<6)continue;gside[i]=raw[i];GINA[i]=gi;gout[i]=gi+w*Math.min(1,0.25+e/14);}}
+     const pw=raw[i]>0?PWR[i]:PWL[i];if(pw>6)continue;const gi=pw>0?HW+1+pw+1.2:HW+GIN;const w=Math.min((raw[i]>0?BARR:BARL)[i]-3,HW+24)-gi;if(w<6)continue;gside[i]=raw[i];GINA[i]=gi;gout[i]=gi+w*Math.min(1,0.25+e/14);}
+   // tidy the traps (v16.1): join short gaps, drop small ones, then give each trap a smooth inner edge and a smooth, tapered outer edge
+   const runs=()=>{const out=[];let a=-1;for(let i=0;i<=N;i++){const g=i<N?gside[i]:0;if(a>=0&&(g!==gside[a]||i===N)){out.push([a,i,gside[a]]);a=-1;}if(g&&a<0)a=i;}return out;};
+   let rs=runs();for(let k=0;k+1<rs.length;k++){const [a0,b0,s0]=rs[k],[a1,,s1]=rs[k+1];if(s0===s1&&a1-b0<=Math.ceil(16/SEG)){for(let i=b0;i<a1;i++){const t=(i-b0+1)/(a1-b0+1);gside[i]=s0;GINA[i]=GINA[b0-1]*(1-t)+GINA[a1]*t;}}}
+   rs=runs();const minLen=Math.ceil(50/SEG);
+   // short traps grow to a proper size (mostly towards the corner exit) where there is room for them
+   const giAt=(i,sg)=>{const pw=sg>0?PWR[i]:PWL[i];const gi=pw>0?HW+1+pw+1.2:HW+GIN;return Math.min((sg>0?BARR:BARL)[i]-3,HW+24)-gi>=5?gi:null;};
+   for(const [a,b,sg] of rs){const len=b-a;if(len>=minLen||len<2)continue;let need=minLen-len,fw=Math.ceil(need*0.65),bw=need-fw;
+     for(let k=0;k<fw;k++){const i=b+k;if(i>=N-60||gside[i]&&gside[i]!==sg)break;const g=giAt(i,sg);if(g===null)break;gside[i]=sg;GINA[i]=g;}
+     for(let k=1;k<=bw;k++){const i=a-k;if(i<=40||gside[i]&&gside[i]!==sg)break;const g=giAt(i,sg);if(g===null)break;gside[i]=sg;GINA[i]=g;}}
+   rs=runs();
+   for(const [a,b,sg] of rs){const len=b-a;if(len<minLen){for(let i=a;i<b;i++){gside[i]=0;}continue;}
+     const gi=new Float64Array(len),wo=new Float64Array(len);
+     for(let k=0;k<len;k++){let m=0;for(let q=-6;q<=6;q++){const i=clamp(a+k+q,a,b-1);m=Math.max(m,GINA[i]);}gi[k]=m;}           // inner edge: never inside the paint, no steps
+     for(let k=0;k<len;k++){let sm=0,n=0;for(let q=-5;q<=5;q++){const i=clamp(k+q,0,len-1);sm+=gi[i];n++;}gi[k]=sm/n;}
+     let wmax=0;for(let k=0;k<len;k++){const i=a+k;wo[k]=Math.min((sg>0?BARR:BARL)[i]-3,HW+24)-gi[k];wmax=Math.max(wmax,wo[k]);}
+     const W0=Math.min(wmax,16);if(W0<5){for(let i=a;i<b;i++)gside[i]=0;continue;}
+     for(let k=0;k<len;k++){const t=Math.min(k,len-1-k)/Math.max(1,len*0.25);const tp=t>=1?1:t*t*(3-2*t);GINA[a+k]=gi[k];gout[a+k]=gi[k]+Math.max(2.5,Math.min(wo[k],W0*(0.35+0.65*tp)));}
+     for(let r=0;r<2;r++){const o=new Float64Array(len);for(let k=0;k<len;k++){let sm=0,n=0;for(let q=-4;q<=4;q++){const i=clamp(k+q,0,len-1);sm+=gout[a+i];n++;}o[k]=sm/n;}for(let k=0;k<len;k++)gout[a+k]=Math.min(o[k],gi[k]+wo[k]);}
+     for(let k=0;k<len;k++)if(wo[k]<2.5)gside[a+k]=0;}
+   for(const [a,b] of runs())if(b-a<minLen)for(let i=a;i<b;i++)gside[i]=0;}
   // racing line (elastic band, curvature minimising)
   {const lim=HW-1.0;   // the line uses the whole road, wheels up to the white lines
    for(const [k,it] of [[30,120],[16,140],[8,140],[4,100]]){for(let r=0;r<it;r++){for(let i=0;i<N;i++){
@@ -516,15 +541,14 @@ function buildTrack(T){TR=T;seed=T.seed;HW=T.hw||7;
   FLAGPOLES=[];PITLANE=null;if(T.sphere)SPHERE={x:T.sphere[0]*T.sc,y:T.sphere[1]*T.sc,r:T.sphere[2],hz:0};
   if(T.fountain){FOUNT=[];const f=T.fountain.map(q=>[q[0]*T.sc,q[1]*T.sc]);for(let k=0;k<=24;k++){const u=k/24;FOUNT.push({x:f[0][0]+(f[1][0]-f[0][0])*u,y:f[0][1]+(f[1][1]-f[0][1])*u,ph:k*0.45});}}
   if(T.street){buildPits(-outSide,0.4,(a,b,o1,o2,h,top,side,crowd)=>({pts:[[cx[a]+nx[a]*o1,cy[a]+ny[a]*o1],[cx[b]+nx[b]*o1,cy[b]+ny[b]*o1],[cx[b]+nx[b]*o2,cy[b]+ny[b]*o2],[cx[a]+nx[a]*o2,cy[a]+ny[a]*o2]],h,top,side,crowd}));for(const b of boxes){b.cx=(b.pts[0][0]+b.pts[2][0])/2;b.cy=(b.pts[0][1]+b.pts[2][1])/2;}
-    placeStands((a,b,o1,o2,h,top,side,crowd)=>({pts:[[cx[a]+nx[a]*o1,cy[a]+ny[a]*o1],[cx[b]+nx[b]*o1,cy[b]+ny[b]*o1],[cx[b]+nx[b]*o2,cy[b]+ny[b]*o2],[cx[a]+nx[a]*o2,cy[a]+ny[a]*o2]],h,top,side,crowd}),1.5);buildCity(T,outSide,clear,inTunnel);}else
+    buildCity(T,outSide,clear,inTunnel);}else
   {const mk=(a,b,o1,o2,h,top,side,crowd)=>({pts:[[cx[a]+nx[a]*o1,cy[a]+ny[a]*o1],[cx[b]+nx[b]*o1,cy[b]+ny[b]*o1],[cx[b]+nx[b]*o2,cy[b]+ny[b]*o2],[cx[a]+nx[a]*o2,cy[a]+ny[a]*o2]],h,top,side,crowd});
-   for(let i=-40;i<40;i+=6){const a=(i+N)%N,b=(i+6+N)%N;boxes.push(mk(a,b,outSide*(BAR[a]+4),outSide*(BAR[a]+13),7,'#9aa3ad','#5b6470',true));}
+   // (grandstands removed in v16.1)
    buildPits(-outSide,0.5,mk);
    for(const b of boxes){b.cx=(b.pts[0][0]+b.pts[2][0])/2;b.cy=(b.pts[0][1]+b.pts[2][1])/2;}
-   placeStands(mk,4);
    boxes=boxes.filter(b=>b.pts.every(p=>clear(p[0],p[1],1)));}
   STAD=null;if(!T.wheelXY)WHEEL=null;
-  if(T.stadium){const ks=T.stadium.map(cpIdx);
+  if(T.stadium&&false){const ks=T.stadium.map(cpIdx);
     let sx=0,sy=0,n=0;for(let i=ks[0];i!==ks[1];i=(i+1)%N){sx+=cx[i];sy+=cy[i];n++;}sx/=n;sy/=n;let rr=0;for(let i=ks[0];i!==ks[1];i=(i+1)%N)rr=Math.max(rr,Math.hypot(cx[i]-sx,cy[i]-sy)+HW+6);
     const r1=rr+4,r2=rr+26;STAD={x:sx,y:sy,r1,r2};const nseg=Math.ceil(2*Math.PI*r1/9);
     for(let k=0;k<nseg;k++){const a0=k/nseg*Math.PI*2,a1=(k+0.92)/nseg*Math.PI*2;const pts=[[sx+Math.cos(a0)*r1,sy+Math.sin(a0)*r1],[sx+Math.cos(a1)*r1,sy+Math.sin(a1)*r1],[sx+Math.cos(a1)*r2,sy+Math.sin(a1)*r2],[sx+Math.cos(a0)*r2,sy+Math.sin(a0)*r2]];
@@ -635,7 +659,7 @@ let PRACTICE=false,RES_T=0,LAPC_T=0,cars=[],ctrl=0,mateIdx=1,state='menu',attrac
 
 function prewarmFlags(){const base=clamp(Math.min(W,H)/68,4.6,11);for(const f of FLAGPOLES){const im=flagImg(f.code);if(!im)continue;for(const m of [0.8,0.9,1.0,1.12]){const fw=Math.max(14,base*m*2.7)*(f.big?3:1);flagFrames(f.code,im,Math.round(Math.pow(2,Math.round(Math.log2(fw)*3)/3)));}}}
 function setupRace(isAttract,mpGrid){setTimeout(prewarmFlags,30);LANE_SEL=0;SWAP=null;FW.on=false;FW.p.length=0;{const f=document.getElementById('fwc');if(f)f.getContext('2d').clearRect(0,0,W,H);}SB=[0,0,0];PASS={side:0,car:null,t:0,armed:0};setTimeout(renderLaneInd,0);
-  attract=isAttract;cars=[];LAPC_T=0;$('lapc').classList.add('hide');FB_T=0;FB_LAST=-99;$('fb').classList.add('hide');skids.length=0;parts.length=0;raceTime=0;finishOrder=0;finishTimer=-1;
+  attract=isAttract;cars=[];PAIRS=new Map();STAT_T=0;LAPC_T=0;$('lapc').classList.add('hide');FB_T=0;FB_LAST=-99;$('fb').classList.add('hide');skids.length=0;parts.length=0;raceTime=0;finishOrder=0;finishTimer=-1;
   const base=[0.9,0.955,1.0][opts.diff];
   const others=[0,1,2,3,4].filter(t=>isAttract||t!==opts.team);
   const order=[];
@@ -872,6 +896,19 @@ function secDone(c,k){const t=raceTime-c.secT;c.secT=raceTime;if(!c.secCur||t<1)
 }
 // timing points every 10 m of race distance: the race time each car reached them, for steady time gaps
 function tpB(c){return Math.floor((progress(c)+L)/10);}
+// race stats for the results awards: top speed, overtakes, places gained, laps led, clean driving, DRS, slipstream, contacts
+let STAT_T=0;let PAIRS=new Map();
+function statTick(dt){if(attract||state!=='race')return;
+  for(const c of cars){if(c.gone)continue;const S=c.stat||(c.stat={vmax:0,pass:0,lost:0,offT:0,ledT:0,drsN:0,towT:0,hits:0,minPos:99});
+    if(!c.out&&!c.finished){S.vmax=Math.max(S.vmax,c.v);if(c.surf>=2)S.offT+=dt;if(c.tow>0.3)S.towT+=dt;if(c.drs&&!S._drs)S.drsN++;S._drs=!!c.drs;}}
+  STAT_T-=dt;if(STAT_T>0)return;STAT_T=0.1;
+  const st=standings();if(st[0]&&!st[0].finished&&st[0].stat)st[0].stat.ledT+=0.1;
+  st.forEach((c,i)=>{if(c.stat)c.stat.minPos=Math.min(c.stat.minPos,i+1);});
+  if(raceTime<3)return;
+  for(let i=0;i<cars.length;i++)for(let j=i+1;j<cars.length;j++){const A=cars[i],B=cars[j];if(A.gone||B.gone||A.out||B.out||A.finished||B.finished)continue;
+    const d=progress(A)-progress(B),key=i*64+j;if(Math.abs(d)>40){PAIRS.delete(key);continue;}const sd=d>3.5?1:d<-3.5?-1:0;if(!sd)continue;
+    const r=PAIRS.get(key);if(!r){PAIRS.set(key,{s:sd,t:-99});continue;}if(r.s===sd)continue;const ok=raceTime-r.t>4;r.s=sd;r.t=raceTime;if(!ok)continue;
+    const W=sd>0?A:B,Lz=sd>0?B:A;W.stat.pass++;Lz.stat.lost++;}}
 function tpRec(c){if(attract||(state!=='race'&&state!=='finished')||c.finished)return;const b=tpB(c);if(!c.tp){c.tp=[];c.tpN=b;c.tp[b]=raceTime;return;}
   if(b>c.tpN&&b-c.tpN<400){for(let k=c.tpN+1;k<=b;k++)c.tp[k]=raceTime;c.tpN=b;}}
 // how many seconds a is ahead of b (null if unknown)
@@ -889,7 +926,7 @@ function collide(){
        if(wA&&!A.remote)A.lane+=(-sa)*0.05;if(wB&&!B.remote)B.lane+=(-sb)*0.05;}
       const vax=Math.cos(A.h)*A.v,vay=Math.sin(A.h)*A.v,vbx=Math.cos(B.h)*B.v,vby=Math.sin(B.h)*B.v;
       const rel=(vbx-vax)*nX+(vby-vay)*nY;
-      if(rel<0){if(-rel>5&&!net){HITS++;A.hits=(A.hits||0)+1;B.hits=(B.hits||0)+1;}const jj=-rel*(net?0.3:0.55);const nax=vax-nX*jj*wA,nay=vay-nY*jj*wA,nbx=vbx+nX*jj*wB,nby=vby+nY*jj*wB;
+      if(rel<0){if(-rel>5){if(!net)HITS++;A.hits=(A.hits||0)+1;B.hits=(B.hits||0)+1;}const jj=-rel*(net?0.3:0.55);const nax=vax-nX*jj*wA,nay=vay-nY*jj*wA,nbx=vbx+nX*jj*wB,nby=vby+nY*jj*wB;
         if(wA)A.v=Math.max(0,nax*Math.cos(A.h)+nay*Math.sin(A.h));if(wB)B.v=Math.max(0,nbx*Math.cos(B.h)+nby*Math.sin(B.h));
         if(-rel>2){crashSnd(-rel,ax,ay);if(-rel>5&&!net){hurt(A,-rel,true);hurt(B,-rel,true);}}if(-rel>2)for(let q=0;q<4;q++)spawn(ax+dx/2,ay+dy/2,0.5,'#ffd27a',0.35,6);}}}}
 function spawn(x,y,z,col,life,sp){if(parts.length>400)return;z+=hAt(x,y);const a=Math.random()*Math.PI*2,s=Math.random()*sp;
@@ -913,7 +950,7 @@ function step(dt){
     if(c.dmg>0.55&&!c.out&&Math.random()<c.dmg*0.25)spawn(c.x-Math.cos(c.h)*1.5,c.y-Math.sin(c.h)*1.5,0.8,'rgba(90,90,90,1)',1.2,0.6);
     if(c.ghost>0)c.ghost-=dt;
     if(state==='race'&&!c.out&&c.v<4&&u[0]>0.05){c.stuckT=(c.stuckT||0)+dt;if(c.stuckT>1.6){c.ghost=3;c.stuckT=0;c.ghosts=(c.ghosts||0)+1;}}else c.stuckT=Math.max(0,(c.stuckT||0)-dt);});
-  collide();
+  collide();statTick(dt);
   for(const c of cars){if(c.gone)continue;locate(c);tpRec(c);if(!attract&&state==='race'&&c===cars[ctrl]&&!c.finished&&!c.out)coach(c,dt);if(c.remote){c.prevS=c.s;continue;}
     const lim=(c.lat>0?BARR:BARL)[c.idx];if(Math.abs(c.lat)>lim){const sg=Math.sign(c.lat),ex=c.lat-sg*lim;c.x-=nx[c.idx]*ex;c.y-=ny[c.idx]*ex;
       const ta=Math.atan2(ty[c.idx],tx[c.idx]);const rel=wrapA(c.h-ta);const sn=Math.abs(Math.sin(rel)),vn=c.v*sn;
@@ -1541,6 +1578,14 @@ function lapCard(c){const lt=c.last;if(!lt)return;const done=c.cross-1,left=opts
   const lab=PRACTICE?'LAP '+done+(c.best===lt&&done>1?' · NEW BEST':''):left<=0?'FINISH':`LAP ${done}/${opts.laps} · `+(left===1?'FINAL LAP':left+' LAPS TO GO');
   const el=$('lapc');el.innerHTML=`<div class="l">${lab}</div><div class="t ${col}">${fmtS(lt)}</div>${d?'<div class="d">'+d+'</div>':''}`;
   el.classList.remove('hide');el.style.animation='none';void el.offsetWidth;el.style.animation='';LAPC_T=4.5;}
+function awardsHtml(){const live=cars.filter(c=>c.stat&&!c.gone||c.stat&&c.finished);const all=cars.filter(c=>c.stat);if(!all.length)return '';
+  const kmh=v=>Math.round(v*3.6);const best=(f,lowest)=>{let w=null,bv=null;for(const c of all){const v=f(c);if(v===null||v===undefined||!isFinite(v))continue;if(bv===null||(lowest?v<bv:v>bv)){bv=v;w=c;}}return w?[w,bv]:null;};
+  const fin=all.filter(c=>c.finished);
+  const A=[['Fastest lap',best(c=>c.best||null,true),v=>fmt(v)],['Top speed',best(c=>c.stat.vmax),v=>kmh(v)+' km/h'],['Most overtakes',best(c=>c.stat.pass||null),v=>v+' pass'+(v>1?'es':'')],
+    ['Places gained',best(c=>c.out?null:((c.grid??0)-standings().indexOf(c))||null),v=>(v>0?'▲':'▼')+Math.abs(v)],['Time in the lead',best(c=>c.stat.ledT>1?c.stat.ledT:null),v=>Math.round(v)+' s'],
+    ['Cleanest race',best(c=>c.out?null:c.stat.offT+(c.tlN||0)*2+(c.hits||0),true),()=>'fewest offs and contacts'],['Slipstream king',best(c=>c.stat.towT>2?c.stat.towT:null),v=>Math.round(v)+' s in the tow'],
+    ['DRS hunter',best(c=>c.stat.drsN||null),v=>v+' DRS run'+(v>1?'s':'')],['Most contacts',best(c=>c.hits||null),v=>v+' hit'+(v>1?'s':'')]];
+  let h='';for(const [k,r,f] of A){if(!r)continue;const [c,v]=r;if(k==='Places gained'&&v<=0)continue;h+=`<div class="aw ${c.mine?'me':''}"><div class="k">${k}</div><b>${teamLogo(c.team,14)}${c.name}</b><span class="v">${f(v)}</span></div>`;}return h;}
 function runStr(o,st){const lead=st[0];if(o===lead)return 'Lap '+Math.min(opts.laps,Math.max(1,o.cross))+'/'+opts.laps;const d=progress(lead)-progress(o);if(d>L)return '+'+Math.floor(d/L)+' lap'+(d>=2*L?'s':'')+' · running';const g=gapT(lead,o);return (g!==null?'+'+g.toFixed(1)+' s':'')+' · running';}
 function resRender(){const st=standings();const c=cars[ctrl];const pos=st.indexOf(c)+1;
   const best=Math.min(...cars.filter(o=>o.mine).map(o=>o.out?99:st.indexOf(o)+1));
@@ -1548,6 +1593,7 @@ function resRender(){const st=standings();const c=cars[ctrl];const pos=st.indexO
   $('resTitle').textContent=(best===99?'Both cars out — DNF':best===1?'🏆 Victory! P1':'Best finish P'+best)+(bc?(g0>0?' (▲'+g0+' from P'+(bc.grid+1)+')':g0<0?' (▼'+(-g0)+' from P'+(bc.grid+1)+')':' (held P'+(bc.grid+1)+')'):'')+' · '+TR.name;
   let h='<tr><td>#</td><td title="Places gained or lost from the grid">+/−</td><td>Driver</td><td>Team</td><td>Time</td><td>Best</td></tr>';
   st.forEach((o,i)=>{const gd=(o.grid??i)-i;const gs=gd>0?`<b style="color:#2ecc71">▲${gd}</b>`:gd<0?`<b style="color:#ff6b5e">▼${-gd}</b>`:'<span style="opacity:.5">–</span>';h+=`<tr class="${o.mine?'me':''}"><td>${i+1}</td><td style="white-space:nowrap" title="Started P${(o.grid??i)+1}">${gs}</td><td>${flag(o.nat,11)} ${o.name}</td><td style="opacity:.85;white-space:nowrap">${teamLogo(o.team,16)} ${TEAMS[o.team].name}</td><td>${o.out?'<b style="color:#ff6b5e">DNF</b>':o.finished?fmt(o.ftime+o.pen)+(o.pen?` <small>(+${o.pen}s)</small>`:''):'running'}</td><td>${fmt(o.best)}</td></tr>`;});
+  const aw=awardsHtml();if($('resAw')._h!==aw){$('resAw')._h=aw;$('resAw').innerHTML=aw;}
   const nh=h;if($('resTable')._h!==nh){$('resTable')._h=nh;$('resTable').innerHTML=nh;}}
 function showResults(){state='finished';resRender();$('results').classList.remove('hide');}
 
