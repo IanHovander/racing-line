@@ -75,9 +75,6 @@ export function audioStatus() {
     return;
   const bad = (opts.sound || opts.music) && GS.state !== 'menu' && (!AC || AC.state !== 'running');
   el.classList.toggle('hide', !bad);
-  const mh = $('menuSnd');
-  if (mh)
-    mh.classList.toggle('hide', !(opts.music && GS.state === 'menu' && (!AC || AC.state !== 'running')));
 }
 export function noiseSrc(loop?) { const s = AC.createBufferSource(); s.buffer = noiseBuf; s.loop = !!loop; return s; }
 export function initAudio() {

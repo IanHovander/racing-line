@@ -101,7 +101,7 @@ button:disabled{opacity:.45}
 #teamStats{margin-top:8px;font-size:12px}#teamStats .tg{opacity:.8;margin-bottom:5px;min-height:2.7em;line-height:1.35}#teamStats .sr{display:flex;align-items:center;gap:8px;margin:2px 0}#teamStats .sr span{flex:0 0 90px;opacity:.75}#teamStats .sb{flex:1;height:7px;background:rgba(255,255,255,.12);border-radius:4px;overflow:hidden}#teamStats .sb i{display:block;height:100%;border-radius:4px}
 .trk{font-size:12px;opacity:.75;margin-top:6px;line-height:1.4}
 #trkInfo{opacity:1}#trkInfo .tname{font-size:15px;font-weight:800}#trkInfo .tname span{font-weight:500;opacity:.65;font-size:12px;margin-left:4px}#trkInfo .tdesc{opacity:.75;margin:3px 0 5px}#trkInfo .tstats{opacity:.85;font-variant-numeric:tabular-nums}
-#menuSnd{font-size:11px;opacity:.6;text-align:center;margin:4px 0 -4px}#menuSnd.hide{display:none}
+
 :is(#wzNav,#lbNav){display:flex;gap:4px;margin:10px 0 4px}:is(#wzNav,#lbNav) button{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:6px 4px;font-size:12px;background:rgba(255,255,255,.05);border-color:transparent;opacity:.55}
 :is(#wzNav,#lbNav) button i{font-style:normal;display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;background:rgba(255,255,255,.18);font-size:11px;font-weight:800}
 :is(#wzNav,#lbNav) button.done{opacity:.85}:is(#wzNav,#lbNav) button.done i{background:#2ecc71;color:#082}:is(#wzNav,#lbNav) button.cur{opacity:1;border-color:#ff3b30;background:rgba(255,59,48,.15)}:is(#wzNav,#lbNav) button.cur i{background:#ff3b30;color:#fff}:is(#wzNav,#lbNav) button:disabled{cursor:default}
