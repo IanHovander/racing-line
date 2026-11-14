@@ -307,6 +307,7 @@ Playable build: https://matthewtorgerson.github.io/racing-line/ (GitHub Pages, b
 - **Geist Mono** (Vercel, SIL OFL 1.1) is the font for every monospaced readout (HUD timing, standings, lap card, live line, room codes). It's self-hosted in `public/fonts/` with its licence, via the `--mono` CSS variable, and was picked over Martian Mono and Reddit Mono (https://claude.ai/artifact/6E13K89Tqfcytor9NAnZqp).
 
 ## v17.4 — team and circuit steps without scrolling (option A of both)
+
 - **Team step:**
   - Teams are a compact list: one row per team with logo, name and driver codes with flags.
   - Under the list, a summary card for the selected team: tagline, the six car bars in two columns, and one line per driver (flag, name, trait summary). The per-driver trait bars are gone from this step.
