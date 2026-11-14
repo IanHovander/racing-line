@@ -378,6 +378,11 @@ Playable build: https://matthewtorgerson.github.io/racing-line/ (GitHub Pages, b
 - Cars are culled at their own height (they used to be tested at ground level 0, so cars low on screen on hilly circuits could vanish early).
 - Cost: render() with all 10 cars on screen went from about 5.8 to 6.2 ms in headless desktop Chrome.
 
+## v17.10 — sponsor boards as real panels
+
+- Lettering is painted in the board's own plane (an affine transform along the board's bottom edge, vertical kept upright, clipped to the face), so it shears and foreshortens with the board instead of floating as rotated text. No lettering on boards seen nearly edge-on (under 22% of their true length).
+- Boards have thickness (a light top edge), are shaded darker the more they turn from the camera, and have a back: seen from behind they show a dark panel above the wall with posts and braces, instead of disappearing.
+
 ## Model
 
 - Tracks: control points → Catmull-Rom → smoothed and resampled every 2 m (`buildTrack()`). Long straights need intermediate control points: without them the spline overshoots at the next tight corner and makes a near-cusp (a 4–7 m radius). That happened on the first Mexico and Vegas drafts.

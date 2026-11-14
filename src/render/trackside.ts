@@ -67,47 +67,96 @@ export function drawWalls(z) {
         const i = i0,
           j = (i0 + 6) % GS.N;
         if (!onScr(GS.TSX[i], GS.TSY[i], 30 * z) || !onScr(GS.TSX[j], GS.TSY[j], 30 * z)) continue;
-        if (-sg * (GS.nx[i] * GS.cC + GS.ny[i] * GS.cS) > -0.05) continue;
+        // which way the board's printed face (towards the track) is turned: > 0 faces the camera
+        const face = sg * (GS.nx[i] * GS.cC + GS.ny[i] * GS.cS);
+        if (Math.abs(face) < 0.04) continue; // edge-on
         const ad = ADS[(grp * 3 + (sg > 0 ? 5 : 0)) % ADS.length];
-        const pa = (k, zz) => {
-          const o = sg * A[k];
+        const pa = (k, zz, ex = 0) => {
+          const o = sg * (A[k] + ex);
           return [GS.TSX[k] + GS.NSX[k] * o, GS.TSY[k] + GS.NSY[k] * o - zz * hz];
         };
         const m = i0 % GS.N,
           m2 = (i0 + 6) % GS.N;
-        const AH = WH + 1.3;
+        const AH = WH + 1.3,
+          TK = 0.14; // board thickness
+        const poly = (pts, fill) => {
+          ctx.fillStyle = fill;
+          ctx.beginPath();
+          pts.forEach((p, k) => (k ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])));
+          ctx.closePath();
+          ctx.fill();
+        };
         const q = [pa(m, 0.12), pa(m2, 0.12), pa(m2, AH), pa(m, AH)];
+        const cap = [pa(m, AH), pa(m2, AH), pa(m2, AH, TK), pa(m, AH, TK)];
         const om = (i0 + 3) % GS.N,
           oo = sg * A[om];
+        // true length of the board on the ground, so the lettering can be painted in the board's own plane
+        const wl = Math.hypot(
+          GS.cx[m2] + GS.nx[m2] * sg * A[m2] - (GS.cx[m] + GS.nx[m] * sg * A[m]),
+          GS.cy[m2] + GS.ny[m2] * sg * A[m2] - (GS.cy[m] + GS.ny[m] * sg * A[m]),
+        );
         ADQ.push([
           depth(GS.cx[om] + GS.nx[om] * oo, GS.cy[om] + GS.ny[om] * oo),
           () => {
-            ctx.fillStyle = ad[1];
+            if (face < 0) {
+              // seen from behind: the unprinted back above the wall, with braces down to the wall top
+              const bk = [pa(m, WH, TK), pa(m2, WH, TK), pa(m2, AH, TK), pa(m, AH, TK)];
+              poly(bk, '#3b4047');
+              ctx.strokeStyle = '#23262b';
+              ctx.lineWidth = Math.max(1, 0.07 * z);
+              ctx.beginPath();
+              for (let k = 0; k <= 6; k += 2) {
+                const n = (i0 + k) % GS.N,
+                  t0 = pa(n, AH, TK),
+                  t1 = pa(n, WH, TK),
+                  ft = pa(n, WH, TH * 0.9);
+                ctx.moveTo(t0[0], t0[1]);
+                ctx.lineTo(t1[0], t1[1]);
+                ctx.moveTo(t0[0] * 0.25 + t1[0] * 0.75, t0[1] * 0.25 + t1[1] * 0.75);
+                const mid = [t0[0] * 0.75 + t1[0] * 0.25, t0[1] * 0.75 + t1[1] * 0.25];
+                ctx.moveTo(mid[0], mid[1]);
+                ctx.lineTo(ft[0], ft[1]);
+              }
+              ctx.stroke();
+              poly(cap, '#c9cdd2');
+              return;
+            }
+            poly(q, ad[1]);
+            // boards turned away from the camera are a little darker, like a lit surface
+            poly(q, `rgba(0,0,0,${(0.26 * (1 - Math.min(1, face * 1.25))).toFixed(3)})`);
+            ctx.strokeStyle = 'rgba(20,22,26,0.8)';
+            ctx.lineWidth = Math.max(1, 0.08 * z);
             ctx.beginPath();
             q.forEach((p, k) => (k ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])));
             ctx.closePath();
-            ctx.fill();
-            ctx.strokeStyle = 'rgba(20,22,26,0.8)';
-            ctx.lineWidth = Math.max(1, 0.08 * z);
             ctx.stroke();
-            const fh = (AH - 0.12) * hz;
-            if (fh < 6) return;
-            const mx = (q[0][0] + q[1][0] + q[2][0] + q[3][0]) / 4,
-              my = (q[0][1] + q[1][1] + q[2][1] + q[3][1]) / 4;
-            let ang = Math.atan2(q[1][1] - q[0][1], q[1][0] - q[0][0]);
-            const len = Math.hypot(q[1][0] - q[0][0], q[1][1] - q[0][1]);
-            if (Math.cos(ang) < 0) ang += Math.PI;
+            poly(cap, '#e4e6e9');
+            const fh = (AH - 0.12) * hz,
+              lp = wl * z;
+            // lettering painted on the face: sheared and foreshortened with the board, read left to right
+            let ux = q[1][0] - q[0][0],
+              uy = q[1][1] - q[0][1],
+              o0 = q[3];
+            if (ux < 0) {
+              ux = -ux;
+              uy = -uy;
+              o0 = q[2];
+            }
+            if (fh < 6 || ux / lp < 0.22) return;
             ctx.save();
-            ctx.translate(mx, my);
-            ctx.rotate(ang);
-            ctx.font = '900 ' + Math.round(fh * 0.62) + 'px Geist,system-ui,sans-serif';
+            ctx.beginPath();
+            q.forEach((p, k) => (k ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])));
+            ctx.clip();
+            ctx.transform(ux / lp, uy / lp, 0, 1, o0[0], o0[1]);
+            ctx.font = '900 ' + Math.round(fh * 0.7) + 'px Geist,system-ui,sans-serif';
             const tw = ctx.measureText(ad[0]).width;
-            const fx = Math.min(1, (len * 0.88) / Math.max(tw, 1));
+            const fx = Math.min(1, (lp * 0.9) / Math.max(tw, 1));
+            ctx.translate(lp / 2, fh * 0.54);
             ctx.scale(fx, 1);
             ctx.fillStyle = ad[2];
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            ctx.fillText(ad[0], 0, fh * 0.04);
+            ctx.fillText(ad[0], 0, 0);
             ctx.restore();
           },
         ]);
