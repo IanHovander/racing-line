@@ -5,7 +5,26 @@ import { $, clamp, store } from '../core/dom';
 import { cars, opts } from '../game/race';
 // ================= Audio =================
 // Everything is synthesised with WebAudio: engines, impacts, surface rumble, crowd and a procedural electro track.
-export let ragn, wgn, AC = null, master, sfxG, musG, noiseBuf, o1, o2, gn, flt, e1, e2, eflt, egn, rgn, rflt, cgn, cgn2, arpDelay;
+export let ragn,
+  wgn,
+  AC = null,
+  master,
+  sfxG,
+  musG,
+  noiseBuf,
+  o1,
+  o2,
+  gn,
+  flt,
+  e1,
+  e2,
+  eflt,
+  egn,
+  rgn,
+  rflt,
+  cgn,
+  cgn2,
+  arpDelay;
 export let lastCrash = 0;
 GS.musStep = 0;
 GS.musNext = 0;
@@ -14,9 +33,13 @@ GS.cheerT = 0;
 // browsers may leave the context suspended; every user gesture retries until it is running.
 export let silentEl = null;
 export function makeSilentWav() {
-  const sr = 8000, n = sr / 2, buf = new ArrayBuffer(44 + n * 2), v = new DataView(buf);
-  const w = (o, str) => { for (let i = 0; i < str.length; i++)
-    v.setUint8(o + i, str.charCodeAt(i)); };
+  const sr = 8000,
+    n = sr / 2,
+    buf = new ArrayBuffer(44 + n * 2),
+    v = new DataView(buf);
+  const w = (o, str) => {
+    for (let i = 0; i < str.length; i++) v.setUint8(o + i, str.charCodeAt(i));
+  };
   w(0, 'RIFF');
   v.setUint32(4, 36 + n * 2, true);
   w(8, 'WAVE');
@@ -34,10 +57,8 @@ export function makeSilentWav() {
 }
 export function unlockAudio() {
   try {
-    if (navigator.audioSession)
-      navigator.audioSession.type = 'playback';
-  }
-  catch (e) { }
+    if (navigator.audioSession) navigator.audioSession.type = 'playback';
+  } catch (e) {}
   try {
     if (!silentEl) {
       silentEl = document.createElement('audio');
@@ -48,38 +69,37 @@ export function unlockAudio() {
       document.body.appendChild(silentEl);
     }
     const p = silentEl.play();
-    if (p && p.catch)
-      p.catch(() => { });
-  }
-  catch (e) { }
+    if (p && p.catch) p.catch(() => {});
+  } catch (e) {}
   initAudio();
-  if (!AC)
-    return;
+  if (!AC) return;
   try {
     if (AC.state !== 'running') {
       const p = AC.resume();
-      if (p && p.then)
-        p.then(audioStatus, audioStatus);
+      if (p && p.then) p.then(audioStatus, audioStatus);
     }
-    const b = AC.createBuffer(1, 1, 22050), src = AC.createBufferSource();
+    const b = AC.createBuffer(1, 1, 22050),
+      src = AC.createBufferSource();
     src.buffer = b;
     src.connect(AC.destination);
     src.start(0);
-  }
-  catch (e) { }
+  } catch (e) {}
   setTimeout(audioStatus, 300);
 }
 export function audioStatus() {
   const el = $('bAudio');
-  if (!el)
-    return;
+  if (!el) return;
   const bad = (opts.sound || opts.music) && GS.state !== 'menu' && (!AC || AC.state !== 'running');
   el.classList.toggle('hide', !bad);
 }
-export function noiseSrc(loop?) { const s = AC.createBufferSource(); s.buffer = noiseBuf; s.loop = !!loop; return s; }
+export function noiseSrc(loop?) {
+  const s = AC.createBufferSource();
+  s.buffer = noiseBuf;
+  s.loop = !!loop;
+  return s;
+}
 export function initAudio() {
-  if (AC)
-    return;
+  if (AC) return;
   try {
     AC = new (window.AudioContext || window.webkitAudioContext)();
     const comp = AC.createDynamicsCompressor();
@@ -97,8 +117,7 @@ export function initAudio() {
     musG.connect(master);
     noiseBuf = AC.createBuffer(1, AC.sampleRate * 2, AC.sampleRate);
     const d = noiseBuf.getChannelData(0);
-    for (let i = 0; i < d.length; i++)
-      d[i] = Math.random() * 2 - 1;
+    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
     // player engine
     o1 = AC.createOscillator();
     o1.type = 'sawtooth';
@@ -192,7 +211,7 @@ export function initAudio() {
     }
     // music bus: arp echo
     arpDelay = AC.createDelay(1);
-    arpDelay.delayTime.value = 60 / 132 * 0.75;
+    arpDelay.delayTime.value = (60 / 132) * 0.75;
     const fb = AC.createGain();
     fb.gain.value = 0.33;
     const dw = AC.createGain();
@@ -204,25 +223,35 @@ export function initAudio() {
     GS.musNext = AC.currentTime + 0.1;
     setInterval(scheduleMusic, 25);
     AC.onstatechange = audioStatus;
-  }
-  catch (e) {
+  } catch (e) {
     AC = null;
   }
 }
-export function setSfx(on) { opts.sound = on; store.set('sound', on); if (AC)
-  sfxG.gain.setTargetAtTime(on ? 1 : 0, AC.currentTime, 0.05); $('bSnd').textContent = on ? '🔊' : '🔇'; }
-export function setMusic(on) { opts.music = on; store.set('music', on); if (AC)
-  musG.gain.setTargetAtTime(on ? 0.32 : 0, AC.currentTime, 0.1); $('bMus').textContent = on ? '🎵' : '🎵✕'; $('bMus').style.opacity = on ? 1 : 0.6; }
+export function setSfx(on) {
+  opts.sound = on;
+  store.set('sound', on);
+  if (AC) sfxG.gain.setTargetAtTime(on ? 1 : 0, AC.currentTime, 0.05);
+  $('bSnd').textContent = on ? '🔊' : '🔇';
+}
+export function setMusic(on) {
+  opts.music = on;
+  store.set('music', on);
+  if (AC) musG.gain.setTargetAtTime(on ? 0.32 : 0, AC.currentTime, 0.1);
+  $('bMus').textContent = on ? '🎵' : '🎵✕';
+  $('bMus').style.opacity = on ? 1 : 0.6;
+}
 export const mf = m => 440 * Math.pow(2, (m - 69) / 12);
-export function env(g, t, peak, dec, att?) { g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(peak, t + (att || 0.003)); g.gain.exponentialRampToValueAtTime(0.0001, t + dec); }
+export function env(g, t, peak, dec, att?) {
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.linearRampToValueAtTime(peak, t + (att || 0.003));
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dec);
+}
 export function crashSnd(intensity, x, y) {
-  if (!AC || !opts.sound)
-    return;
+  if (!AC || !opts.sound) return;
   const c = cars[GS.ctrl];
   const dist = Math.hypot(x - c.x, y - c.y);
   const vol = clamp(intensity / 25, 0.15, 1) * clamp(1 - dist / 140, 0, 1);
-  if (vol < 0.03 || AC.currentTime - lastCrash < 0.07)
-    return;
+  if (vol < 0.03 || AC.currentTime - lastCrash < 0.07) return;
   lastCrash = AC.currentTime;
   const t = AC.currentTime;
   const n = noiseSrc();
@@ -259,17 +288,25 @@ export function crashSnd(intensity, x, y) {
 }
 export function init(): void {
   // try to start the menu music straight away; browsers may still wait for the first tap/click/key
-  setTimeout(() => { try {
-    initAudio();
-    if (AC && AC.state !== 'running') {
-      const p = AC.resume();
-      if (p && p.then)
-        p.then(audioStatus, audioStatus);
-    }
-  }
-  catch (e) { } audioStatus(); }, 50);
-  ['pointerdown', 'touchend', 'keydown', 'click'].forEach(ev => document.addEventListener(ev, () => { if (!AC || AC.state !== 'running' || (silentEl && silentEl.paused))
-    unlockAudio(); }, true));
+  setTimeout(() => {
+    try {
+      initAudio();
+      if (AC && AC.state !== 'running') {
+        const p = AC.resume();
+        if (p && p.then) p.then(audioStatus, audioStatus);
+      }
+    } catch (e) {}
+    audioStatus();
+  }, 50);
+  ['pointerdown', 'touchend', 'keydown', 'click'].forEach(ev =>
+    document.addEventListener(
+      ev,
+      () => {
+        if (!AC || AC.state !== 'running' || (silentEl && silentEl.paused)) unlockAudio();
+      },
+      true,
+    ),
+  );
 }
 /** debug/test hook: reassign a module-level binding */
 export function __set(name: string, v: any): void {

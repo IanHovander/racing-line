@@ -19,13 +19,16 @@ import { POSTERS } from './posters';
 import { segInit, syncAllSegs } from './widgets';
 import { WZ, wzHost, wzJoin } from './wizard';
 export function showTeamStats() {
-  const t = TEAMS[opts.team], st = TEAM_STATS[opts.team];
-  const R: [
-    string,
-    number,
-    number,
-    number
-  ][] = [['Top speed', st.top, 0.96, 1.06], ['Acceleration', st.acc, 0.97, 1.07], ['Braking', st.brk, 0.9, 1.4], ['Cornering', st.grip, 0.975, 1.035], ['Tyre life', 2 - st.tyre, 0.8, 1.3], ['Durability', 2 - st.dur, 0.75, 1.2]];
+  const t = TEAMS[opts.team],
+    st = TEAM_STATS[opts.team];
+  const R: [string, number, number, number][] = [
+    ['Top speed', st.top, 0.96, 1.06],
+    ['Acceleration', st.acc, 0.97, 1.07],
+    ['Braking', st.brk, 0.9, 1.4],
+    ['Cornering', st.grip, 0.975, 1.035],
+    ['Tyre life', 2 - st.tyre, 0.8, 1.3],
+    ['Durability', 2 - st.dur, 0.75, 1.2],
+  ];
   let h = `<div class="tg" style="display:flex;gap:8px;align-items:center">${teamLogo(opts.team, 22)}<span><b>${t.name}</b> — ${st.tag}</span></div>`;
   for (const [n, v, a, b] of R) {
     const p = Math.round(clamp((v - a) / (b - a), 0.06, 1) * 100);
@@ -35,7 +38,14 @@ export function showTeamStats() {
   for (let d = 0; d < 2; d++) {
     const ds = DRIVER_STATS[opts.team][d];
     h += `<div class="drv"><b>${flag(t.nat[d], 11)} ${t.drivers[d]}</b><div class="dtag">${ds.tag}</div>`;
-    for (const [n, k] of [['Pace', 'pace'], ['Aggression', 'aggr'], ['Defending', 'defend'], ['Consistency', 'consist'], ['Wet', 'wet'], ['Tyre care', 'tyre']])
+    for (const [n, k] of [
+      ['Pace', 'pace'],
+      ['Aggression', 'aggr'],
+      ['Defending', 'defend'],
+      ['Consistency', 'consist'],
+      ['Wet', 'wet'],
+      ['Tyre care', 'tyre'],
+    ])
       h += `<div class="sr"><span>${n}</span><div class="sb"><i style="width:${Math.round(ds[k] * 100)}%;background:${t.acc}"></i></div></div>`;
     h += `</div>`;
   }
@@ -56,7 +66,11 @@ export function startRace() {
   setSfx(opts.sound);
   setMusic(opts.music);
   cheer(0.5);
-  showToast(GS.PRACTICE ? 'Practice · ' + cars[GS.ctrl].name + ' — unlimited laps' : TEAMS[opts.team].name + ': ' + cars[GS.ctrl].name + ' & ' + cars[GS.mateIdx].name);
+  showToast(
+    GS.PRACTICE
+      ? 'Practice · ' + cars[GS.ctrl].name + ' — unlimited laps'
+      : TEAMS[opts.team].name + ': ' + cars[GS.ctrl].name + ' & ' + cars[GS.mateIdx].name,
+  );
 }
 export function toMenu() {
   $('yflag').classList.add('hide');
@@ -68,7 +82,16 @@ export function toMenu() {
   $('home').classList.remove('hide');
   $('menu').classList.add('hide');
 }
-export const backToLobby = () => { MP.phase = 'lobby'; mpPresence(); MP.room && MP.room.presence({ me: null, ai: null, start: null, grid: null }).catch(() => { }); ['tl', 'board', 'spd', 'btns'].forEach(id => $(id).classList.add('hide')); $('yflag').classList.add('hide'); $('lights').style.display = 'none'; setupRace(true); showLobby(); };
+export const backToLobby = () => {
+  MP.phase = 'lobby';
+  mpPresence();
+  MP.room && MP.room.presence({ me: null, ai: null, start: null, grid: null }).catch(() => {});
+  ['tl', 'board', 'spd', 'btns'].forEach(id => $(id).classList.add('hide'));
+  $('yflag').classList.add('hide');
+  $('lights').style.display = 'none';
+  setupRace(true);
+  showLobby();
+};
 export function init(): void {
   {
     const el = $('sTrack');
@@ -88,17 +111,27 @@ export function init(): void {
       $('trkMap').innerHTML = drawTrackMap();
       bindTrackMap();
       {
-        let hmin = 1e9, hmax = -1e9;
+        let hmin = 1e9,
+          hmax = -1e9;
         for (let i = 0; i < GS.N; i++) {
           hmin = Math.min(hmin, GS.HT[i]);
           hmax = Math.max(hmax, GS.HT[i]);
         }
-        $('trkInfo').innerHTML = `<div class="tname">${t.name} <span>${CIRCUIT_PLACE[t.id] || ''}</span></div><div class="tdesc">${t.sub}</div><div class="tstats">${(GS.L / 1000).toFixed(2)} km · ${GS.CORNERS.length} corners · ${GS.DRSZ.length} DRS zone${GS.DRSZ.length === 1 ? '' : 's'} · ${Math.round(hmax - hmin)} m elevation${t.night ? ' · night race' : ''}${t.street ? ' · street circuit' : ''}${best ? ' · <b>Your best ' + fmt(best) + '</b>' : ''}</div>`;
+        $('trkInfo').innerHTML =
+          `<div class="tname">${t.name} <span>${CIRCUIT_PLACE[t.id] || ''}</span></div><div class="tdesc">${t.sub}</div><div class="tstats">${(GS.L / 1000).toFixed(2)} km · ${GS.CORNERS.length} corners · ${GS.DRSZ.length} DRS zone${GS.DRSZ.length === 1 ? '' : 's'} · ${Math.round(hmax - hmin)} m elevation${t.night ? ' · night race' : ''}${t.street ? ' · street circuit' : ''}${best ? ' · <b>Your best ' + fmt(best) + '</b>' : ''}</div>`;
       }
     };
-    el.addEventListener('click', e => { const b = (e.target as HTMLElement).closest('button'); if (!b)
-      return; const i = +b.dataset.v; if (i === GS.trackIdx)
-      return; GS.trackIdx = i; store.set('track', i); buildTrack(TRACKS[i]); setupRace(true); sync(); });
+    el.addEventListener('click', e => {
+      const b = (e.target as HTMLElement).closest('button');
+      if (!b) return;
+      const i = +b.dataset.v;
+      if (i === GS.trackIdx) return;
+      GS.trackIdx = i;
+      store.set('track', i);
+      buildTrack(TRACKS[i]);
+      setupRace(true);
+      sync();
+    });
     sync();
   }
   $('sTeam').addEventListener('click', () => setTimeout(showTeamStats, 0));
@@ -112,7 +145,10 @@ export function init(): void {
   segInit('sDiff', 'diff', Number);
   segInit('sCam', 'cam', Number);
   segInit('sRain', 'rain', Number);
-  $('sRain').addEventListener('click', () => { WX.rain = opts.rain; buildProfile(); });
+  $('sRain').addEventListener('click', () => {
+    WX.rain = opts.rain;
+    buildProfile();
+  });
   segInit('sTyres', 'tyres', Number);
   segInit('sDmg', 'damage', Number);
   segInit('sYellow', 'yellow', Number);
@@ -124,24 +160,61 @@ export function init(): void {
   segInit('sLine', 'line', v => v === '1');
   segInit('sGears', 'gears', Number);
   $('sGears').addEventListener('click', () => setTimeout(updatePads, 0));
-  for (const [id, key, cast] of [['pTurns', 'turns', Number], ['pTow', 'tow', Number], ['pDRSs', 'drs', Number], ['pGears', 'gears', Number], ['pPedals', 'pedals', Number], ['pSteer', 'steer', Number], ['pCam', 'cam', Number], ['pLine', 'line', v => v === '1'], ['pSnd', 'sound', v => v === '1'], ['pMus', 'music', v => v === '1']])
+  for (const [id, key, cast] of [
+    ['pTurns', 'turns', Number],
+    ['pTow', 'tow', Number],
+    ['pDRSs', 'drs', Number],
+    ['pGears', 'gears', Number],
+    ['pPedals', 'pedals', Number],
+    ['pSteer', 'steer', Number],
+    ['pCam', 'cam', Number],
+    ['pLine', 'line', v => v === '1'],
+    ['pSnd', 'sound', v => v === '1'],
+    ['pMus', 'music', v => v === '1'],
+  ])
     segInit(id, key, cast);
-  $('pause').addEventListener('click', e => { if (!(e.target as HTMLElement).closest('.seg'))
-    return; setTimeout(() => { unlockAudio(); setSfx(opts.sound); setMusic(opts.music); updatePads(); syncCtrlMenu(); renderLaneInd(); syncAllSegs(); }, 0); });
+  $('pause').addEventListener('click', e => {
+    if (!(e.target as HTMLElement).closest('.seg')) return;
+    setTimeout(() => {
+      unlockAudio();
+      setSfx(opts.sound);
+      setMusic(opts.music);
+      updatePads();
+      syncCtrlMenu();
+      renderLaneInd();
+      syncAllSegs();
+    }, 0);
+  });
   segInit('sSnd', 'sound', v => v === '1');
   segInit('sMus', 'music', v => v === '1');
-  $('sSnd').addEventListener('click', () => setTimeout(() => { unlockAudio(); setSfx(opts.sound); }, 0));
-  $('sMus').addEventListener('click', () => setTimeout(() => { unlockAudio(); setMusic(opts.music); }, 0));
+  $('sSnd').addEventListener('click', () =>
+    setTimeout(() => {
+      unlockAudio();
+      setSfx(opts.sound);
+    }, 0),
+  );
+  $('sMus').addEventListener('click', () =>
+    setTimeout(() => {
+      unlockAudio();
+      setMusic(opts.music);
+    }, 0),
+  );
   {
     const el = $('sTeam');
-    TEAMS.forEach((t, i) => { const b = document.createElement('button'); b.dataset.v = String(i); b.innerHTML = `${teamLogo(i, 34)}<span><div class="tn">${t.name}</div><div class="td">${flag(t.nat[0], 10)} ${t.drivers[0]}</div><div class="td">${flag(t.nat[1], 10)} ${t.drivers[1]}</div></span>`; el.appendChild(b); });
+    TEAMS.forEach((t, i) => {
+      const b = document.createElement('button');
+      b.dataset.v = String(i);
+      b.innerHTML = `${teamLogo(i, 34)}<span><div class="tn">${t.name}</div><div class="td">${flag(t.nat[0], 10)} ${t.drivers[0]}</div><div class="td">${flag(t.nat[1], 10)} ${t.drivers[1]}</div></span>`;
+      el.appendChild(b);
+    });
     segInit('sTeam', 'team', Number);
   }
-  $('helpTxt').innerHTML = isTouch ? '<b>Touch:</b> GAS and BRAKE buttons on the right, ◀ ▶ on the left for Lanes or Manual steering. The Swap button switches between your two cars; pedals, steering, camera and sound are set here in the menu.<br>Watch the red braking zones on the racing line — overcook a corner and you run wide.' :
-    '<b>Keys:</b> ↑/W/Space gas · ↓/S brake · ←→/A D steer or change lane · <b>Tab/C swap to teammate</b> · R reset car · P/Esc pause<br>Throttle only: lift before the red braking zones and the car brakes itself — stay flat too long and you run wide.';
-  $('bStart').onclick = () => WZ.mode === 'host' ? wzHost() : WZ.mode === 'join' ? wzJoin() : startRace();
-  $('bAgain').onclick = () => mpOn() ? backToLobby() : startRace();
-  $('bRestart').onclick = () => mpOn() ? backToLobby() : startRace();
-  $('bQuit').onclick = () => mpOn() ? leaveRoom() : toMenu();
-  $('bQuit2').onclick = () => mpOn() ? leaveRoom() : toMenu();
+  $('helpTxt').innerHTML = isTouch
+    ? '<b>Touch:</b> GAS and BRAKE buttons on the right, ◀ ▶ on the left for Lanes or Manual steering. The Swap button switches between your two cars; pedals, steering, camera and sound are set here in the menu.<br>Watch the red braking zones on the racing line — overcook a corner and you run wide.'
+    : '<b>Keys:</b> ↑/W/Space gas · ↓/S brake · ←→/A D steer or change lane · <b>Tab/C swap to teammate</b> · R reset car · P/Esc pause<br>Throttle only: lift before the red braking zones and the car brakes itself — stay flat too long and you run wide.';
+  $('bStart').onclick = () => (WZ.mode === 'host' ? wzHost() : WZ.mode === 'join' ? wzJoin() : startRace());
+  $('bAgain').onclick = () => (mpOn() ? backToLobby() : startRace());
+  $('bRestart').onclick = () => (mpOn() ? backToLobby() : startRace());
+  $('bQuit').onclick = () => (mpOn() ? leaveRoom() : toMenu());
+  $('bQuit2').onclick = () => (mpOn() ? leaveRoom() : toMenu());
 }

@@ -9,7 +9,9 @@ import { render } from '../render/render';
 import { STEP } from '../sim/ai';
 import { step } from '../sim/step';
 import { hud } from '../ui/hud';
-export let last = performance.now(), acc = 0, frameN = 0;
+export let last = performance.now(),
+  acc = 0,
+  frameN = 0;
 export let FDT = 1 / 60;
 export function frame(now) {
   const dt = Math.min(0.05, (now - last) / 1000);
@@ -20,8 +22,7 @@ export function frame(now) {
     GS.SWAP.t += dt;
     const u = GS.SWAP.t / GS.SWAP.dur;
     ts = u < 0.8 ? 0.04 : 0.04 + 0.96 * Math.min(1, (u - 0.8) / 0.2);
-    if (u >= 1 || mpOn())
-      GS.SWAP = null;
+    if (u >= 1 || mpOn()) GS.SWAP = null;
   }
   if (GS.state !== 'paused') {
     acc += dt * ts;
@@ -31,16 +32,14 @@ export function frame(now) {
       acc -= STEP;
       n++;
     }
-    if (n >= 12)
-      acc = 0;
+    if (n >= 12) acc = 0;
   }
   mpSend(dt);
   updateCamera(GS.state === 'paused' ? 0 : dt);
   render();
   hud(dt);
   audio(dt);
-  if ((frameN = (frameN + 1) % 60) === 0)
-    audioStatus();
+  if ((frameN = (frameN + 1) % 60) === 0) audioStatus();
   requestAnimationFrame(frame);
 }
 export function init(): void {

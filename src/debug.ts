@@ -51,11 +51,194 @@ import * as m46 from './game/loop';
 import * as m47 from './sim/start';
 import * as m48 from './ui/home';
 
-const MODS: any[] = [m47, m48, m0, m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12, m13, m14, m15, m16, m17, m18, m19, m20, m21, m22, m23, m24, m25, m26, m27, m28, m29, m30, m31, m32, m33, m34, m35, m36, m37, m38, m39, m40, m41, m42, m43, m44, m45, m46];
+const MODS: any[] = [
+  m47,
+  m48,
+  m0,
+  m1,
+  m2,
+  m3,
+  m4,
+  m5,
+  m6,
+  m7,
+  m8,
+  m9,
+  m10,
+  m11,
+  m12,
+  m13,
+  m14,
+  m15,
+  m16,
+  m17,
+  m18,
+  m19,
+  m20,
+  m21,
+  m22,
+  m23,
+  m24,
+  m25,
+  m26,
+  m27,
+  m28,
+  m29,
+  m30,
+  m31,
+  m32,
+  m33,
+  m34,
+  m35,
+  m36,
+  m37,
+  m38,
+  m39,
+  m40,
+  m41,
+  m42,
+  m43,
+  m44,
+  m45,
+  m46,
+];
 export function installDebug(): void {
   const w = window as any;
-  for (const k of Object.keys(GS)) def(k, () => (GS as any)[k], (v) => { (GS as any)[k] = v; });
-  ["HW","seed","cpIdx","STAD","BRIDGE","WHEEL","SPHERE","FOUNT","DRSZ","DRSMAP","CORNERS","CMAP","SECI","SECB","SB","NEXTC","BARR","BARL","SIDES","PIT_SIDE","TR","N","L","SEG","cx","cy","tx","ty","nx","ny","ccurv","BAR","kerb","gside","gout","off","rx","ry","rk","vf","zone","boxes","trees","STONES","MM","TSX","TSY","NSX","NSY","PWR","PWL","SWR","SWL","GINA","FLAGPOLES","PITLANE","minX","minY","maxX","maxY","WATER","TUN","LIGHTS","HT","SL","HG","PZONE","trackIdx","PRACTICE","RES_T","LAPC_T","ctrl","mateIdx","state","raceTime","cdT","finishTimer","finishOrder","SWAP","HITS","LANE_SEL","PASS","STAT_T","PAIRS","PZ","cS","cC","OX","OY","CARSCR","CARDEP","AHEAD","HMUL","FB_T","FB_LAST","musStep","musNext","cheerT","sqg","sqf","NICK"].forEach((k: string) => def(k, () => (GS as any)[k], (v) => { (GS as any)[k] = v; }));
-  for (const m of MODS) for (const k of Object.keys(m)) { if (k === 'init' || k === '__set') continue; def(k, () => m[k], (v) => { if (m.__set) m.__set(k, v); }); }
-  function def(k: string, get: () => any, set: (v: any) => void) { try { Object.defineProperty(w, k, { get, set, configurable: true }); } catch (e) { /* unforgeable window property */ } }
+  for (const k of Object.keys(GS))
+    def(
+      k,
+      () => (GS as any)[k],
+      v => {
+        (GS as any)[k] = v;
+      },
+    );
+  [
+    'HW',
+    'seed',
+    'cpIdx',
+    'STAD',
+    'BRIDGE',
+    'WHEEL',
+    'SPHERE',
+    'FOUNT',
+    'DRSZ',
+    'DRSMAP',
+    'CORNERS',
+    'CMAP',
+    'SECI',
+    'SECB',
+    'SB',
+    'NEXTC',
+    'BARR',
+    'BARL',
+    'SIDES',
+    'PIT_SIDE',
+    'TR',
+    'N',
+    'L',
+    'SEG',
+    'cx',
+    'cy',
+    'tx',
+    'ty',
+    'nx',
+    'ny',
+    'ccurv',
+    'BAR',
+    'kerb',
+    'gside',
+    'gout',
+    'off',
+    'rx',
+    'ry',
+    'rk',
+    'vf',
+    'zone',
+    'boxes',
+    'trees',
+    'STONES',
+    'MM',
+    'TSX',
+    'TSY',
+    'NSX',
+    'NSY',
+    'PWR',
+    'PWL',
+    'SWR',
+    'SWL',
+    'GINA',
+    'FLAGPOLES',
+    'PITLANE',
+    'minX',
+    'minY',
+    'maxX',
+    'maxY',
+    'WATER',
+    'TUN',
+    'LIGHTS',
+    'HT',
+    'SL',
+    'HG',
+    'PZONE',
+    'trackIdx',
+    'PRACTICE',
+    'RES_T',
+    'LAPC_T',
+    'ctrl',
+    'mateIdx',
+    'state',
+    'raceTime',
+    'cdT',
+    'finishTimer',
+    'finishOrder',
+    'SWAP',
+    'HITS',
+    'LANE_SEL',
+    'PASS',
+    'STAT_T',
+    'PAIRS',
+    'PZ',
+    'cS',
+    'cC',
+    'OX',
+    'OY',
+    'CARSCR',
+    'CARDEP',
+    'AHEAD',
+    'HMUL',
+    'FB_T',
+    'FB_LAST',
+    'musStep',
+    'musNext',
+    'cheerT',
+    'sqg',
+    'sqf',
+    'NICK',
+  ].forEach((k: string) =>
+    def(
+      k,
+      () => (GS as any)[k],
+      v => {
+        (GS as any)[k] = v;
+      },
+    ),
+  );
+  for (const m of MODS)
+    for (const k of Object.keys(m)) {
+      if (k === 'init' || k === '__set') continue;
+      def(
+        k,
+        () => m[k],
+        v => {
+          if (m.__set) m.__set(k, v);
+        },
+      );
+    }
+  function def(k: string, get: () => any, set: (v: any) => void) {
+    try {
+      Object.defineProperty(w, k, { get, set, configurable: true });
+    } catch (e) {
+      /* unforgeable window property */
+    }
+  }
 }

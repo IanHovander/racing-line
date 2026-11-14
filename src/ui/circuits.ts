@@ -22,8 +22,16 @@ export const CIRCUIT_ICON = {
  <path d="M0 39.5h40" stroke="#123" stroke-width="1.5"/>`,
   singapore: `<rect width="40" height="20" fill="#ef3340"/><rect y="20" width="40" height="20" fill="#fff"/><circle cx="8" cy="10" r="5" fill="#fff"/><circle cx="10" cy="10" r="5" fill="#ef3340"/>
  <g fill="#fff"><circle cx="15" cy="6" r=".9"/><circle cx="18" cy="9" r=".9"/><circle cx="17" cy="13" r=".9"/><circle cx="13" cy="13" r=".9"/><circle cx="12" cy="9" r=".9"/></g>
- <path d="M8 38V26h4v12zM18 38V25h4v13zM28 38V26h4v12z" fill="#2a3550"/><path d="M6 25.5h28l-1 1.5H7z" fill="#2a3550"/><path d="M0 38h40v2H0z" fill="#3a7bd5"/>`
+ <path d="M8 38V26h4v12zM18 38V25h4v13zM28 38V26h4v12z" fill="#2a3550"/><path d="M6 25.5h28l-1 1.5H7z" fill="#2a3550"/><path d="M0 38h40v2H0z" fill="#3a7bd5"/>`,
 };
 // host-country colours for the bar under each circuit name
-export const CIRCUIT_COLS = { mexico: ['#006847', '#ffffff', '#ce1126'], texas: ['#bf0a30', '#ffffff', '#002868'], paulista: ['#009c3b', '#ffdf00', '#002776'], monte: ['#ce1126', '#ffffff'],
-  sakhir: ['#ffffff', '#ce1126'], suzuka: ['#ffffff', '#bc002d'], spa: ['#111111', '#fdda24', '#ef3340'], singapore: ['#ef3340', '#ffffff'] };
+export const CIRCUIT_COLS = {
+  mexico: ['#006847', '#ffffff', '#ce1126'],
+  texas: ['#bf0a30', '#ffffff', '#002868'],
+  paulista: ['#009c3b', '#ffdf00', '#002776'],
+  monte: ['#ce1126', '#ffffff'],
+  sakhir: ['#ffffff', '#ce1126'],
+  suzuka: ['#ffffff', '#bc002d'],
+  spa: ['#111111', '#fdda24', '#ef3340'],
+  singapore: ['#ef3340', '#ffffff'],
+};

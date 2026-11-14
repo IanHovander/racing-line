@@ -33,7 +33,9 @@ if (dev) {
   const ctx = await esbuild.context(options);
   await ctx.watch();
   const { port } = await ctx.serve({ servedir: out, port: 5173 });
-  console.log(`Racing Line dev server: http://localhost:${port}/  (add ?debug to expose game state on window)`);
+  console.log(
+    `Racing Line dev server: http://localhost:${port}/  (add ?debug to expose game state on window)`,
+  );
 } else {
   await esbuild.build(options);
 }

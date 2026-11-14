@@ -10,8 +10,7 @@ import { cornerAt } from '../track/track';
 GS.FB_T = 0;
 GS.FB_LAST = -99;
 export function feedback(txt, col) {
-  if (GS.raceTime - GS.FB_LAST < 2.5)
-    return;
+  if (GS.raceTime - GS.FB_LAST < 2.5) return;
   GS.FB_LAST = GS.raceTime;
   const el = $('fb');
   el.innerHTML = '<i style="background:' + col + '"></i>' + txt;
@@ -23,8 +22,7 @@ export function feedback(txt, col) {
   GS.FB_T = 3;
 }
 export function coach(c, dt) {
-  if (!GS.CORNERS.length || c.v < 1)
-    return;
+  if (!GS.CORNERS.length || c.v < 1) return;
   const kmh = v => Math.round(v * 3.6);
   const nm = o => o.name.split(' ').pop() || o.name;
   // corners
@@ -41,34 +39,33 @@ export function coach(c, dt) {
     K.C = C;
   }
   if (K.n > 0 && K.C) {
-    const C = K.C, pv = PROF[c.team] || GS.vf;
+    const C = K.C,
+      pv = PROF[c.team] || GS.vf;
     K.minV = Math.min(K.minV, c.v);
     K.minP = Math.min(K.minP, pv[c.idx]);
-    if (c.surf >= 2 || Math.abs(c.lat) > GS.HW + 0.8)
-      K.off = true;
+    if (c.surf >= 2 || Math.abs(c.lat) > GS.HW + 0.8) K.off = true;
     for (const o of cars) {
-      if (o === c || o.gone)
-        continue;
+      if (o === c || o.gone) continue;
       let d = o.s - c.s;
-      if (d < -GS.L / 2)
-        d += GS.L;
-      else if (d > GS.L / 2)
-        d -= GS.L;
-      if (d > 0 && d < 28 && Math.abs(o.lat - c.lat) < 3)
-        K.traffic = true;
+      if (d < -GS.L / 2) d += GS.L;
+      else if (d > GS.L / 2) d -= GS.L;
+      if (d > 0 && d < 28 && Math.abs(o.lat - c.lat) < 3) K.traffic = true;
     }
     let past = (c.idx - C.i1 + GS.N) % GS.N;
     if (past < GS.N / 2 && past > 10) {
       const ca = 'T' + K.n;
-      if (K.bump !== c.bumpT) { } // contact in the corner: no grade
-      else if (K.off)
-        feedback('Ran wide at ' + ca, '#ff6b5e');
+      if (K.bump !== c.bumpT) {
+      } // contact in the corner: no grade
+      else if (K.off) feedback('Ran wide at ' + ca, '#ff6b5e');
       else if (!K.traffic && C.R < 150 && K.minV >= K.minP * 0.98) {
-        const cb = c.cBest || (c.cBest = {}), pb = cb[K.n];
+        const cb = c.cBest || (c.cBest = {}),
+          pb = cb[K.n];
         if (pb !== undefined && K.minV > pb + 0.6)
-          feedback('Best yet at ' + ca + ' — ' + kmh(K.minV) + ' km/h, +' + (kmh(K.minV) - kmh(pb)) + ' km/h', '#2ecc71');
-      }
-      else if (!K.traffic && C.R < 150 && K.minV < K.minP * 0.86)
+          feedback(
+            'Best yet at ' + ca + ' — ' + kmh(K.minV) + ' km/h, +' + (kmh(K.minV) - kmh(pb)) + ' km/h',
+            '#2ecc71',
+          );
+      } else if (!K.traffic && C.R < 150 && K.minV < K.minP * 0.86)
         feedback('Slow through ' + ca + ' (−' + (kmh(K.minP) - kmh(K.minV)) + ' km/h)', '#ffd60a');
       if (!K.off && K.bump === c.bumpT) {
         const cb = c.cBest || (c.cBest = {});
@@ -82,8 +79,7 @@ export function coach(c, dt) {
   const P0 = progress(c);
   const rel = c.relP || (c.relP = new Map());
   for (const o of cars) {
-    if (o === c || o.gone)
-      continue;
+    if (o === c || o.gone) continue;
     const d = progress(o) - P0;
     if (Math.abs(d) > 40) {
       rel.delete(o);
@@ -92,33 +88,30 @@ export function coach(c, dt) {
     let r = rel.get(o);
     const side = d > 3.5 ? 1 : d < -3.5 ? -1 : 0;
     if (!r) {
-      if (side)
-        rel.set(o, { s: side, t: -99 });
+      if (side) rel.set(o, { s: side, t: -99 });
       continue;
     }
-    if (!side || side === r.s)
-      continue;
+    if (!side || side === r.s) continue;
     const flip = GS.raceTime - r.t > 6;
     r.s = side;
     r.t = GS.raceTime;
-    if (!flip || o.out || GS.raceTime < 8)
-      continue;
+    if (!flip || o.out || GS.raceTime < 8) continue;
     const at = cornerAt(c.idx);
-    if (side < 0)
-      feedback('Nice move on ' + nm(o) + (at ? ' into ' + at : ''), '#c77dff');
-    else
-      feedback(nm(o) + ' gets past' + (at ? ' at ' + at : ''), '#ff8a3d');
+    if (side < 0) feedback('Nice move on ' + nm(o) + (at ? ' into ' + at : ''), '#c77dff');
+    else feedback(nm(o) + ' gets past' + (at ? ' at ' + at : ''), '#ff8a3d');
   }
 }
 export function lapCard(c) {
   const lt = c.last;
-  if (!lt)
-    return;
-  const done = c.cross - 1, left = opts.laps - done;
+  if (!lt) return;
+  const done = c.cross - 1,
+    left = opts.laps - done;
   const fast = Math.min(...cars.filter(o => o.best).map(o => o.best));
   const col = lt <= fast + 1e-6 ? 'p' : lt <= c.best + 0.3 ? 'g' : 'y';
-  const st = standings(), i = st.indexOf(c);
-  const ah = i > 0 ? st[i - 1] : null, bh = st[i + 1] && !st[i + 1].out ? st[i + 1] : null;
+  const st = standings(),
+    i = st.indexOf(c);
+  const ah = i > 0 ? st[i - 1] : null,
+    bh = st[i + 1] && !st[i + 1].out ? st[i + 1] : null;
   const nm = o => (o.name.split(' ').pop() || o.name).slice(0, 3).toUpperCase();
   let d = '';
   if (ah) {
@@ -129,7 +122,11 @@ export function lapCard(c) {
     const g = gapT(c, bh);
     d += `<span><b>P${i + 2} ${nm(bh)}</b>${g !== null ? '−' + g.toFixed(1) : '—'}</span>`;
   }
-  const lab = GS.PRACTICE ? 'LAP ' + done + (c.best === lt && done > 1 ? ' · NEW BEST' : '') : left <= 0 ? 'FINISH' : `LAP ${done}/${opts.laps} · ` + (left === 1 ? 'FINAL LAP' : left + ' LAPS TO GO');
+  const lab = GS.PRACTICE
+    ? 'LAP ' + done + (c.best === lt && done > 1 ? ' · NEW BEST' : '')
+    : left <= 0
+      ? 'FINISH'
+      : `LAP ${done}/${opts.laps} · ` + (left === 1 ? 'FINAL LAP' : left + ' LAPS TO GO');
   const el = $('lapc');
   el.innerHTML = `<div class="l">${lab}</div><div class="t ${col}">${fmtS(lt)}</div>${d ? '<div class="d">' + d + '</div>' : ''}`;
   el.classList.remove('hide');

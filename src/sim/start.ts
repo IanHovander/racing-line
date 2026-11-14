@@ -44,9 +44,15 @@ function launch(c, reaction: number | null): void {
   c.boostT = 0;
   if (reaction === null || c !== cars[GS.ctrl]) return;
   const r = reaction.toFixed(2);
-  if (reaction < 0.2) { c.launchBoost = 1.15; c.boostT = 2; feedback(`Perfect start — ${r} s reaction`, '#c77dff'); }
-  else if (reaction < 0.35) { c.launchBoost = 1.07; c.boostT = 2; feedback(`Good start — ${r} s reaction`, '#2ecc71'); }
-  else if (reaction < 0.6) feedback(`${r} s reaction`, '#ffd60a');
+  if (reaction < 0.2) {
+    c.launchBoost = 1.15;
+    c.boostT = 2;
+    feedback(`Perfect start — ${r} s reaction`, '#c77dff');
+  } else if (reaction < 0.35) {
+    c.launchBoost = 1.07;
+    c.boostT = 2;
+    feedback(`Good start — ${r} s reaction`, '#2ecc71');
+  } else if (reaction < 0.6) feedback(`${r} s reaction`, '#ffd60a');
   else feedback(`Slow start — ${r} s reaction`, '#ff8a3d');
 }
 
@@ -56,7 +62,10 @@ function launch(c, reaction: number | null): void {
  */
 export function launchGate(c, isPlayer: boolean): boolean {
   if (c.launched || attract) return true;
-  if (GS.raceTime > 8) { c.launched = true; return true; }   // joined late, swapped cars, etc.
+  if (GS.raceTime > 8) {
+    c.launched = true;
+    return true;
+  } // joined late, swapped cars, etc.
   if (isPlayer) {
     const go = input.thr || (!usesThrottle() && START.tap);
     if (go || GS.raceTime > 3) launch(c, GS.raceTime);

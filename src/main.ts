@@ -31,4 +31,9 @@ init11(); // ui/wizard
 initHome(); // ui/home
 init12(); // game/loop
 
-if (/[?&]debug\b/.test(location.search) || /^(localhost|127\.0\.0\.1)$/.test(location.hostname) || (window as any).__RL_DEBUG) installDebug();
+if (
+  /[?&]debug\b/.test(location.search) ||
+  /^(localhost|127\.0\.0\.1)$/.test(location.hostname) ||
+  (window as any).__RL_DEBUG
+)
+  installDebug();

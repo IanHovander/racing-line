@@ -5,6 +5,7 @@
 Playable build: https://matthewtorgerson.github.io/racing-line/ (GitHub Pages, built from this repo by GitHub Actions). Up to v16.1 the game was one self-contained HTML file; it is now a TypeScript app (see CLAUDE.md).
 
 ## What's in the game
+
 - **View**: helicopter chase cam (rotates with the car, looks ahead with speed, and follows the car's height) or fixed isometric; 2.5D projection with extruded cars, trees, grandstands, garages and buildings.
 - **Controls**: two independent settings, in the menu and as in-race buttons (keys M and N).
   - **Pedals** (`opts.pedals`): Throttle only (lift and the car auto-brakes to the safe speed), Brake only (the car accelerates by itself; only the brake keys brake), Throttle + Brake, and Auto (v14.7, `opts.pedals=3`: the car works both pedals itself to the safe speed for the steering mode, like the AI; on touch the GAS and BRAKE buttons are hidden). All 16 pedal/steering combinations are tested.
@@ -24,30 +25,30 @@ Playable build: https://matthewtorgerson.github.io/racing-line/ (GitHub Pages, b
   - Measured with an Overtake-mode bot over four circuits: committed passes succeed ~77% on Easy, ~65% on Normal and ~60% on Hard. With the straight-only rule, contacts in auto-steered races are back at the no-defence baseline.
 - **Teams**:
 
-  | Team | Logo | Drivers (nationality) | Car character | top | acc | brk | grip | tyre wear | damage taken |
-  |---|---|---|---|---|---|---|---|---|---|
-  | Scuderia Rosso | red shield, yellow lightning bolt | M. Vance (Canada), L. Moreau (France) | Power: fastest on the straights, hard on its tyres | 1.05 | 1.02 | 1.0 | 0.984 | 1.12 | 1.0 |
-  | Argent GP | silver hexagon, teal chevrons | J. Keller (Germany), T. Okafor (Nigeria) | All-rounder: no weak spot, toughest chassis | 1.01 | 1.01 | 1.05 | 1.006 | 1.0 | 0.85 |
-  | Papaya Racing | orange disc, blue swoosh | E. Lindqvist (Sweden), K. Sato (Japan) | Downforce: best in the corners, slow on the straights | 0.98 | 1.0 | 1.0 | 1.026 | 1.05 | 1.1 |
-  | Verde Motorsport | green leaf, lime V | R. Duarte (Brazil), S. Visser (Netherlands) | Late brakers: best stopping power, kindest to tyres | 1.01 | 1.0 | 1.36 | 1.0 | 0.75 | 1.0 |
-  | Azure F1 | blue diamond, pink star | P. Novak (Czechia), D. Ferreira (Portugal) | Traction: rockets out of slow corners | 0.99 | 1.055 | 1.0 | 0.997 | 1.0 | 1.15 |
-
+  | Team             | Logo                              | Drivers (nationality)                       | Car character                                         | top  | acc   | brk  | grip  | tyre wear | damage taken |
+  | ---------------- | --------------------------------- | ------------------------------------------- | ----------------------------------------------------- | ---- | ----- | ---- | ----- | --------- | ------------ |
+  | Scuderia Rosso   | red shield, yellow lightning bolt | M. Vance (Canada), L. Moreau (France)       | Power: fastest on the straights, hard on its tyres    | 1.05 | 1.02  | 1.0  | 0.984 | 1.12      | 1.0          |
+  | Argent GP        | silver hexagon, teal chevrons     | J. Keller (Germany), T. Okafor (Nigeria)    | All-rounder: no weak spot, toughest chassis           | 1.01 | 1.01  | 1.05 | 1.006 | 1.0       | 0.85         |
+  | Papaya Racing    | orange disc, blue swoosh          | E. Lindqvist (Sweden), K. Sato (Japan)      | Downforce: best in the corners, slow on the straights | 0.98 | 1.0   | 1.0  | 1.026 | 1.05      | 1.1          |
+  | Verde Motorsport | green leaf, lime V                | R. Duarte (Brazil), S. Visser (Netherlands) | Late brakers: best stopping power, kindest to tyres   | 1.01 | 1.0   | 1.36 | 1.0   | 0.75      | 1.0          |
+  | Azure F1         | blue diamond, pink star           | P. Novak (Czechia), D. Ferreira (Portugal)  | Traction: rockets out of slow corners                 | 0.99 | 1.055 | 1.0  | 0.997 | 1.0       | 1.15         |
   - Multipliers in `TEAM_STATS`; each team has its own speed profile `PROF[team]`. Balanced from measured lap-time sensitivities: all five cars lap within ~0.15 s.
   - Original inline-SVG logos (`LOGOS`) and driver flags (`FLAGS`).
+
 - **Driver traits** (v14.8, `DRIVER_STATS[team][driver]`, helper `DRV(c)`). Each driver has six traits from 0 to 1 (0.5 = average) that change how the AI races that car. They don't change how the car drives under your control, except tyre care, which always applies.
 
-  | Driver | Pace | Aggression | Defending | Consistency | Wet | Tyre care | Summary |
-  |---|---|---|---|---|---|---|---|
-  | M. Vance | .80 | .75 | .60 | .55 | .60 | .40 | Fast and fearless, hard on tyres |
-  | L. Moreau | .65 | .50 | .70 | .75 | .50 | .60 | Steady team player |
-  | J. Keller | .80 | .45 | .65 | .90 | .70 | .70 | Metronome — rarely makes a mistake |
-  | T. Okafor | .70 | .70 | .55 | .60 | .80 | .50 | Bold overtaker, great in the rain |
-  | E. Lindqvist | .75 | .35 | .50 | .80 | .90 | .65 | Clean and calm, rain master |
-  | K. Sato | .70 | .60 | .80 | .70 | .55 | .75 | Tough to pass, kind to tyres |
-  | R. Duarte | .75 | .85 | .70 | .50 | .85 | .45 | All-out attacker, thrives in the wet |
-  | S. Visser | .70 | .65 | .90 | .65 | .60 | .55 | The wall — defends everything |
-  | P. Novak | .60 | .40 | .45 | .85 | .50 | .85 | Tyre whisperer, long-run specialist |
-  | D. Ferreira | .65 | .80 | .55 | .45 | .65 | .50 | Wild card — brilliant or in the wall |
+  | Driver       | Pace | Aggression | Defending | Consistency | Wet | Tyre care | Summary                              |
+  | ------------ | ---- | ---------- | --------- | ----------- | --- | --------- | ------------------------------------ |
+  | M. Vance     | .80  | .75        | .60       | .55         | .60 | .40       | Fast and fearless, hard on tyres     |
+  | L. Moreau    | .65  | .50        | .70       | .75         | .50 | .60       | Steady team player                   |
+  | J. Keller    | .80  | .45        | .65       | .90         | .70 | .70       | Metronome — rarely makes a mistake   |
+  | T. Okafor    | .70  | .70        | .55       | .60         | .80 | .50       | Bold overtaker, great in the rain    |
+  | E. Lindqvist | .75  | .35        | .50       | .80         | .90 | .65       | Clean and calm, rain master          |
+  | K. Sato      | .70  | .60        | .80       | .70         | .55 | .75       | Tough to pass, kind to tyres         |
+  | R. Duarte    | .75  | .85        | .70       | .50         | .85 | .45       | All-out attacker, thrives in the wet |
+  | S. Visser    | .70  | .65        | .90       | .65         | .60 | .55       | The wall — defends everything        |
+  | P. Novak     | .60  | .40        | .45       | .85         | .50 | .85       | Tyre whisperer, long-run specialist  |
+  | D. Ferreira  | .65  | .80        | .55       | .45         | .65 | .50       | Wild card — brilliant or in the wall |
 
   Effects:
   - Pace: ±1.2% AI speed.
@@ -58,6 +59,7 @@ Playable build: https://matthewtorgerson.github.io/racing-line/ (GitHub Pages, b
   - Tyre care: wear × (1.2 − 0.4×tyre).
   - In the menu, the team panel shows both drivers with flag, summary and six bars.
   - Test: 300 s races on four circuits with Auto pedals and steering had 0–2 contacts; the low-consistency drivers occasionally ran wide.
+
 - **Pit straight dressing** (every circuit):
   - Pit building of ten garages (two per team, team colours) opposite the main grandstand (`buildPits()`), a pit lane strip, and a row of 10 waving driver-nationality flags.
   - **Pit entry and exit** (v13, reworked v13.1): on permanent circuits the pit-side wall of the main straight is pulled in to HW+2.6 m, so it's a real pit wall right beside the track, easing back out ~60 m beyond the pits. The pit lane runs directly behind it, with:
@@ -119,6 +121,7 @@ Playable build: https://matthewtorgerson.github.io/racing-line/ (GitHub Pages, b
   - Crowd audio is still removed (`CROWD_ENABLED=false`).
 
 ## v15 changes (track limits, racing, finish)
+
 - **Why holding the throttle paid**: a flat-out bot was slower over a lap everywhere, but gained 0.3–1.3 s through some corners, worst in the esses (Bahrain T12, Suzuka T3–T5, Spa). A trace of Bahrain T12 showed it at 60 m/s against the line's 35–45 m/s. It straightened the S-bends by using the full road plus ~3 m of paint beyond the white line, sliding the whole way.
 - **Track limits rule** (menu Race rules: Off / Penalty every 3rd / Every 2nd; default every 3rd, `opts.limits`).
   - An offence is all four wheels past the white line (|lat| > HW + 1.3 m), counted once per excursion, for every car and not on street circuits.
@@ -147,6 +150,7 @@ Playable build: https://matthewtorgerson.github.io/racing-line/ (GitHub Pages, b
   - Flag marshal: an orange-suited figure on the pit wall at the line waves a chequered flag once the leader starts the last lap.
 
 ## Gearbox (v15.1)
+
 - Setting **Gearbox: Automatic / Manual** (`opts.gears`) in the main menu and the pause menu.
 - 8 gears, with top speeds (`GEARTOP`) of 20, 31, 42, 53, 64, 75, 86 and 97 m/s.
   - Automatic, the AI, and AI-driven teammates use `autoGear(v)`: the lowest gear not past 97% of its top speed. The gear shown and the engine pitch now follow it.
@@ -164,14 +168,15 @@ Playable build: https://matthewtorgerson.github.io/racing-line/ (GitHub Pages, b
 - Swapping cars puts the new car in the right gear.
 - Test (racing-line bot, laps):
 
-  | Gear changes | Lone Star | Monaco | Bahrain |
-  |---|---|---|---|
-  | Automatic | 59.8 | 44.3 | 47.1 |
-  | Manual, shifting at the blue lights | 59.9 | 44.3 | 47.1 |
-  | Manual, shifting up early at 60% revs | 60.7 | 45.1 | 48.1 |
-  | Stuck in 3rd | 79.8 | 54.2 | 57.7 |
+  | Gear changes                          | Lone Star | Monaco | Bahrain |
+  | ------------------------------------- | --------- | ------ | ------- |
+  | Automatic                             | 59.8      | 44.3   | 47.1    |
+  | Manual, shifting at the blue lights   | 59.9      | 44.3   | 47.1    |
+  | Manual, shifting up early at 60% revs | 60.7      | 45.1   | 48.1    |
+  | Stuck in 3rd                          | 79.8      | 54.2   | 57.7    |
 
 ## v15.2 (performance and results)
+
 - **Start-line stutter.** CPU profile at the Lone Star grid: ~25% of each frame went to drawing the waving flags. Each flag was an SVG image drawn in 10 slices every frame, and drawing an SVG is slow, especially on phones.
   - Each flag is now rasterised once to a small canvas, and the wave is pre-rendered into 12 animation frames per flag and size (`flagFrames`, `FLAGANIM`, capped at 60 sets). Each flag is now one `drawImage` per frame.
   - Crowd dots are worked out once per stand (`b.dots`) and drawn as one path per colour, with no clipping and none when zoomed far out.
@@ -181,6 +186,7 @@ Playable build: https://matthewtorgerson.github.io/racing-line/ (GitHub Pages, b
   - The title adds your best car's change, e.g. "Best finish P5 (▲2 from P7)".
 
 ## v15.3 (DRS, Hard AI, flags)
+
 - **DRS** (`opts.drs`: Off / Button / Automatic; in Race rules and the pause menu; default Button).
   - Zones: the 2–3 longest straights (curvature < 1/500 over ±8 samples, at least 280 m). Each zone starts 30 m into its straight and ends 50 m before the braking point, with a detection point 120 m before the straight starts.
   - Zone lengths: Azteca 798/520 m, Lone Star 622/250, Paulista 396/384/200, Monte Porto 218, Desert Lights 470/236, Sakura 572/408/206, Ardennes 470/246, Marina 374/220.
@@ -193,6 +199,7 @@ Playable build: https://matthewtorgerson.github.io/racing-line/ (GitHub Pages, b
 - **Flag stutter fix**: v15.2's flag animation cache was keyed by exact pixel size, and the camera zoom changes with speed, so the frames were being rebuilt while driving. Frames are now built at fixed sizes (1/3-octave steps) and scaled, and pre-built for the race's zoom range while the start lights run (`prewarmFlags`). No flag frames are built during the race, and the real frame rate down the main straight holds 60 fps in testing.
 
 ## v15.4 — menu wizard, circuit cards, music, HUD
+
 - **Menu is a 4-step wizard:** Mode → Team → Circuit → Settings (step pills at top, Back/Next bar; Circuit step skipped for host/join). Mode cards: Single player / Host multiplayer / Join multiplayer; the final button reads START / HOST / JOIN RACE. Mode remembered (`hcgp_mode`). `WZ`, `wzGo`, `wzSteps`.
 - **Circuit cards:** each circuit has a hand-drawn 40×40 SVG icon (`CIRCUIT_ICON`: country colours + motif — Aztec pyramid, Lone Star + longhorn, Brazil globe, Monaco yacht, Bahrain palm, rising sun + sakura, Belgian pines, Singapore crescent + Marina Bay Sands) and a thumbnail layout (`trackLayout` re-runs the spline/smoothing coarsely). Selected circuit shows a large map (`drawTrackMap`): sectors coloured, DRS zones dashed, start line + direction arrow, corner numbers.
 - **Logo:** "Wind tunnel", monochrome (chosen by the user after three rounds of options; fonts were rejected in favour of drawn lettering). Heavy chamfered glyphs slanted 20°, square caps clipped to one cap band so every letter is exactly the same height; RACING white, LINE grey (#8a93a3); the front of the word fades in from airflow streaks. Generated by the separate picker page (https://claude.ai/artifact/MTaaT1r7Zk37VyJnmnHD63: 8 speed effects × 10 colour schemes) and pasted in as static SVG.
@@ -211,6 +218,7 @@ Playable build: https://matthewtorgerson.github.io/racing-line/ (GitHub Pages, b
 - **Race rules** rows spaced with divider lines.
 
 ## v15.6 — menu polish, settings, lock-ups
+
 - **Circuit step:** posters only (no name label, no button frame; selected poster lifts with a white outline, others dimmed). Below: circuit name + place (`CIRCUIT_PLACE`), description, then stats line (km · corners · DRS zones · elevation · night/street · your best), then the angled map + profile. Poster track maps are bigger (scale .92, dark under-stroke).
 - **No layout shift:** team buttons fixed 84 px with 2-line clamp; team tagline and driver taglines have fixed min-heights; settings notes have min-heights. Driver-traits explainer removed.
 - **Settings regrouped** into sections (main menu): Race (Opponents, Laps, Weather) · Driving (Pedals, Steering, Gearbox) · Rules (Tyre wear, Damage, Slipstream, DRS, Track limits, Yellow flags) · Display & sound (Camera, Racing line, Turn numbers, Sound, Music). Pause menu uses the same grouping.
@@ -227,6 +235,7 @@ Playable build: https://matthewtorgerson.github.io/racing-line/ (GitHub Pages, b
 - Option pages for pending choices: team logos https://claude.ai/artifact/2voBPsJDVV3VAkeSQxRNm9 ; car markers + defend notifications https://claude.ai/artifact/5T4gSnxxS7UPRTN4oLxcR3
 
 ## GitHub Pages + WebRTC multiplayer (v15.7)
+
 - **Hosted at https://matthewtorgerson.github.io/racing-line/** from repo `matthewtorgerson/racing-line` (branch `main`, root): `index.html`, `vendor/peerjs.min.js` (PeerJS 1.5.5, MIT), README. The old `matthewtorgerson.github.io` repo's custom-domain claim (www.matthewtorgerson.com) was removed so project pages stop redirecting to the Squarespace site.
 - **Multiplayer outside claude.ai** uses PeerJS (`makeP2PApi`), modelled on the RoboRally website mode: same interface as claude.ai's room service (`join → onPeers / presence / leave`). The first browser to open a code registers `racingline-mt-<code>` on PeerJS's free cloud server and becomes the hub; guests connect to it with a reliable JSON data channel. Presence is merged per player and the hub rebroadcasts the full list on change (66 ms tick) or every 2 s; guests heartbeat every 2 s; silent guests drop after 8 s, a silent hub after 10 s. On claude.ai the room capability is still used. Invite link = the page URL + `#code`.
 - **One team per player** (v15.8): the lobby has a team picker (`lbTeams`); teams held by others are greyed with their name. Lobby order = host first, then join time (`presence.jt`); if two players hold the same team, the later one is moved to a free team with a toast (`resolveTeam`). Each human drives car 1 of their team, the teammate is AI. Max 5 racers; extra players get a "race is full" note and are left out of the grid. Pasting a room link into an open tab joins it (`hashchange`).
@@ -234,6 +243,7 @@ Playable build: https://matthewtorgerson.github.io/racing-line/ (GitHub Pages, b
 - Tested: two pages with a simulated PeerJS (lobby, race start, car sync, guest drop); on the live site hosting registers with PeerJS's server and shows the lobby/QR. A second tab in the same cloud test browser couldn't connect (that sandbox likely blocks peer connections), so a real two-device test is still needed. Join errors now say whether the code wasn't found, the host couldn't be reached, or the matchmaking server is down.
 
 ## Multiplayer lobby + netcode (v15.9)
+
 - Host goes straight into a lobby; Join opens the code box. Everything is chosen inside the lobby, in order: players (name), team, circuit (poster grid), race settings, then each player's own controls.
 - Up to two humans per team (teammates by join order, driver 1 then 2); a third player is moved to a team with a free seat. Empty seats are AI.
 - Host sets the circuit and race settings (Opponents, Laps, Weather, Tyre wear, Damage, Slipstream, DRS on/off, Track limits, Yellow flags); guests see them read-only. Pedals, Steering, Gearbox and DRS Button/Automatic are per player.
@@ -242,6 +252,7 @@ Playable build: https://matthewtorgerson.github.io/racing-line/ (GitHub Pages, b
 - Shared race clock: the host sends its clock; guests slew theirs to match, so countdown, lap and finish times agree on every screen.
 
 ## v16 — practice, lap card, coaching, lobby steps
+
 - **Practice mode** (menu mode card): only your car (team driver 1), unlimited laps, track-limits warnings without penalties. Online: host's "Session: Practice (players only)" race setting removes the AI.
 - **Lap card** (`lapCard`, `#lapc`): after each lap, "LAP n/N · k LAPS TO GO / FINAL LAP", the lap time in purple (fastest of anyone), green (your best or within 0.3 s) or yellow (slower), and time gaps to the cars directly ahead and behind.
 - **Coaching** (`coach`, `#fb`): "Ran wide at T6", "Slow through T4 (−18 km/h)" (apex speed under 86% of the line's), "Best yet at T7 — +4 km/h" (new personal best apex speed near the limit); passes "Nice move on Sato into T5" / "Sato gets past at T5" with ±3.5 m hysteresis and a 6 s per-car cooldown; one message per 2.5 s; none in the first 8 s.
@@ -257,12 +268,14 @@ Playable build: https://matthewtorgerson.github.io/racing-line/ (GitHub Pages, b
 - **Grandstand styles** in preview (`STAND_STYLE`, `?stands=1..5`): stepped terraces, terraces + roof, flag-colour seats, packed crowd with flags, grass bank. Options page: https://claude.ai/artifact/PEgwPvMHVRewaWZvT8dD7U
 
 ## v16.1
+
 - **Grandstands removed** (corner stands, main-straight grandstand, Azteca stadium bowl and its pulled-in walls). Style code stays in the file (`STAND_STYLE`) but nothing uses it.
 - **Gravel traps tidied**: same-side traps less than 16 m apart are joined; short ones grow to ~50 m (mostly towards the exit) where there's room, otherwise they're dropped; each trap gets a smooth inner edge (max-filtered, never inside the paint) and a smooth outer edge tapering at both ends (max ~16 m wide). Counts went from 8–20 slivers per circuit to 1–3 clean traps on the permanent circuits (Suzuka/Spa keep their big ones).
 - **Race awards** on the results screen (`statTick`, `awardsHtml`): fastest lap, top speed, most overtakes (pair-wise with ±3.5 m hysteresis), places gained, time in the lead, cleanest race (off-track time + strikes + contacts), slipstream time, DRS runs, most contacts. Your car's awards are white.
 - **Racing-line colours fixed**: no red when you're over the speed cap on a straight (DRS/tow) or slightly over the line's speed; in testing, red under a car not braking fell from ~45% of samples to ~2.5% and red on straights from ~5% to 0.
 
 ## v17.1 — main screen (option A)
+
 - **Main screen** (`src/ui/home.ts`, `#home`): the attract race runs behind the logo, with a dark gradient at top and bottom. Two big pill buttons sit in the thumb zone: **Single player** (white) and **Multiplayer** (outline). Under them is a live line, "LIVE · circuit · lap n". Top corners hold round sound (mutes/unmutes music and effects together) and settings buttons. Chosen from https://claude.ai/artifact/XHFhBAh2rJgL2oujg7cALA (option A).
 - **Setup panel**: each button opens the wizard as a panel, a bottom sheet on phones (≤640 px wide) and a centred card on wider screens. Close it with ✕, Escape or a tap outside.
   - Single player: Session (Race / Practice) → Team → Circuit → Settings.
@@ -271,6 +284,7 @@ Playable build: https://matthewtorgerson.github.io/racing-line/ (GitHub Pages, b
 - The "Tap anywhere to start the music" hint is gone; music still starts on the first tap, click or key.
 
 ## v17.2 — timing-based starts (`src/sim/start.ts`)
+
 - Cars stay on the grid after lights out until their driver reacts.
 - **Your launch:** press the throttle after the lights go out. In pedal modes without a GAS pad (Brake only, Auto), any tap or key launches the car. The text under the lights says which ("Hit the GAS / Tap when the lights go out").
 - **Reaction time sets the launch**, shown as a coaching message:
@@ -282,6 +296,7 @@ Playable build: https://matthewtorgerson.github.io/racing-line/ (GitHub Pages, b
 - **AI reaction:** 0.12–0.55 s, quicker for drivers with high consistency, so the field spreads off the line.
 
 ## Model
+
 - Tracks: control points → Catmull-Rom → smoothed and resampled every 2 m (`buildTrack()`). Long straights need intermediate control points: without them the spline overshoots at the next tight corner and makes a near-cusp (a 4–7 m radius). That happened on the first Mexico and Vegas drafts.
 - Per-track options: `hw`, `smooth`, `street`, `water`, `tunnel`, `night`, `palms`, `runoffAsphalt`, `elev`, `paint`. New in v13:
   - `bridge`: the circuit crosses itself; see Crossover bridge below.
@@ -330,6 +345,7 @@ Playable build: https://matthewtorgerson.github.io/racing-line/ (GitHub Pages, b
   - Phone-sized frame times (headless desktop Chrome): 5–20 ms. Sakura and Neon Strip are the heaviest, at ~20 ms.
 
 ## Change log
+
 - v2–v12: see earlier entries: runoff/AI fixes, gravel, audio, slipstream, COTA/Interlagos, Monaco, tyres/damage/yellows, multiplayer, rain, Bahrain night, western theme, contact reduction, team stats/logos/flags, Lane steering, elevation, painted run-off, pits and flags, Pedals/Steering split, big painted fields, Overtake steering.
 - v12.1 (hotfix): grid cars are drawn at the right height before lights out on elevated grids.
 - v13: renamed **Racing Line**.
@@ -345,6 +361,7 @@ Playable build: https://matthewtorgerson.github.io/racing-line/ (GitHub Pages, b
 - v13.1: no more bow-tie walls (per-side walls capped by the corner radius); pit wall beside the track with a functional-looking pit lane (fast and working lanes, team boxes, speed-limit lines, entry and exit cut through the pit wall).
 
 ## Ideas next
+
 - Pit stops using the new entry/exit lanes (tyres, repairs; wet vs slick tyres), DRS zones, changing weather.
 - Make the corner stands read better from above: roofs, or a stepped seating texture.
 - Car liveries with team logos.

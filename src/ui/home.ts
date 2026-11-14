@@ -70,7 +70,9 @@ export function init(): void {
   $('pnlClose').onclick = closePanel;
   $('wzDone').onclick = closePanel;
   // tap the dimmed area around the panel to close it
-  $('menu').addEventListener('click', (e: MouseEvent) => { if (e.target === $('menu')) closePanel(); });
+  $('menu').addEventListener('click', (e: MouseEvent) => {
+    if (e.target === $('menu')) closePanel();
+  });
   $('hSnd').onclick = () => {
     unlockAudio();
     const on = !(opts.music || opts.sound);
@@ -84,11 +86,16 @@ export function init(): void {
   const join = () => {
     unlockAudio();
     const c = normCode($('joinCode2').value);
-    if (!c) { showToast('Room codes are 5 letters and numbers, like AB3K9'); return; }
+    if (!c) {
+      showToast('Room codes are 5 letters and numbers, like AB3K9');
+      return;
+    }
     enterRoom(c, false);
   };
   $('bJoin2').onclick = join;
-  $('joinCode2').addEventListener('keydown', (e: KeyboardEvent) => { if (e.key === 'Enter') join(); });
+  $('joinCode2').addEventListener('keydown', (e: KeyboardEvent) => {
+    if (e.key === 'Enter') join();
+  });
   setInterval(updateLive, 500);
   showHome();
 }

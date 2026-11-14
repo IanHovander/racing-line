@@ -32,18 +32,18 @@ There's no `package-lock.json` yet; commit the one `npm install` creates.
 `index.html` is the page shell (all the menu / HUD / lobby markup), `src/styles.css` all the styling,
 `src/main.ts` the entry point. Modules by area:
 
-| Folder | What's there |
-|---|---|
-| `core/` | canvas setup and resize, `$` (getElementById), `clamp`, `wrapA`, `store` (localStorage, `hcgp_` prefix — keep it so players keep their settings) |
-| `track/` | circuit data (`circuits.ts`: control points, elevation, scenery options), geometry state and helpers (`track.ts`), the big `buildTrack` (spline, walls, run-off, gravel, paint, racing line, scenery), street-circuit city, the active track |
-| `teams/` | teams, logos, flags, car stats, driver traits |
-| `sim/` | car model (gears, top speeds), speed profiles and racing-line colours (`profile.ts`), AI driving and racecraft (`ai.ts`), the player's assists (`player.ts`), physics, timing/sectors/stats, and `step.ts` (the fixed-step simulation, collisions, standings, damage, yellows) |
-| `render/` | camera + projection (`P(x,y,z)`), primitives (`prism`, track bands), cars, trees/flags, walls/sponsor boards/tunnel/bridge, effects (fireworks, rain, night glow), buildings, and `render.ts` (one frame) |
-| `ui/` | HUD, lap card + coaching messages, results and awards, menu wizard, circuit posters/maps, settings widgets |
-| `audio/` | engine/impact sounds, crowd (disabled), procedural music themes per circuit |
-| `net/` | multiplayer: transport (claude.ai room or PeerJS), lobby, netcode (state sync, smoothing, shared race clock), QR codes |
-| `vendor/` | third-party QR code generator |
-| `game/` | race setup (`setupRace`, options, race state) and the main loop |
+| Folder    | What's there                                                                                                                                                                                                                                                                   |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `core/`   | canvas setup and resize, `$` (getElementById), `clamp`, `wrapA`, `store` (localStorage, `hcgp_` prefix — keep it so players keep their settings)                                                                                                                               |
+| `track/`  | circuit data (`circuits.ts`: control points, elevation, scenery options), geometry state and helpers (`track.ts`), the big `buildTrack` (spline, walls, run-off, gravel, paint, racing line, scenery), street-circuit city, the active track                                   |
+| `teams/`  | teams, logos, flags, car stats, driver traits                                                                                                                                                                                                                                  |
+| `sim/`    | car model (gears, top speeds), speed profiles and racing-line colours (`profile.ts`), AI driving and racecraft (`ai.ts`), the player's assists (`player.ts`), physics, timing/sectors/stats, and `step.ts` (the fixed-step simulation, collisions, standings, damage, yellows) |
+| `render/` | camera + projection (`P(x,y,z)`), primitives (`prism`, track bands), cars, trees/flags, walls/sponsor boards/tunnel/bridge, effects (fireworks, rain, night glow), buildings, and `render.ts` (one frame)                                                                      |
+| `ui/`     | HUD, lap card + coaching messages, results and awards, menu wizard, circuit posters/maps, settings widgets                                                                                                                                                                     |
+| `audio/`  | engine/impact sounds, crowd (disabled), procedural music themes per circuit                                                                                                                                                                                                    |
+| `net/`    | multiplayer: transport (claude.ai room or PeerJS), lobby, netcode (state sync, smoothing, shared race clock), QR codes                                                                                                                                                         |
+| `vendor/` | third-party QR code generator                                                                                                                                                                                                                                                  |
+| `game/`   | race setup (`setupRace`, options, race state) and the main loop                                                                                                                                                                                                                |
 
 ### State and start-up — read before adding code
 

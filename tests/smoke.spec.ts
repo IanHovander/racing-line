@@ -6,7 +6,7 @@ declare const window: any;
 
 async function open(page: Page) {
   const errors: string[] = [];
-  page.on('pageerror', (e) => errors.push(String(e)));
+  page.on('pageerror', e => errors.push(String(e)));
   await page.goto('/?debug');
   await page.waitForFunction(() => typeof window.wzGo === 'function' && window.N > 0);
   return errors;
@@ -32,15 +32,25 @@ test('a single-player race runs, finishes and shows awards', async ({ page }) =>
   const errors = await open(page);
   await page.click('#hSolo');
   await page.click('#bSolo');
-  await page.evaluate(() => { window.opts.laps = 1; window.wzGo(3); });
+  await page.evaluate(() => {
+    window.opts.laps = 1;
+    window.wzGo(3);
+  });
   await page.click('#bStart');
   const r = await page.evaluate(() => {
-    window.opts.pedals = 3; window.opts.steer = 0;          // let the car drive itself
-    window.setupRace(false); window.state = 'race';
+    window.opts.pedals = 3;
+    window.opts.steer = 0; // let the car drive itself
+    window.setupRace(false);
+    window.state = 'race';
     for (let i = 0; i < 120 * 150 && window.state === 'race'; i++) window.step(window.STEP);
     for (let i = 0; i < 120 * 6; i++) window.step(window.STEP);
     const me = window.cars[window.ctrl];
-    return { state: window.state, lap: me.cross, best: me.best, awards: document.getElementById('resAw')!.children.length };
+    return {
+      state: window.state,
+      lap: me.cross,
+      best: me.best,
+      awards: document.getElementById('resAw')!.children.length,
+    };
   });
   expect(r.state).toBe('finished');
   expect(r.best).toBeGreaterThan(40);
@@ -64,10 +74,19 @@ test('every circuit builds and the AI laps it without leaving the track', async 
   const out = await page.evaluate(() => {
     const res: any[] = [];
     for (let t = 0; t < window.TRACKS.length; t++) {
-      window.trackIdx = t; window.buildTrack(window.TRACKS[t]); window.PRACTICE = true;
-      window.opts.pedals = 3; window.opts.steer = 0; window.setupRace(false); window.state = 'race';
-      const me = window.cars[window.ctrl]; let off = 0;
-      for (let i = 0; i < 120 * 130; i++) { window.step(window.STEP); if (me.surf >= 2) off++; }
+      window.trackIdx = t;
+      window.buildTrack(window.TRACKS[t]);
+      window.PRACTICE = true;
+      window.opts.pedals = 3;
+      window.opts.steer = 0;
+      window.setupRace(false);
+      window.state = 'race';
+      const me = window.cars[window.ctrl];
+      let off = 0;
+      for (let i = 0; i < 120 * 130; i++) {
+        window.step(window.STEP);
+        if (me.surf >= 2) off++;
+      }
       res.push({ id: window.TRACKS[t].id, best: me.best, offSeconds: off / 120 });
     }
     window.PRACTICE = false;

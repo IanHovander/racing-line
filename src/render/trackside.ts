@@ -8,20 +8,34 @@ import { GLOWS } from './scenery';
 import { NEONQ, TUN_STYLE } from '../track/track';
 // crossover bridge: pillars, deck, walls, then the cars on it drawn again on top
 // invented sponsors for the barrier boards
-export const ADS = [['VOLTRA', '#0b3d91', '#ffffff'], ['APEXA', '#e10600', '#ffffff'], ['NOVEX', '#111111', '#39d353'], ['ZEPHYRA', '#f5f5f5', '#0a58ca'], ['KITEWAY', '#ffcc00', '#111111'], ['ORBANI', '#5a2ca0', '#ffffff'], ['TORQEL', '#00857c', '#ffffff'], ['LUMORA', '#ff6a00', '#ffffff']];
+export const ADS = [
+  ['VOLTRA', '#0b3d91', '#ffffff'],
+  ['APEXA', '#e10600', '#ffffff'],
+  ['NOVEX', '#111111', '#39d353'],
+  ['ZEPHYRA', '#f5f5f5', '#0a58ca'],
+  ['KITEWAY', '#ffcc00', '#111111'],
+  ['ORBANI', '#5a2ca0', '#ffffff'],
+  ['TORQEL', '#00857c', '#ffffff'],
+  ['LUMORA', '#ff6a00', '#ffffff'],
+];
 export const ADQ = [];
 export function drawWalls(z) {
   ADQ.length = 0;
-  const hz = z * cam.hz, st = !!GS.TR.street, WH = st ? 1.1 : 1.0, TH = st ? 0.35 : 0.7;
+  const hz = z * cam.hz,
+    st = !!GS.TR.street,
+    WH = st ? 1.1 : 1.0,
+    TH = st ? 0.35 : 0.7;
   ctx.lineJoin = 'round';
   const strip = (sg, z0, z1, o0, o1, col, step?) => {
     const A = sg > 0 ? GS.BARR : GS.BARL;
     ctx.beginPath();
     for (let i = 0; i < GS.N; i += step || 1) {
       const j = (i + (step || 1)) % GS.N;
-      if (!onScr(GS.TSX[i], GS.TSY[i], 50 * z))
-        continue;
-      const a0 = sg * (A[i] + o0), a1 = sg * (A[i] + o1), b0 = sg * (A[j] + o0), b1 = sg * (A[j] + o1);
+      if (!onScr(GS.TSX[i], GS.TSY[i], 50 * z)) continue;
+      const a0 = sg * (A[i] + o0),
+        a1 = sg * (A[i] + o1),
+        b0 = sg * (A[j] + o0),
+        b1 = sg * (A[j] + o1);
       ctx.moveTo(GS.TSX[i] + GS.NSX[i] * a0, GS.TSY[i] + GS.NSY[i] * a0 - z0 * hz);
       ctx.lineTo(GS.TSX[j] + GS.NSX[j] * b0, GS.TSY[j] + GS.NSY[j] * b0 - z0 * hz);
       ctx.lineTo(GS.TSX[j] + GS.NSX[j] * b1, GS.TSY[j] + GS.NSY[j] * b1 - z1 * hz);
@@ -47,50 +61,56 @@ export function drawWalls(z) {
     if (z > 2.2) {
       const A = sg > 0 ? GS.BARR : GS.BARL;
       for (let i0 = 0; i0 < GS.N; i0 += 6) {
-        const blk = Math.floor(i0 / 6), grp = Math.floor(blk / 8);
-        if ((grp * 5 + (GS.TR.seed || 0) + (sg > 0 ? 1 : 0)) % 4 === 0)
-          continue;
-        const i = i0, j = (i0 + 6) % GS.N;
-        if (!onScr(GS.TSX[i], GS.TSY[i], 30 * z) || !onScr(GS.TSX[j], GS.TSY[j], 30 * z))
-          continue;
-        if (-sg * (GS.nx[i] * GS.cC + GS.ny[i] * GS.cS) > -0.05)
-          continue;
+        const blk = Math.floor(i0 / 6),
+          grp = Math.floor(blk / 8);
+        if ((grp * 5 + (GS.TR.seed || 0) + (sg > 0 ? 1 : 0)) % 4 === 0) continue;
+        const i = i0,
+          j = (i0 + 6) % GS.N;
+        if (!onScr(GS.TSX[i], GS.TSY[i], 30 * z) || !onScr(GS.TSX[j], GS.TSY[j], 30 * z)) continue;
+        if (-sg * (GS.nx[i] * GS.cC + GS.ny[i] * GS.cS) > -0.05) continue;
         const ad = ADS[(grp * 3 + (sg > 0 ? 5 : 0)) % ADS.length];
-        const pa = (k, zz) => { const o = sg * A[k]; return [GS.TSX[k] + GS.NSX[k] * o, GS.TSY[k] + GS.NSY[k] * o - zz * hz]; };
-        const m = i0 % GS.N, m2 = (i0 + 6) % GS.N;
+        const pa = (k, zz) => {
+          const o = sg * A[k];
+          return [GS.TSX[k] + GS.NSX[k] * o, GS.TSY[k] + GS.NSY[k] * o - zz * hz];
+        };
+        const m = i0 % GS.N,
+          m2 = (i0 + 6) % GS.N;
         const AH = WH + 1.3;
         const q = [pa(m, 0.12), pa(m2, 0.12), pa(m2, AH), pa(m, AH)];
-        const om = (i0 + 3) % GS.N, oo = sg * A[om];
-        ADQ.push([depth(GS.cx[om] + GS.nx[om] * oo, GS.cy[om] + GS.ny[om] * oo), () => {
+        const om = (i0 + 3) % GS.N,
+          oo = sg * A[om];
+        ADQ.push([
+          depth(GS.cx[om] + GS.nx[om] * oo, GS.cy[om] + GS.ny[om] * oo),
+          () => {
             ctx.fillStyle = ad[1];
             ctx.beginPath();
-            q.forEach((p, k) => k ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]));
+            q.forEach((p, k) => (k ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])));
             ctx.closePath();
             ctx.fill();
             ctx.strokeStyle = 'rgba(20,22,26,0.8)';
             ctx.lineWidth = Math.max(1, 0.08 * z);
             ctx.stroke();
             const fh = (AH - 0.12) * hz;
-            if (fh < 6)
-              return;
-            const mx = (q[0][0] + q[1][0] + q[2][0] + q[3][0]) / 4, my = (q[0][1] + q[1][1] + q[2][1] + q[3][1]) / 4;
+            if (fh < 6) return;
+            const mx = (q[0][0] + q[1][0] + q[2][0] + q[3][0]) / 4,
+              my = (q[0][1] + q[1][1] + q[2][1] + q[3][1]) / 4;
             let ang = Math.atan2(q[1][1] - q[0][1], q[1][0] - q[0][0]);
             const len = Math.hypot(q[1][0] - q[0][0], q[1][1] - q[0][1]);
-            if (Math.cos(ang) < 0)
-              ang += Math.PI;
+            if (Math.cos(ang) < 0) ang += Math.PI;
             ctx.save();
             ctx.translate(mx, my);
             ctx.rotate(ang);
             ctx.font = '900 ' + Math.round(fh * 0.62) + 'px system-ui,sans-serif';
             const tw = ctx.measureText(ad[0]).width;
-            const fx = Math.min(1, len * 0.88 / Math.max(tw, 1));
+            const fx = Math.min(1, (len * 0.88) / Math.max(tw, 1));
             ctx.scale(fx, 1);
             ctx.fillStyle = ad[2];
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.fillText(ad[0], 0, fh * 0.04);
             ctx.restore();
-          }]);
+          },
+        ]);
       }
     }
     if (GS.TR.fence) {
@@ -101,10 +121,10 @@ export function drawWalls(z) {
       edge(GS.SIDES, WH + 3.2, sg);
       const A = sg > 0 ? GS.BARR : GS.BARL;
       for (let i = 0; i < GS.N; i += 3) {
-        if (!onScr(GS.TSX[i], GS.TSY[i], 30 * z))
-          continue;
+        if (!onScr(GS.TSX[i], GS.TSY[i], 30 * z)) continue;
         const o = sg * (A[i] + 0.15);
-        const x = GS.TSX[i] + GS.NSX[i] * o, y = GS.TSY[i] + GS.NSY[i] * o;
+        const x = GS.TSX[i] + GS.NSX[i] * o,
+          y = GS.TSY[i] + GS.NSY[i] * o;
         ctx.moveTo(x, y - WH * hz);
         ctx.lineTo(x, y - (WH + 3.2) * hz);
       }
@@ -121,27 +141,35 @@ export function secBoard(i, k) {
   if (me && !attract) {
     e = (me.secCur && me.secCur[prev]) || (me.secPrev && me.secPrev[prev]) || null;
   }
-  signBoard(i, (GS.BARL[i] < GS.BARR[i] ? -1 : 1), 'S' + (prev + 1), e ? SECCOL[e.col] : '#4a4f59');
+  signBoard(i, GS.BARL[i] < GS.BARR[i] ? -1 : 1, 'S' + (prev + 1), e ? SECCOL[e.col] : '#4a4f59');
 }
-export function tunSeg() { if (!GS.TUN)
-  return []; if (GS.TUN.seg && GS.TUN.seg.N === GS.N)
-  return GS.TUN.seg; const seg: any = []; for (let i = GS.TUN[0];; i = (i + 1) % GS.N) {
-  seg.push(i);
-  if (i === GS.TUN[1] || seg.length > GS.N)
-    break;
-} seg.N = GS.N; GS.TUN.seg = seg; return seg; }
+export function tunSeg() {
+  if (!GS.TUN) return [];
+  if (GS.TUN.seg && GS.TUN.seg.N === GS.N) return GS.TUN.seg;
+  const seg: any = [];
+  for (let i = GS.TUN[0]; ; i = (i + 1) % GS.N) {
+    seg.push(i);
+    if (i === GS.TUN[1] || seg.length > GS.N) break;
+  }
+  seg.N = GS.N;
+  GS.TUN.seg = seg;
+  return seg;
+}
 // tunnel interior, drawn with the road: darker inside, strip lights along both walls (and, for the cut-away, tall inner walls)
 export function drawTunnelFloor(z) {
-  if (!GS.TUN)
-    return;
-  const seg = tunSeg(), hz = z * cam.hz;
+  if (!GS.TUN) return;
+  const seg = tunSeg(),
+    hz = z * cam.hz;
   ctx.fillStyle = 'rgba(8,8,12,0.5)';
   ctx.beginPath();
   for (let k = 0; k < seg.length - 1; k++) {
-    const i = seg[k], j = seg[k + 1];
-    if (!onScr(GS.TSX[i], GS.TSY[i], 60 * z))
-      continue;
-    const ai = GS.BARR[i], aj = GS.BARR[j], li = GS.BARL[i], lj = GS.BARL[j];
+    const i = seg[k],
+      j = seg[k + 1];
+    if (!onScr(GS.TSX[i], GS.TSY[i], 60 * z)) continue;
+    const ai = GS.BARR[i],
+      aj = GS.BARR[j],
+      li = GS.BARL[i],
+      lj = GS.BARL[j];
     ctx.moveTo(GS.TSX[i] + GS.NSX[i] * ai, GS.TSY[i] + GS.NSY[i] * ai);
     ctx.lineTo(GS.TSX[j] + GS.NSX[j] * aj, GS.TSY[j] + GS.NSY[j] * aj);
     ctx.lineTo(GS.TSX[j] - GS.NSX[j] * lj, GS.TSY[j] - GS.NSY[j] * lj);
@@ -155,10 +183,11 @@ export function drawTunnelFloor(z) {
       ctx.fillStyle = '#4a4743';
       ctx.beginPath();
       for (let k = 0; k < seg.length - 1; k++) {
-        const i = seg[k], j = seg[k + 1];
-        if (!onScr(GS.TSX[i], GS.TSY[i], 60 * z))
-          continue;
-        const a = sg * A[i], b = sg * A[j];
+        const i = seg[k],
+          j = seg[k + 1];
+        if (!onScr(GS.TSX[i], GS.TSY[i], 60 * z)) continue;
+        const a = sg * A[i],
+          b = sg * A[j];
         ctx.moveTo(GS.TSX[i] + GS.NSX[i] * a, GS.TSY[i] + GS.NSY[i] * a);
         ctx.lineTo(GS.TSX[j] + GS.NSX[j] * b, GS.TSY[j] + GS.NSY[j] * b);
         ctx.lineTo(GS.TSX[j] + GS.NSX[j] * b, GS.TSY[j] + GS.NSY[j] * b - 4.2 * hz);
@@ -176,46 +205,65 @@ export function drawTunnelFloor(z) {
     for (let k = 0; k < seg.length; k++) {
       const i = seg[k];
       const o = sg * (A[i] - 0.15);
-      const x = GS.TSX[i] + GS.NSX[i] * o, y = GS.TSY[i] + GS.NSY[i] * o - hl * hz;
+      const x = GS.TSX[i] + GS.NSX[i] * o,
+        y = GS.TSY[i] + GS.NSY[i] * o - hl * hz;
       k ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
     }
     ctx.stroke();
     for (let k = 2; k < seg.length; k += 5) {
       const i = seg[k];
       const o = sg * (A[i] - 0.15);
-      const x = GS.TSX[i] + GS.NSX[i] * o, y = GS.TSY[i] + GS.NSY[i] * o - hl * hz;
-      if (onScr(x, y, 10))
-        GLOWS.push([x, y, z * 2.2, '255,214,140', 0.55]);
+      const x = GS.TSX[i] + GS.NSX[i] * o,
+        y = GS.TSY[i] + GS.NSY[i] * o - hl * hz;
+      if (onScr(x, y, 10)) GLOWS.push([x, y, z * 2.2, '255,214,140', 0.55]);
     }
   }
 }
 // tunnel portals: two pillars and a lintel across the road at each end (depth-sorted with the cars)
 export function queuePortals(objs) {
-  if (!GS.TUN || TUN_STYLE !== 2)
-    return;
-  const z = cam.zoom, hz = z * cam.hz;
+  if (!GS.TUN || TUN_STYLE !== 2) return;
+  const z = cam.zoom,
+    hz = z * cam.hz;
   for (const i of [GS.TUN[0], GS.TUN[1]]) {
     const d = depth(GS.cx[i], GS.cy[i]);
-    objs.push([d, 7, () => {
-        if (!onScr(GS.TSX[i], GS.TSY[i], 80 * z))
-          return;
+    objs.push([
+      d,
+      7,
+      () => {
+        if (!onScr(GS.TSX[i], GS.TSY[i], 80 * z)) return;
         const P2 = (o, zz) => [GS.TSX[i] + GS.NSX[i] * o, GS.TSY[i] + GS.NSY[i] * o - zz * hz];
-        const a = GS.BARR[i] + 1.2, b = -(GS.BARL[i] + 1.2);
-        const quad = (p, col) => { ctx.fillStyle = col; ctx.beginPath(); p.forEach((q, k) => k ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1])); ctx.closePath(); ctx.fill(); };
-        const ex = GS.tx[i] * 0, thick = 1.2;
-        const sh = (o, zz, dd) => { const x = GS.cx[i] + GS.nx[i] * o + GS.tx[i] * dd, y = GS.cy[i] + GS.ny[i] * o + GS.ty[i] * dd; return P(x, y, zz + GS.HT[i]); };
+        const a = GS.BARR[i] + 1.2,
+          b = -(GS.BARL[i] + 1.2);
+        const quad = (p, col) => {
+          ctx.fillStyle = col;
+          ctx.beginPath();
+          p.forEach((q, k) => (k ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1])));
+          ctx.closePath();
+          ctx.fill();
+        };
+        const ex = GS.tx[i] * 0,
+          thick = 1.2;
+        const sh = (o, zz, dd) => {
+          const x = GS.cx[i] + GS.nx[i] * o + GS.tx[i] * dd,
+            y = GS.cy[i] + GS.ny[i] * o + GS.ty[i] * dd;
+          return P(x, y, zz + GS.HT[i]);
+        };
         for (const o of [a, b]) {
           const w = o > 0 ? -1.2 : 1.2;
           quad([sh(o, 0, 0), sh(o + w, 0, 0), sh(o + w, 5.6, 0), sh(o, 5.6, 0)], '#c9c2b4');
         }
         quad([sh(a, 4.5, 0), sh(b, 4.5, 0), sh(b, 5.8, 0), sh(a, 5.8, 0)], '#d8d1c3');
         quad([sh(a, 5.8, 0), sh(b, 5.8, 0), sh(b, 5.8, thick), sh(a, 5.8, thick)], '#ece6da');
-      }]);
+      },
+    ]);
   }
 }
 export function signBoard(i, sg, txt, bg) {
-  const z = cam.zoom, o = sg * (GS.HW + 2.6);
-  const bx = GS.TSX[i] + GS.NSX[i] * o, by = GS.TSY[i] + GS.NSY[i] * o, top = by - 2.4 * z * cam.hz;
+  const z = cam.zoom,
+    o = sg * (GS.HW + 2.6);
+  const bx = GS.TSX[i] + GS.NSX[i] * o,
+    by = GS.TSY[i] + GS.NSY[i] * o,
+    top = by - 2.4 * z * cam.hz;
   ctx.strokeStyle = '#cfd3d8';
   ctx.lineWidth = Math.max(1, 0.15 * z);
   ctx.beginPath();
@@ -224,15 +272,14 @@ export function signBoard(i, sg, txt, bg) {
   ctx.stroke();
   const fs = Math.max(9, Math.min(22, z * 1.25));
   ctx.font = '800 ' + fs + 'px system-ui,sans-serif';
-  const w = Math.max(fs * 1.1, ctx.measureText(txt).width + fs * 0.6), h = fs * 1.25;
+  const w = Math.max(fs * 1.1, ctx.measureText(txt).width + fs * 0.6),
+    h = fs * 1.25;
   ctx.fillStyle = bg;
   ctx.strokeStyle = '#fff';
   ctx.lineWidth = Math.max(1, fs * 0.1);
   ctx.beginPath();
-  if (ctx.roundRect)
-    ctx.roundRect(bx - w / 2, top - h, w, h, fs * 0.25);
-  else
-    ctx.rect(bx - w / 2, top - h, w, h);
+  if (ctx.roundRect) ctx.roundRect(bx - w / 2, top - h, w, h, fs * 0.25);
+  else ctx.rect(bx - w / 2, top - h, w, h);
   ctx.fill();
   ctx.stroke();
   ctx.fillStyle = '#fff';
@@ -244,32 +291,35 @@ export function signBoard(i, sg, txt, bg) {
 }
 export function drawBridge() {
   const B = GS.BRIDGE;
-  if (!B)
-    return;
-  const z = cam.zoom, hz = cam.hz;
+  if (!B) return;
+  const z = cam.zoom,
+    hz = cam.hz;
   const ids = [];
-  for (let k = -B.r0; k <= B.r1; k++)
-    ids.push((B.up + k + GS.N) % GS.N);
-  if (!ids.some(i => onScr(GS.TSX[i], GS.TSY[i], 120 * z)))
-    return;
+  for (let k = -B.r0; k <= B.r1; k++) ids.push((B.up + k + GS.N) % GS.N);
+  if (!ids.some(i => onScr(GS.TSX[i], GS.TSY[i], 120 * z))) return;
   const me = cars[Math.max(0, GS.ctrl)];
   const under = me && !me.gone && !attract && Math.abs(B.cd(me.idx, B.lo)) < 24 && (me.hz || 0) < B.hl + 3;
   ctx.globalAlpha = under ? 0.42 : 1;
-  const th = 1.5 * z * hz, wh = -1.0 * z * hz;
+  const th = 1.5 * z * hz,
+    wh = -1.0 * z * hz;
   ctx.fillStyle = '#8f8b83';
   for (const p of B.pil) {
     const i = p.k;
-    const x = GS.TSX[i] + GS.NSX[i] * p.o, y = GS.TSY[i] + GS.NSY[i] * p.o;
+    const x = GS.TSX[i] + GS.NSX[i] * p.o,
+      y = GS.TSY[i] + GS.NSY[i] * p.o;
     const dh = (GS.HT[i] - p.h0) * z * hz;
     const w = Math.max(1.5, 0.7 * z);
-    if (dh > th)
-      ctx.fillRect(x - w, y + th, 2 * w, dh - th);
+    if (dh > th) ctx.fillRect(x - w, y + th, 2 * w, dh - th);
   }
   const strip = (a0f, a1f, zy0, zy1, col) => {
     ctx.beginPath();
     for (let k = 0; k < ids.length - 1; k++) {
-      const i = ids[k], j = ids[k + 1];
-      const a0 = a0f(i), a1 = a1f(i), b0 = a0f(j), b1 = a1f(j);
+      const i = ids[k],
+        j = ids[k + 1];
+      const a0 = a0f(i),
+        a1 = a1f(i),
+        b0 = a0f(j),
+        b1 = a1f(j);
       ctx.moveTo(GS.TSX[i] + GS.NSX[i] * a0, GS.TSY[i] + GS.NSY[i] * a0 + zy0);
       ctx.lineTo(GS.TSX[j] + GS.NSX[j] * b0, GS.TSY[j] + GS.NSY[j] * b0 + zy0);
       ctx.lineTo(GS.TSX[j] + GS.NSX[j] * b1, GS.TSY[j] + GS.NSY[j] * b1 + zy1);
@@ -279,42 +329,101 @@ export function drawBridge() {
     ctx.fillStyle = col;
     ctx.fill();
   };
-  strip(i => GS.BARR[i], i => GS.BARR[i], 0, th, '#6f6b64');
-  strip(i => -GS.BARL[i], i => -GS.BARL[i], 0, th, '#6f6b64');
-  strip(i => GS.BARR[i], i => -GS.BARL[i], 0, 0, '#a8a49b');
-  strip(() => GS.HW + 0.45, () => -GS.HW - 0.45, 0, 0, '#ececec');
-  strip(() => GS.HW, () => -GS.HW, 0, 0, opts.rain ? '#35373c' : '#46484e');
+  strip(
+    i => GS.BARR[i],
+    i => GS.BARR[i],
+    0,
+    th,
+    '#6f6b64',
+  );
+  strip(
+    i => -GS.BARL[i],
+    i => -GS.BARL[i],
+    0,
+    th,
+    '#6f6b64',
+  );
+  strip(
+    i => GS.BARR[i],
+    i => -GS.BARL[i],
+    0,
+    0,
+    '#a8a49b',
+  );
+  strip(
+    () => GS.HW + 0.45,
+    () => -GS.HW - 0.45,
+    0,
+    0,
+    '#ececec',
+  );
+  strip(
+    () => GS.HW,
+    () => -GS.HW,
+    0,
+    0,
+    opts.rain ? '#35373c' : '#46484e',
+  );
   ctx.strokeStyle = 'rgba(0,0,0,0.16)';
   ctx.lineWidth = 2.2 * z;
   ctx.beginPath();
-  ids.forEach((i, k) => { const x = GS.TSX[i] + GS.NSX[i] * GS.off[i], y = GS.TSY[i] + GS.NSY[i] * GS.off[i]; k ? ctx.lineTo(x, y) : ctx.moveTo(x, y); });
+  ids.forEach((i, k) => {
+    const x = GS.TSX[i] + GS.NSX[i] * GS.off[i],
+      y = GS.TSY[i] + GS.NSY[i] * GS.off[i];
+    k ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+  });
   ctx.stroke();
-  strip(i => GS.BARR[i], i => GS.BARR[i], 0, wh, '#cfccc5');
-  strip(i => -GS.BARL[i], i => -GS.BARL[i], 0, wh, '#cfccc5');
+  strip(
+    i => GS.BARR[i],
+    i => GS.BARR[i],
+    0,
+    wh,
+    '#cfccc5',
+  );
+  strip(
+    i => -GS.BARL[i],
+    i => -GS.BARL[i],
+    0,
+    wh,
+    '#cfccc5',
+  );
   ctx.strokeStyle = '#eceae4';
   ctx.lineWidth = Math.max(1, 0.3 * z);
   for (const sg of [1, -1]) {
     ctx.beginPath();
-    ids.forEach((i, k) => { const b = sg * (sg > 0 ? GS.BARR : GS.BARL)[i]; const x = GS.TSX[i] + GS.NSX[i] * b, y = GS.TSY[i] + GS.NSY[i] * b + wh; k ? ctx.lineTo(x, y) : ctx.moveTo(x, y); });
+    ids.forEach((i, k) => {
+      const b = sg * (sg > 0 ? GS.BARR : GS.BARL)[i];
+      const x = GS.TSX[i] + GS.NSX[i] * b,
+        y = GS.TSY[i] + GS.NSY[i] * b + wh;
+      k ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+    });
     ctx.stroke();
   }
   ctx.globalAlpha = 1;
   const R = Math.max(B.r0, B.r1) + 3;
-  cars.forEach((c, i) => { if (c.gone || Math.abs(B.cd(c.idx, B.up)) > R || (c.hz || 0) < B.hl + 3)
-    return; if (c.ghost > 0)
-    ctx.globalAlpha = 0.5; drawCar(c, !attract && i === GS.ctrl, !attract && i === GS.mateIdx); ctx.globalAlpha = 1; });
+  cars.forEach((c, i) => {
+    if (c.gone || Math.abs(B.cd(c.idx, B.up)) > R || (c.hz || 0) < B.hl + 3) return;
+    if (c.ghost > 0) ctx.globalAlpha = 0.5;
+    drawCar(c, !attract && i === GS.ctrl, !attract && i === GS.mateIdx);
+    ctx.globalAlpha = 1;
+  });
 }
 // Ferris wheel by the main straight
 export function drawWheel(w) {
   GS.PZ = w.hz || 0;
   try {
     const hub = P(w.x, w.y, w.r + 3);
-    if (!onScr(hub[0], hub[1], w.r * cam.zoom * 1.6))
-      return;
-    const i0 = 0, d = [GS.tx[i0], GS.ty[i0]];
-    const ax = P(w.x + d[0] * w.r, w.y + d[1] * w.r, w.r + 3), bx = P(w.x, w.y, 2 * w.r + 3);
-    const A = [ax[0] - hub[0], ax[1] - hub[1]], Bv = [bx[0] - hub[0], bx[1] - hub[1]];
-    const pt = a => [hub[0] + A[0] * Math.cos(a) + Bv[0] * Math.sin(a), hub[1] + A[1] * Math.cos(a) + Bv[1] * Math.sin(a)];
+    if (!onScr(hub[0], hub[1], w.r * cam.zoom * 1.6)) return;
+    const i0 = 0,
+      d = [GS.tx[i0], GS.ty[i0]];
+    const ax = P(w.x + d[0] * w.r, w.y + d[1] * w.r, w.r + 3),
+      bx = P(w.x, w.y, 2 * w.r + 3);
+    const A = [ax[0] - hub[0], ax[1] - hub[1]],
+      Bv = [bx[0] - hub[0], bx[1] - hub[1]];
+    const pt = a => [
+      hub[0] + A[0] * Math.cos(a) + Bv[0] * Math.sin(a),
+      hub[1] + A[1] * Math.cos(a) + Bv[1] * Math.sin(a),
+    ];
     ctx.strokeStyle = '#d8dce2';
     ctx.lineWidth = Math.max(1.5, 0.4 * cam.zoom);
     for (const s2 of [-0.55, 0.55]) {
@@ -328,7 +437,7 @@ export function drawWheel(w) {
     ctx.lineWidth = Math.max(1, 0.3 * cam.zoom);
     ctx.beginPath();
     for (let k = 0; k <= 40; k++) {
-      const p = pt(k / 40 * Math.PI * 2);
+      const p = pt((k / 40) * Math.PI * 2);
       k ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]);
     }
     ctx.stroke();
@@ -336,28 +445,25 @@ export function drawWheel(w) {
     ctx.lineWidth = Math.max(1, 0.15 * cam.zoom);
     ctx.beginPath();
     for (let k = 0; k < 16; k++) {
-      const p = pt(rot + k / 16 * Math.PI * 2);
+      const p = pt(rot + (k / 16) * Math.PI * 2);
       ctx.moveTo(hub[0], hub[1]);
       ctx.lineTo(p[0], p[1]);
     }
     ctx.stroke();
     const cols = ['#e94b6b', '#ffd34d', '#4bb3e9', '#7ad06b'];
     for (let k = 0; k < 16; k++) {
-      const p = pt(rot + k / 16 * Math.PI * 2);
+      const p = pt(rot + (k / 16) * Math.PI * 2);
       const s2 = Math.max(3, 0.9 * cam.zoom);
       ctx.fillStyle = cols[k % 4];
       ctx.fillRect(p[0] - s2 / 2, p[1], s2, s2 * 1.1);
-      if (w.lit)
-        GLOWS.push([p[0], p[1], s2 * 2.2, '180,220,255', 0.8]);
+      if (w.lit) GLOWS.push([p[0], p[1], s2 * 2.2, '180,220,255', 0.8]);
     }
     if (w.lit) {
       const rim = [];
-      for (let k = 0; k < 40; k++)
-        rim.push(pt(k / 40 * Math.PI * 2));
+      for (let k = 0; k < 40; k++) rim.push(pt((k / 40) * Math.PI * 2));
       NEONQ.push([rim, '120,200,255', true]);
     }
-  }
-  finally {
+  } finally {
     GS.PZ = 0;
   }
 }
@@ -368,8 +474,7 @@ export function drawSphere(o) {
     const c = P(o.x, o.y, o.r);
     const r = o.r * cam.zoom;
     o.scr = null;
-    if (!onScr(c[0], c[1], r * 1.3))
-      return;
+    if (!onScr(c[0], c[1], r * 1.3)) return;
     o.scr = [c[0], c[1], r];
     const sh = P(o.x, o.y, 0);
     ctx.fillStyle = 'rgba(0,0,0,0.3)';
@@ -383,8 +488,7 @@ export function drawSphere(o) {
     ctx.beginPath();
     ctx.arc(c[0], c[1], r, 0, 7);
     ctx.fill();
-  }
-  finally {
+  } finally {
     GS.PZ = 0;
   }
 }
@@ -395,7 +499,10 @@ export function drawNeon() {
   ctx.lineJoin = 'round';
   if (GS.TR.neon) {
     const z = cam.zoom;
-    for (const [sg, col] of [[1, '255,60,200'], [-1, '60,220,255']]) {
+    for (const [sg, col] of [
+      [1, '255,60,200'],
+      [-1, '60,220,255'],
+    ]) {
       ctx.beginPath();
       edge(GS.SIDES, 1.1, sg);
       ctx.strokeStyle = `rgba(${col},0.28)`;
@@ -408,9 +515,8 @@ export function drawNeon() {
   }
   for (const [pts, col, closed] of NEONQ) {
     ctx.beginPath();
-    pts.forEach((p, k) => k ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]));
-    if (closed)
-      ctx.closePath();
+    pts.forEach((p, k) => (k ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])));
+    if (closed) ctx.closePath();
     const fl = 0.75 + 0.25 * Math.sin(tm * 3 + pts[0][0] * 0.05);
     ctx.strokeStyle = `rgba(${col},${(0.25 * fl).toFixed(3)})`;
     ctx.lineWidth = Math.max(4, cam.zoom * 0.9);
@@ -421,32 +527,30 @@ export function drawNeon() {
   }
   if (GS.SPHERE && GS.SPHERE.scr) {
     const [x, y, r] = GS.SPHERE.scr;
-    const ph = Math.floor(tm / 8) % 3, hu = (tm * 25) % 360;
+    const ph = Math.floor(tm / 8) % 3,
+      hu = (tm * 25) % 360;
     ctx.save();
     ctx.beginPath();
     ctx.arc(x, y, r, 0, 7);
     ctx.clip();
     if (ph === 0) {
       const g = ctx.createLinearGradient(x - r, y - r, x + r, y + r);
-      for (let k = 0; k <= 6; k++)
-        g.addColorStop(k / 6, `hsla(${(hu + k * 55) % 360},90%,55%,0.85)`);
+      for (let k = 0; k <= 6; k++) g.addColorStop(k / 6, `hsla(${(hu + k * 55) % 360},90%,55%,0.85)`);
       ctx.fillStyle = g;
       ctx.fillRect(x - r, y - r, 2 * r, 2 * r);
-    }
-    else if (ph === 1) {
+    } else if (ph === 1) {
       ctx.fillStyle = `hsla(${hu},80%,45%,0.6)`;
       ctx.fillRect(x - r, y - r, 2 * r, 2 * r);
       ctx.strokeStyle = `hsla(${(hu + 180) % 360},95%,65%,0.9)`;
       ctx.lineWidth = Math.max(2, r * 0.06);
       for (let k = -6; k <= 6; k++) {
-        const yy = y + k * r / 6 + ((tm * r * 0.3) % (r / 6));
+        const yy = y + (k * r) / 6 + ((tm * r * 0.3) % (r / 6));
         ctx.beginPath();
         ctx.moveTo(x - r, yy);
         ctx.lineTo(x + r, yy);
         ctx.stroke();
       }
-    }
-    else {
+    } else {
       const g = ctx.createRadialGradient(x - r * 0.2, y - r * 0.2, r * 0.05, x, y, r);
       g.addColorStop(0, 'rgba(255,240,180,0.95)');
       g.addColorStop(0.5, `hsla(${hu},90%,55%,0.7)`);
@@ -460,9 +564,9 @@ export function drawNeon() {
     ctx.lineCap = 'round';
     for (const f of GS.FOUNT) {
       const h = 4 + 12 * Math.max(0, Math.sin(tm * 1.3 + f.ph));
-      const a = P(f.x, f.y, 0), b = P(f.x, f.y, h);
-      if (!onScr(a[0], a[1], 40))
-        continue;
+      const a = P(f.x, f.y, 0),
+        b = P(f.x, f.y, h);
+      if (!onScr(a[0], a[1], 40)) continue;
       ctx.strokeStyle = 'rgba(170,220,255,0.35)';
       ctx.lineWidth = Math.max(3, cam.zoom * 0.8);
       ctx.beginPath();
