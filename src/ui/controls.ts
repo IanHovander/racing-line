@@ -181,7 +181,10 @@ export function layoutPads() {
   if (right.length) {
     const padL = Math.min(...right.map(r => r.left)),
       padTop = Math.min(...right.map(r => r.top)),
-      leftEdge = Math.max(10, ...['pL', 'pR', 'pDn'].filter(vis).map(id => $(id).getBoundingClientRect().right + 10));
+      leftEdge = Math.max(
+        10,
+        ...['pL', 'pR', 'pDn'].filter(vis).map(id => $(id).getBoundingClientRect().right + 10),
+      );
     const main = right.reduce((a, r) => (r.right > a.right ? r : a));
     const bottom = H - Math.max(...right.map(r => r.bottom));
     if (H > W) {
