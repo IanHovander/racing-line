@@ -47,6 +47,8 @@ canvas{display:block;position:fixed;inset:0;width:100vw;height:100vh}
 #btns{position:fixed;top:10px;right:10px;display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;max-width:60vw}
 #btns button,.ov button{font:inherit;color:#fff;background:rgba(10,12,18,.7);border:1px solid rgba(255,255,255,.25);border-radius:9px;padding:7px 10px;font-size:13px;font-weight:600;cursor:pointer}
 #btns button:active{background:rgba(255,255,255,.25)}
+#lbTrack{display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:6px;margin-top:4px}#lbTrack button{padding:0!important;border:0!important;background:none!important;opacity:.6;border-radius:3px}#lbTrack button.sel{opacity:1;outline:2px solid #fff;outline-offset:2px}#lbTrack button:disabled{cursor:default}#lbTrack svg{display:block;width:100%;height:auto}
+#lobby .rules button:disabled{cursor:default}#lobby .rules button:disabled:not(.sel){opacity:.45}
 #lbTeams{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}#lbTeams button{display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 3px!important;font-size:10.5px;line-height:1.15;min-height:74px}#lbTeams button.sel{background:#f2f4f7!important;color:#111!important;border-color:#fff!important}#lbTeams button:disabled{opacity:.45;cursor:default}#lbTeams button small{font-size:9.5px;opacity:.8;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #rcb{position:fixed;top:auto;bottom:128px;left:50%;transform:translate(-50%,8px);z-index:6;display:flex;align-items:stretch;border-radius:7px;overflow:hidden;box-shadow:0 4px 16px #0009;opacity:0;transition:opacity .25s,transform .25s;pointer-events:none;white-space:nowrap;max-width:calc(100vw - 20px)}
 #rcb.on{opacity:1;transform:translate(-50%,0)}#rcb .k{display:grid;place-items:center;padding:0 10px;background:#f2f4f7}#rcb.pen .k{background:#ff8a00}#rcb .k svg{display:block;width:24px;height:24px}
@@ -244,14 +246,15 @@ body.touch #spd{bottom:auto;top:auto;bottom:110px}
   <div class="sub" id="lbInfo"></div>
   <div class="lbwrap"><div id="qr"></div><div style="flex:1;min-width:0"><div class="trk">Room code</div><div class="code" id="lbCode"></div>
     <button id="bCopy">Copy invite link</button><div class="trk" id="lbLink" style="word-break:break-all"></div></div></div>
-  <div id="lbHostOpts" class="row"><label>Circuit</label><div class="seg" id="lbTrack"></div><label style="margin-top:8px">Laps</label><div class="seg" id="lbLaps"><button data-v="3">3</button><button data-v="5">5</button><button data-v="10">10</button></div></div>
-  <div class="row"><label>Your name</label><input id="nick" maxlength="16" autocomplete="off"></div>
-  <div class="row"><label>Your team</label><div id="lbTeams"></div><div class="trk" id="lbTeamNote"></div></div>
-  <div class="row"><label>Players</label><div id="lbPlayers"></div></div>
+  <div class="sect"><div class="sh">Players</div><div class="row" style="margin:4px 0 6px"><label>Your name</label><input id="nick" maxlength="16" autocomplete="off"></div><div id="lbPlayers"></div></div>
+  <div class="sect"><div class="sh">Team</div><div id="lbTeams"></div><div class="trk" id="lbTeamNote"></div></div>
+  <div class="sect"><div class="sh">Circuit</div><div id="lbTrack"></div><div class="trk" id="lbTrackNote"></div></div>
+  <div class="sect"><div class="sh">Race settings</div><div class="rules" id="lbRules"></div><div class="trk" id="lbRulesNote"></div></div>
+  <div class="sect"><div class="sh">Your controls</div><div class="rules" id="lbCtrl"></div></div>
   <button class="go" id="bLbStart">Start race</button>
   <div class="help" id="lbWait"></div>
   <div class="seg" style="margin-top:8px"><button id="bLbLeave">Leave room</button></div>
-  <div class="help" id="lbHelp">Friends need access to this game on claude.ai (use Share) and must be signed in. Team, controls and race rules come from each player's main menu; the host's circuit, laps and rules apply.</div>
+  <div class="help" id="lbHelp">Friends need access to this game on claude.ai (use Share) and must be signed in. Everyone picks a team and their own controls here; the host picks the circuit and race settings.</div>
 </div></div>
 <div id="joinDlg" class="ov hide"><div class="card"><h2>Join an online race</h2>
   <div class="sub">Enter the room code from the host's lobby, or just scan their QR code with your phone camera.</div>
@@ -836,7 +839,7 @@ function secDone(c,k){const t=raceTime-c.secT;c.secT=raceTime;if(!c.secCur||t<1)
 function progress(c){return c.cross>=1?(c.cross-1)*L+c.s:c.s-L;}
 function collide(){
   for(let i=0;i<cars.length;i++)for(let j=i+1;j<cars.length;j++){const A=cars[i],B=cars[j];
-    if(A.gone||B.gone||A.ghost>0||B.ghost>0||(A.remote&&B.remote)||(A.x-B.x)**2+(A.y-B.y)**2>64||Math.abs((A.hz||0)-(B.hz||0))>3)continue;const wA=A.remote?0:(B.remote?2:1),wB=B.remote?0:(A.remote?2:1);
+    if(A.gone||B.gone||A.ghost>0||B.ghost>0||(A.remote&&B.remote)||(A.x-B.x)**2+(A.y-B.y)**2>64||Math.abs((A.hz||0)-(B.hz||0))>3)continue;const net=A.remote||B.remote;const wA=A.remote?0:(B.remote?1:1),wB=B.remote?0:(A.remote?1:1);
     for(const fa of [1.6,-1.6])for(const fb of [1.6,-1.6]){
       const ax=A.x+Math.cos(A.h)*fa,ay=A.y+Math.sin(A.h)*fa,bx=B.x+Math.cos(B.h)*fb,by=B.y+Math.sin(B.h)*fb;
       let dx=bx-ax,dy=by-ay,d=Math.hypot(dx,dy);if(d>=1.9||d<1e-4)continue;
@@ -846,9 +849,9 @@ function collide(){
        if(wA&&!A.remote)A.lane+=(-sa)*0.05;if(wB&&!B.remote)B.lane+=(-sb)*0.05;}
       const vax=Math.cos(A.h)*A.v,vay=Math.sin(A.h)*A.v,vbx=Math.cos(B.h)*B.v,vby=Math.sin(B.h)*B.v;
       const rel=(vbx-vax)*nX+(vby-vay)*nY;
-      if(rel<0){if(-rel>5){HITS++;A.hits=(A.hits||0)+1;B.hits=(B.hits||0)+1;}const jj=-rel*0.55;const nax=vax-nX*jj*wA,nay=vay-nY*jj*wA,nbx=vbx+nX*jj*wB,nby=vby+nY*jj*wB;
+      if(rel<0){if(-rel>5&&!net){HITS++;A.hits=(A.hits||0)+1;B.hits=(B.hits||0)+1;}const jj=-rel*(net?0.3:0.55);const nax=vax-nX*jj*wA,nay=vay-nY*jj*wA,nbx=vbx+nX*jj*wB,nby=vby+nY*jj*wB;
         if(wA)A.v=Math.max(0,nax*Math.cos(A.h)+nay*Math.sin(A.h));if(wB)B.v=Math.max(0,nbx*Math.cos(B.h)+nby*Math.sin(B.h));
-        if(-rel>2){crashSnd(-rel,ax,ay);if(-rel>5){hurt(A,-rel,true);hurt(B,-rel,true);}}if(-rel>2)for(let q=0;q<4;q++)spawn(ax+dx/2,ay+dy/2,0.5,'#ffd27a',0.35,6);}}}}
+        if(-rel>2){crashSnd(-rel,ax,ay);if(-rel>5&&!net){hurt(A,-rel,true);hurt(B,-rel,true);}}if(-rel>2)for(let q=0;q<4;q++)spawn(ax+dx/2,ay+dy/2,0.5,'#ffd27a',0.35,6);}}}}
 function spawn(x,y,z,col,life,sp){if(parts.length>400)return;z+=hAt(x,y);const a=Math.random()*Math.PI*2,s=Math.random()*sp;
   parts.push({x,y,z,vx:Math.cos(a)*s,vy:Math.sin(a)*s,vz:1+Math.random()*2,life,max:life,col,r:0.3+Math.random()*0.5});}
 function step(dt){
@@ -3012,7 +3015,7 @@ function makeP2PApi(PeerCls){PeerCls=PeerCls||window.Peer;const opt=()=>({debug:
       const tick=setInterval(()=>{if(closed){clearInterval(tick);return;}const now=Date.now();
         for(const [id,t] of seen)if(now-t>8000){seen.delete(id);const c=conns.get(id);conns.delete(id);pres.delete(id);try{c&&c.close();}catch(_){}dirty=true;}   // silent guests are dropped
         if(!dirty&&now-lastB<2000)return;dirty=false;lastB=now;const s=snapshot();list=s;emit();
-        const msg={t:'s',peers:s};for(const c of conns.values()){try{if(c.open)c.send(msg);}catch(_){}}},66);
+        const msg={t:'s',peers:s};for(const c of conns.values()){try{if(c.open)c.send(msg);}catch(_){}}},40);
       return {onPeers(f,onLost){subs.add(f);if(onLost)lostCbs.add(onLost);setTimeout(emit,0);return ()=>{subs.delete(f);if(onLost)lostCbs.delete(onLost);};},
         async presence(p){Object.assign(mine,p);dirty=true;},
         async leave(){closed=true;clearInterval(tick);for(const c of conns.values())try{c.close();}catch(_){}try{peer.destroy();}catch(_){}}};}
@@ -3029,7 +3032,7 @@ function makeP2PApi(PeerCls){PeerCls=PeerCls||window.Peer;const opt=()=>({debug:
   for(let i=0;i<(onClaude?50:8)&&!(window.claude&&window.claude.use);i++)await new Promise(r=>setTimeout(r,200));
   try{if(window.claude&&window.claude.use)MP.api=await window.claude.use('room');}catch(e){MP.api=null;}
   if(!MP.api&&window.RTCPeerConnection&&location.protocol!=='file:'){try{await loadPeerJS();MP.api=makeP2PApi();MP.p2p=true;ARTIFACT_URL=location.origin+location.pathname;}catch(e){MP.api=null;}}
-  if(MP.p2p)$('lbHelp').textContent='Friends open this page (or scan the QR code) and join with the code. Players connect directly to the host over WebRTC. Team, controls and race rules come from each player\'s main menu; the host picks the circuit, laps and race rules.';
+  if(MP.p2p)$('lbHelp').textContent='Friends open this page (or scan the QR code) and join with the code. Players connect directly to the host over WebRTC. Everyone picks a team and their own controls here; the host picks the circuit and race settings.';
   mpAvail();const h=(location.hash||'').slice(1);if(MP.api&&/^gp-[a-z0-9]{4,8}$/.test(h))enterRoom(h,false);addEventListener('hashchange',()=>{const h2=(location.hash||'').slice(1);if(MP.api&&!MP.room&&/^gp-[a-z0-9]{4,8}$/.test(h2))enterRoom(h2,false);});})();
 function mpAvail(){const ok=!!MP.api;$('bHost').disabled=!ok;$('bJoin').disabled=!ok;
   $('mpNote').textContent=ok?'Single player races the AI. Host to race friends live: they join with your code or QR code.':'Online play isn\'t available in this view (it needs the game opened from claude.ai while signed in).';}
@@ -3037,40 +3040,60 @@ const mpCode=()=>'gp-'+Array.from({length:5},()=>'abcdefghjkmnpqrstuvwxyz2345678
 async function enterRoom(code,asHost){
   if(!MP.api)return;try{if(MP.room)await leaveRoom(true);
     MP.room=await MP.api.join(code);}catch(e){const t=e&&e.type;showToast(t==='peer-unavailable'?'No race found with code '+code:t==='timeout'?'Couldn\'t reach the host for '+code+' — their network may block direct connections':t==='network'||t==='server-error'||t==='socket-error'?'Can\'t reach the matchmaking server right now':'Could not join '+code);MP.room=null;return;}
-  MP.code=code;MP.host=asHost;MP.phase='lobby';MP.jt=Date.now();MP.lastStart=null;try{location.hash=code;}catch(e){}
+  MP.code=code;MP.host=asHost;MP.phase='lobby';MP.jt=Date.now();opts.drs=store.get('drs',2);lbRulesInit();MP.lastStart=null;try{location.hash=code;}catch(e){}
   MP.unsub=MP.room.onPeers(ch=>{MP.peers=ch.peers;const me=ch.peers.find(p=>p.sameTab);if(me)MP.me=me.peer;mpPeers(ch);},()=>{showToast('Lost connection to the room');leaveRoom();});
   mpPresence(true);showLobby();}
 async function leaveRoom(quiet){const r=MP.room;MP.room=null;MP.phase='off';MP.host=false;if(MP.unsub)MP.unsub();MP.unsub=null;try{if(r)await r.leave();}catch(e){}
   try{history.replaceState(null,'',location.pathname+location.search);}catch(e){try{location.hash='';}catch(_){}}
   $('lobby').classList.add('hide');if(!quiet)toMenu();}
 function hostPeer(){const hs=MP.peers.filter(p=>p.presence&&p.presence.role==='host');if(!hs.length)return null;hs.sort((a,b)=>a.peer<b.peer?-1:1);return hs[0];}
-function mpCfg(){return {track:trackIdx,laps:opts.laps,rain:opts.rain,tyres:opts.tyres,damage:opts.damage,yellow:opts.yellow,diff:opts.diff,tow:opts.tow};}
+function mpCfg(){if(!MP.rules)lbRulesInit();return Object.assign({track:trackIdx},MP.rules);}
 function mpPresence(full){if(!MP.room)return;const p={v:1,nick:NICK.slice(0,16),team:opts.team,role:MP.host?'host':'guest',phase:MP.phase,jt:MP.jt||0};
   if(MP.host)p.cfg=mpCfg();MP.room.presence(p).catch(()=>{});}
 // --- lobby UI ---
 var showLobby=function(){$('menu').classList.add('hide');$('results').classList.add('hide');$('pause').classList.add('hide');$('joinDlg').classList.add('hide');$('lobby').classList.remove('hide');
   const link=ARTIFACT_URL+'#'+MP.code;$('lbCode').textContent=MP.code;$('lbLink').textContent=link;$('nick').value=NICK;
   drawQR(link);renderLobby();}
+// ---- lobby: circuit (host), race settings (host), controls (each player)
+const LB_RULES=[['diff','Opponents',[[0,'Easy'],[1,'Normal'],[2,'Hard']]],['laps','Laps',[[3,'3'],[5,'5'],[10,'10']]],['rain','Weather',[[0,'Dry'],[1,'Rain']]],
+  ['tyres','Tyre wear',[[0,'Off'],[1,'On']]],['damage','Damage & knockouts',[[0,'Off'],[1,'On']]],['tow','Slipstream',[[0,'Off'],[1,'On']]],['drsOn','DRS',[[0,'Off'],[1,'On']]],
+  ['limits','Track limits',[[0,'Off'],[3,'Penalty every 3rd'],[2,'Every 2nd']]],['yellow','Yellow flags',[[0,'Off'],[3,'3 s'],[10,'10 s'],[30,'30 s']]]];
+const LB_CTRL=[['pedals','Pedals',[[0,'Throttle only'],[1,'Brake only'],[2,'Throttle + Brake'],[3,'Auto']]],['steer','Steering',[[0,'Auto'],[1,'Lanes'],[2,'Manual'],[3,'Overtake']]],
+  ['gears','Gearbox',[[0,'Automatic'],[1,'Manual']]],['drsMode','DRS',[[1,'Button'],[2,'Automatic']]]];
+function lbRulesInit(){MP.rules={diff:opts.diff,laps:opts.laps,rain:opts.rain,tyres:opts.tyres,damage:opts.damage,tow:opts.tow,drsOn:opts.drs?1:0,limits:opts.limits,yellow:opts.yellow};}
+function segRow(label,list,cur,dis,onPick){const d=document.createElement('div');const sp=document.createElement('span');sp.textContent=label;d.appendChild(sp);const g=document.createElement('div');g.className='seg';
+  for(const [v,t] of list){const b=document.createElement('button');b.textContent=t;b.classList.toggle('sel',v===cur);b.disabled=dis;b.onclick=()=>{if(!dis)onPick(v);};g.appendChild(b);}d.appendChild(g);return d;}
+function renderLobbySettings(cfg){const r=$('lbRules');r.textContent='';const src=MP.host?MP.rules:(cfg||{});
+  for(const [k,label,list] of LB_RULES)r.appendChild(segRow(label,list,src[k],!MP.host,v=>{MP.rules[k]=v;mpPresence();renderLobby();}));
+  $('lbRulesNote').textContent=MP.host?'You set these for everyone.':(cfg?'Set by the host.':'Waiting for the host…');
+  const c=$('lbCtrl');c.textContent='';const drsPref=store.get('drs',2)||2;
+  for(const [k,label,list] of LB_CTRL){const cur=k==='drsMode'?drsPref:opts[k];c.appendChild(segRow(label,list,cur,false,v=>{if(k==='drsMode'){store.set('drs',v);}else{opts[k]=v;store.set(k,v);}try{syncAllSegs();}catch(e){}renderLobby();}));}
+  const tr=$('lbTrack');if(!tr.children.length)TRACKS.forEach((t,i)=>{const b=document.createElement('button');b.title=t.name;b.dataset.v=i;
+    b.innerHTML=(POSTERS[t.id]||t.name).replace(/id="([^"]+)"/g,'id="lb$1"').replace(/url\(#([^)]+)\)/g,'url(#lb$1)');
+    b.onclick=()=>{if(!MP.host)return;trackIdx=i;store.set('track',i);buildTrack(TRACKS[i]);setupRace(true);mpPresence();renderLobby();};tr.appendChild(b);});
+  const ti=MP.host?trackIdx:(cfg?clamp(cfg.track|0,0,TRACKS.length-1):-1);[...tr.children].forEach((b,i)=>{b.classList.toggle('sel',i===ti);b.disabled=!MP.host;});
+  $('lbTrackNote').textContent=ti>=0?TRACKS[ti].name+' · '+(CIRCUIT_PLACE[TRACKS[ti].id]||'')+(MP.host?'':' — chosen by the host'):'Waiting for the host…';}
 // ---- every player races a different team: earlier arrivals keep their pick, later ones move to a free team
 function lobbyOrder(){return MP.peers.filter(p=>p.kind==='viewer'&&p.presence&&p.presence.nick).sort((a,b)=>{const ra=a.presence.role==='host'?0:1,rb=b.presence.role==='host'?0:1;
   return ra-rb||((a.presence.jt||0)-(b.presence.jt||0))||(a.peer<b.peer?-1:1);});}
-function teamOwners(){const own={};for(const p of lobbyOrder()){const t=clamp(+p.presence.team||0,0,4);if(own[t]===undefined)own[t]=p;}return own;}
-function resolveTeam(){if(!MP.room||MP.phase!=='lobby')return;const own=teamOwners();const mine=own[opts.team];
-  if(mine&&!mine.sameTab){const free=[0,1,2,3,4].find(t=>own[t]===undefined);MP.full=free===undefined;
-    if(!MP.full){const was=TEAMS[opts.team].name;opts.team=free;store.set('team',free);mpPresence();showToast(String(mine.presence.nick)+' already has '+was+' — you\'re now '+TEAMS[free].name);}}
+function teamOwners(){const own={};for(const p of lobbyOrder()){const t=clamp(+p.presence.team||0,0,4);(own[t]=own[t]||[]).push(p);}return own;}   // team -> players, in arrival order (max 2 race)
+function resolveTeam(){if(!MP.room||MP.phase!=='lobby')return;const own=teamOwners();const l=own[opts.team]||[];const idx=l.findIndex(p=>p.sameTab);
+  if(idx>=2){const free=[0,1,2,3,4].find(t=>(own[t]||[]).length<2);MP.full=free===undefined;
+    if(!MP.full){const was=TEAMS[opts.team].name;opts.team=free;store.set('team',free);mpPresence();showToast(was+' already has two drivers — you\'re now with '+TEAMS[free].name);}}
   else MP.full=false;}
 function renderLobbyTeams(){const el=$('lbTeams');if(!el)return;const own=teamOwners();el.textContent='';
-  TEAMS.forEach((t,i)=>{const b=document.createElement('button');const o=own[i];const mine=o&&o.sameTab;b.innerHTML=teamLogo(i,26)+'<span>'+t.name+'</span>'+(o&&!mine?'<small>'+String(o.presence.nick).replace(/[<>&]/g,'')+'</small>':'');
-    b.classList.toggle('sel',i===opts.team&&!MP.full);b.disabled=!!(o&&!mine);b.onclick=()=>{if(b.disabled||!MP.room)return;opts.team=i;store.set('team',i);mpPresence();renderLobby();};el.appendChild(b);});
-  $('lbTeamNote').textContent=MP.full?'All five teams are taken — this race is full, so you can watch the lobby but not race.':'Every player drives a different team; your teammate is driven by the AI.';}
+  TEAMS.forEach((t,i)=>{const b=document.createElement('button');const l=(own[i]||[]).filter(p=>!p.sameTab);const names=l.map(p=>String(p.presence.nick).replace(/[<>&]/g,'')).join(', ');
+    b.innerHTML=teamLogo(i,26)+'<span>'+t.name+'</span>'+(names?'<small>'+names+'</small>':'');
+    b.classList.toggle('sel',i===opts.team&&!MP.full);b.disabled=l.length>=2&&i!==opts.team;b.onclick=()=>{if(b.disabled||!MP.room)return;opts.team=i;store.set('team',i);mpPresence();renderLobby();};el.appendChild(b);});
+  $('lbTeamNote').textContent=MP.full?'All ten seats are taken — this race is full, so you can watch the lobby but not race.':'Up to two players per team — race as teammates, or pick your own team. Empty seats are driven by the AI.';}
 function renderLobby(){if(!MP.room)return;resolveTeam();renderLobbyTeams();const hp=hostPeer(),list=$('lbPlayers');list.textContent='';
   for(const p of MP.peers){if(p.kind!=='viewer')continue;const pr=p.presence||{};const d=document.createElement('div');d.className='lbp';
     const sw=document.createElement('span');sw.style.flex='0 0 auto';sw.innerHTML=teamLogo(clamp(+pr.team||0,0,4),18);d.appendChild(sw);
     const n=document.createElement('span');n.textContent=String(pr.nick||'Joining…').slice(0,16)+(p.sameTab?' (you)':'')+(p.guest?' · guest':'');d.appendChild(n);
     const r=document.createElement('small');r.textContent=pr.role==='host'?'HOST':(pr.phase==='race'?'racing':'ready');d.appendChild(r);list.appendChild(d);}
   const cfg=MP.host?mpCfg():(hp&&hp.presence.cfg)||null;
-  $('lbInfo').textContent=cfg?`${TRACKS[clamp(cfg.track|0,0,TRACKS.length-1)].name} · ${cfg.laps|0} laps · ${cfg.rain?'rain':'dry'} · tyres ${cfg.tyres?'on':'off'} · damage ${cfg.damage?'on':'off'} · yellow flags ${cfg.yellow?cfg.yellow+' s':'off'}`:'Waiting for the host…';
-  $('bLbStart').classList.toggle('hide',!MP.host);$('lbHostOpts').classList.toggle('hide',!MP.host);
+  $('lbInfo').textContent=cfg?`${TRACKS[clamp(cfg.track|0,0,TRACKS.length-1)].name} · ${cfg.laps|0} laps · ${cfg.rain?'rain':'dry'}`:'Waiting for the host…';
+  $('bLbStart').classList.toggle('hide',!MP.host);renderLobbySettings(cfg);
   const n=MP.peers.filter(p=>p.kind==='viewer').length;
   $('lbWait').textContent=MP.host?(n>1?`${n} players — start when everyone's in. Empty grid slots are filled with AI.`:'Waiting for players… you can also start alone.'):(hp?'The host will start the race.':'No host here yet — share this code with whoever is hosting.');}
 async function drawQR(text){const el=$('qr');try{el.innerHTML=qrSvg(text);}catch(e){el.textContent='QR unavailable — share the link below';}}
@@ -3082,11 +3105,12 @@ function mpPeers(ch){if(!MP.room)return;
     if(hp&&hp.presence.phase==='countdown'&&hp.presence.start&&hp.presence.start!==MP.lastStart&&Array.isArray(hp.presence.grid)){MP.lastStart=hp.presence.start;startMpRace(hp.presence.grid,hp.presence.cfg,hp.peer);}}
   if(MP.phase==='race')for(const p of ch.peers){if(p.sameTab)continue;const pr=p.presence||{};
     if(Array.isArray(pr.me)){const c=cars.find(c=>c.owner===p.peer&&c.human);if(c)netSet(c,pr.me);}
+    if(hp&&p.peer===hp.peer&&!MP.host)mpSyncClock(pr.clk);
     if(Array.isArray(pr.ai)&&hp&&p.peer===hp.peer&&!MP.host)for(const e of pr.ai){const c=cars[e[0]|0];if(c&&c.owner===p.peer)netSet(c,e.slice(1));}}
   if(MP.phase==='race')for(const c of cars){if(c.remote&&c.human&&!MP.peers.some(p=>p.peer===c.owner)&&!c.out){c.out=true;c.outT=0;c.net=null;showToast(c.name+' disconnected');}}}
 function hostStart(){if(!MP.host||!MP.room)return;unlockAudio();
   const used={};const grid=[];
-  for(const p of lobbyOrder()){const t=clamp(+(p.presence.team)||0,0,4);if(used[t])continue;used[t]=1;grid.push({p:p.peer,t,d:0,n:String(p.presence.nick||'Driver').slice(0,16)});}   // one team per player
+  for(const p of lobbyOrder()){const t=clamp(+(p.presence.team)||0,0,4);const d=used[t]||0;if(d>=2)continue;used[t]=d+1;grid.push({p:p.peer,t,d,n:String(p.presence.nick||'Driver').slice(0,16)});}   // up to two players per team
   const ai=[];for(let t=0;t<5;t++)for(let d=0;d<2;d++){if((used[t]||0)>d)continue;ai.push({p:null,t,d});}
   const slots=[];const nAI=10-grid.length;for(let i=0;i<nAI;i++)slots.push(ai[i]);
   // humans start mid-grid, AI around them
@@ -3095,30 +3119,47 @@ function hostStart(){if(!MP.host||!MP.room)return;unlockAudio();
   MP.room.presence({phase:'countdown',start,grid:order,cfg:mpCfg(),me:null,ai:null}).catch(()=>{});
   startMpRace(order,mpCfg(),MP.me);}
 function startMpRace(grid,cfg,hostId){
-  if(!MP.host&&MP.me&&!grid.some(e=>e.p===MP.me)){showToast('This race is full (all five teams taken) — wait for the next one');return;}
+  if(!MP.host&&MP.me&&!grid.some(e=>e.p===MP.me)){showToast('This race is full — wait for the next one');return;}
   if(cfg){if((cfg.track|0)!==trackIdx&&TRACKS[cfg.track|0]){trackIdx=cfg.track|0;buildTrack(TRACKS[trackIdx]);}
-    opts.laps=clamp(cfg.laps|0,1,20);opts.tyres=cfg.tyres?1:0;opts.damage=cfg.damage?1:0;opts.yellow=[0,3,10,30].includes(cfg.yellow)?cfg.yellow:10;opts.diff=clamp(cfg.diff|0,0,2);opts.rain=cfg.rain?1:0;if(cfg.tow!==undefined)opts.tow=cfg.tow?1:0;WX.rain=opts.rain;buildProfile();}
+    opts.laps=clamp(cfg.laps|0,1,20);opts.tyres=cfg.tyres?1:0;opts.damage=cfg.damage?1:0;opts.yellow=[0,3,10,30].includes(cfg.yellow)?cfg.yellow:10;opts.diff=clamp(cfg.diff|0,0,2);opts.rain=cfg.rain?1:0;if(cfg.tow!==undefined)opts.tow=cfg.tow?1:0;if(cfg.limits!==undefined)opts.limits=[0,2,3].includes(cfg.limits)?cfg.limits:3;opts.drs=cfg.drsOn===0?0:(store.get('drs',2)||2);WX.rain=opts.rain;buildProfile();}
   MP.phase='race';if(!MP.host)mpPresence();
   $('lobby').classList.add('hide');$('results').classList.add('hide');$('menu').classList.add('hide');
   setupRace(false,grid.map(e=>({p:e.p,t:clamp(e.t|0,0,4),d:e.d?1:0,n:e.n,owner:e.p||hostId})));
   ['tl','board','spd','btns'].forEach(id=>$(id).classList.remove('hide'));updatePads();updateLights();setSfx(opts.sound);setMusic(opts.music);cheer(0.5);
   showToast('Online race · '+cars.filter(c=>c.human).length+' players');}
 const R1=v=>Math.round(v*10)/10,R3=v=>Math.round(v*1000)/1000;
-function netState(c){return [R1(c.x),R1(c.y),R3(c.h),R1(c.v),c.cross,(c.out?1:0)|(c.finished?2:0),Math.round(c.ftime*100)/100,Math.round(c.dmg*100)/100,Math.round(c.tow*100)/100,Math.round(c.best*100)/100,c.pen|0];}
-function netSet(c,a){if(a.length<11||!a.every(v=>typeof v==='number'&&isFinite(v)))return;c.net={x:a[0],y:a[1],h:a[2],v:Math.max(0,a[3]),cross:a[4]|0,out:!!(a[5]&1),fin:!!(a[5]&2),ft:a[6],dmg:clamp(a[7],0,1),tow:clamp(a[8],0,1),best:a[9],pen:a[10]|0,t:performance.now()};}
+function netState(c){return [R1(c.x),R1(c.y),R3(c.h),R1(c.v),c.cross,(c.out?1:0)|(c.finished?2:0),Math.round(c.ftime*100)/100,Math.round(c.dmg*100)/100,Math.round(c.tow*100)/100,Math.round(c.best*100)/100,c.pen|0,Date.now()%1e9];}   // last field: sender clock (ms) so receivers can time-stamp each state
+function netSet(c,a){if(a.length<11||!a.every(v=>typeof v==='number'&&isFinite(v)))return;
+  // clock offset between sender and us: track the smallest (now - sent) seen, drifting slowly so a clock jump recovers
+  let ts=a.length>11?a[11]:null;const nowMs=Date.now()%1e9;if(ts!==null){const o=nowMs-ts;c.netOff=(c.netOff===undefined||o<c.netOff)?o:c.netOff+(o-c.netOff)*0.02;}
+  const prev=c.net;let w=0;if(prev&&ts!==null&&prev.ts!==null&&ts>prev.ts){w=clamp(wrapA(a[2]-prev.h)/((ts-prev.ts)/1000),-3,3);}
+  if(prev&&ts!==null&&prev.ts!==null&&ts<=prev.ts)return;   // older than what we have: ignore
+  c.net={ts,w,x:a[0],y:a[1],h:a[2],v:Math.max(0,a[3]),cross:a[4]|0,out:!!(a[5]&1),fin:!!(a[5]&2),ft:a[6],dmg:clamp(a[7],0,1),tow:clamp(a[8],0,1),best:a[9],pen:a[10]|0,t:performance.now()};}
 // remote cars glide towards where their owner says they are, extrapolated by speed
-function netFollow(c,dt){const n=c.net;if(!n)return;const age=Math.min(0.4,(performance.now()-n.t)/1000);
-  const px=n.x+Math.cos(n.h)*n.v*age,py=n.y+Math.sin(n.h)*n.v*age;const ex=px-c.x,ey=py-c.y;
-  if(ex*ex+ey*ey>900){c.x=px;c.y=py;c.h=n.h;}else{const k=Math.min(1,dt*12);c.x+=ex*k;c.y+=ey*k;c.h=wrapA(c.h+wrapA(n.h-c.h)*k);}
+function netFollow(c,dt){const n=c.net;if(!n)return;
+  // how old this state really is: sender-clock age (jitter-free) plus ~50 ms one-way latency; falls back to arrival time
+  const age=Math.min(0.6,n.ts!==null&&c.netOff!==undefined?Math.max(0,(Date.now()%1e9-n.ts-c.netOff)/1000+0.05):(performance.now()-n.t)/1000);
+  // predict along an arc using the measured turn rate, so cars keep following the corner between updates
+  let px=n.x,py=n.y,ph=n.h;const steps=Math.max(1,Math.ceil(age/0.05)),sdt=age/steps;for(let i=0;i<steps;i++){ph+=n.w*sdt;px+=Math.cos(ph)*n.v*sdt;py+=Math.sin(ph)*n.v*sdt;}
+  const ex=px-c.x,ey=py-c.y;
+  if(ex*ex+ey*ey>400){c.x=px;c.y=py;c.h=ph;}else{const k=Math.min(1,dt*14);c.x+=ex*k;c.y+=ey*k;c.h=wrapA(c.h+wrapA(ph-c.h)*k);}
   c.v=n.v;c.tow=n.tow;c.dmg=n.dmg;c.best=n.best;c.pen=n.pen;if(n.cross!==c.cross){c.cross=n.cross;}
   if(n.out&&!c.out){c.out=true;c.outT=0;showToast(c.name+' is OUT!');}
   if(n.fin&&!c.finished){c.finished=true;c.ftime=n.ft;c.place=++finishOrder;}}
-function mpSend(dt){if(!MP.room||MP.phase!=='race')return;MP.sendT-=dt;if(MP.sendT>0)return;MP.sendT=1/15;
+// ---- shared race clock: guests follow the host's clock, so every finish time is measured on the same clock and all results screens agree
+function mpClock(){return state==='countdown'?cdT-goAt:raceTime;}
+function mpSyncClock(clk){if(!Array.isArray(clk)||clk.length<2||MP.host)return;const [hv,hts]=clk;if(!isFinite(hv)||!isFinite(hts))return;
+  const o=Date.now()%1e9-hts;MP.hostOff=(MP.hostOff===undefined||o<MP.hostOff)?o:MP.hostOff+(o-MP.hostOff)*0.02;
+  const target=hv+Math.max(0,(Date.now()%1e9-hts-MP.hostOff)/1000+0.05),diff=target-mpClock();if(Math.abs(diff)<0.004)return;
+  const nv=mpClock()+(Math.abs(diff)>0.4?diff:diff*0.15);
+  if(state==='countdown'){if(nv>=0){cdT=goAt;raceTime=nv;}else cdT=nv+goAt;}else if(state==='race'&&nv<0){state='countdown';cdT=nv+goAt;raceTime=0;updateLights();}else if(state==='race'||state==='finished')raceTime=nv;}
+function mpSend(dt){if(!MP.room||MP.phase!=='race')return;MP.sendT-=dt;if(MP.sendT>0)return;MP.sendT=1/20;
   const me=cars[ctrl];const p={me:me?netState(me):null};
-  if(MP.host)p.ai=cars.map((c,i)=>(!c.human&&!c.remote)?[i].concat(netState(c)):null).filter(Boolean);
+  if(MP.host){p.ai=cars.map((c,i)=>(!c.human&&!c.remote)?[i].concat(netState(c)):null).filter(Boolean);p.clk=[Math.round(mpClock()*1000)/1000,Date.now()%1e9];}
   MP.room.presence(p).catch(()=>{});}
 
 // ================= Menu wiring =================
+{const E=CanvasRenderingContext2D.prototype.ellipse;CanvasRenderingContext2D.prototype.ellipse=function(x,y,a,b,...r){return E.call(this,x,y,Math.abs(a)||0,Math.abs(b)||0,...r);};}   // never throw on a negative radius
 const SEG_SYNC=[];const syncAllSegs=()=>SEG_SYNC.forEach(f=>f());
 function segInit(id,key,cast){const el=$(id);const sync=()=>[...el.children].forEach(b=>b.classList.toggle('sel',cast(b.dataset.v)===opts[key]));SEG_SYNC.push(sync);
   el.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;opts[key]=cast(b.dataset.v);store.set(key,opts[key]);sync();});sync();}
@@ -3230,7 +3271,7 @@ function wzGo(n){WZ.s=n;WZ.max=Math.max(WZ.max,n);const st=wzSteps();
   $('bStart').textContent=WZ.mode==='host'?'HOST RACE':WZ.mode==='join'?'JOIN RACE':'START RACE';
   const c=$('menu');c.scrollTop=0;const cd=c.querySelector('.card');if(cd)cd.scrollTop=0;}
 const wzStep=d=>{const st=wzSteps(),i=st.indexOf(WZ.s);wzGo(st[clamp(i+d,0,st.length-1)]);};
-const wzMode=m=>{WZ.mode=m;store.set('wzmode',m);WZ.max=0;wzGo(1);};
+const wzMode=m=>{if(m==='host'){wzHost();return;}if(m==='join'){wzJoin();return;}WZ.mode=m;store.set('wzmode',m);WZ.max=0;wzGo(1);};
 $('bSolo').onclick=()=>wzMode('solo');$('bHost').onclick=()=>wzMode('host');$('bJoin').onclick=()=>wzMode('join');
 $('wzBack').onclick=()=>wzStep(-1);$('wzNext').onclick=()=>wzStep(1);
 $('wzNav').onclick=e=>{const b=e.target.closest('button');if(b&&!b.disabled)wzGo(+b.dataset.s);};
@@ -3242,11 +3283,7 @@ $('bJoinGo').onclick=()=>{unlockAudio();const c=$('joinCode').value.trim().toLow
 $('bLbStart').onclick=hostStart;$('bLbLeave').onclick=()=>leaveRoom();
 $('bCopy').onclick=()=>{const t=ARTIFACT_URL+'#'+MP.code;try{navigator.clipboard.writeText(t).then(()=>showToast('Invite link copied'),()=>showToast('Copy failed — select the link below'));}catch(e){showToast('Copy failed — select the link below');}};
 $('nick').addEventListener('input',e=>{NICK=e.target.value.replace(/[^\p{L}\p{N} ._-]/gu,'').slice(0,16)||NICK;store.set('nick',NICK);mpPresence();});
-{const el=$('lbTrack');TRACKS.forEach((t,i)=>{const b=document.createElement('button');b.textContent=t.name;b.dataset.v=i;el.appendChild(b);});
-  const sync=()=>{[...el.children].forEach((b,i)=>b.classList.toggle('sel',i===trackIdx));[...$('lbLaps').children].forEach(b=>b.classList.toggle('sel',+b.dataset.v===opts.laps));};
-  el.addEventListener('click',e=>{const b=e.target.closest('button');if(!b||!MP.host)return;trackIdx=+b.dataset.v;store.set('track',trackIdx);buildTrack(TRACKS[trackIdx]);setupRace(true);sync();mpPresence();renderLobby();});
-  $('lbLaps').addEventListener('click',e=>{const b=e.target.closest('button');if(!b||!MP.host)return;opts.laps=+b.dataset.v;store.set('laps',opts.laps);sync();mpPresence();renderLobby();});
-  const so=showLobby;showLobby=function(){sync();so();};}
+
 $('bResume').onclick=togglePause;$('bReset').onclick=resetCar;$('bPause').onclick=togglePause;
 $('bSwap').onclick=swapCar;$('pSwap').addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();swapCar();$('pSwap').classList.add('on');setTimeout(()=>$('pSwap').classList.remove('on'),180);});$('bMode').onclick=cycleMode;$('bSteer').onclick=cycleSteer;$('bCam').onclick=toggleCam;$('bLine').onclick=toggleLine;
 $('bSnd').onclick=()=>{unlockAudio();setSfx(!opts.sound);};
