@@ -423,8 +423,8 @@ function makeCar(c) {
 
 function updateLine() {
   if (!lineCol || !lineGeo) return;
-  const show = opts.line && !attract && cars[GS.ctrl];
-  if (!show) {
+  const visible = opts.line && !attract && cars[GS.ctrl];
+  if (!visible) {
     lineCol.fill(0);
     lineGeo.attributes.color.needsUpdate = true;
     return;

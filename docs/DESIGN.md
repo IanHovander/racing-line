@@ -356,6 +356,7 @@ Playable build: https://matthewtorgerson.github.io/racing-line/ (GitHub Pages, b
   - Draws: ground, water, run-off (with skirts down to the ground), gravel, painted run-off, white lines, asphalt, rubbered line, kerbs, start chequers, racing line (vertex colours updated per frame, dashed), barriers (face, top, back), buildings (extruded footprints), trees (instanced: three-cone pines, round trees with trunks), cars (extruded body/pods/cover/wings, cylinder tyres, helmet, shadow). The canvas, kept on top, draws the car markers, name tags and minimap.
   - Not yet in 3D: flags and flag poles, sponsor boards and catch fences, sector boards and turn numbers, pit lane markings and garages' colour stripes, tunnel, bridge, Ferris wheel, sphere, skids, particles, rain, night lighting, shadows.
 - **Benchmark**: Settings → Display → Run Benchmark (or `bench()` in the console) runs the race behind the menu for 6 s with each renderer and reports fps, render() time (CPU) mean / p95 and frame-time p95 (`ui/bench.ts`, `PERF` in `game/loop.ts`).
+- **Audio off while hidden**: on `visibilitychange` (and `pagehide`) the audio context is suspended and the silent keep-alive element paused; both resume when the page is visible again.
 - **Music**: one theme for the whole game, the Ardennes Forest new beat. The other circuit themes, the drive layer and their instruments are removed.
 
 ## Model

@@ -298,11 +298,28 @@ export function init(): void {
     } catch (e) {}
     audioStatus();
   }, 50);
+  // no music or sound while the page is hidden (another tab or app, screen locked): suspend the audio
+  // context and the silent keep-alive element, and pick up again when the page is visible
+  const onVis = () => {
+    if (document.hidden) {
+      try {
+        if (AC && AC.state === 'running') AC.suspend();
+        if (silentEl) silentEl.pause();
+      } catch (e) {}
+    } else unlockAudio();
+  };
+  document.addEventListener('visibilitychange', onVis);
+  addEventListener('pagehide', () => {
+    try {
+      if (AC) AC.suspend();
+      if (silentEl) silentEl.pause();
+    } catch (e) {}
+  });
   ['pointerdown', 'touchend', 'keydown', 'click'].forEach(ev =>
     document.addEventListener(
       ev,
       () => {
-        if (!AC || AC.state !== 'running' || (silentEl && silentEl.paused)) unlockAudio();
+        if (!document.hidden && (!AC || AC.state !== 'running' || (silentEl && silentEl.paused))) unlockAudio();
       },
       true,
     ),
