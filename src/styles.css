@@ -2035,3 +2035,7 @@ body.touch #notes:not(.menu) {
   height: 30px;
   font-size: 20px;
 }
+#hLap i {
+  font-style: normal;
+  opacity: 0.55;
+}

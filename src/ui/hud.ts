@@ -29,9 +29,17 @@ export function hud(dt) {
   hudT = 0.1;
   const c = cars[GS.ctrl];
   const st = standings();
-  $('hLap').textContent = GS.PRACTICE
-    ? 'PRACTICE · LAP ' + Math.max(1, c.cross)
-    : 'LAP ' + clamp(c.cross, 1, opts.laps) + '/' + opts.laps + (c.finished ? ' ✓' : '');
+  {
+    // current lap bright, the rest ("LAP", "/", total) faded
+    const h = GS.PRACTICE
+      ? `<i>PRACTICE · LAP</i> ${Math.max(1, c.cross)}`
+      : `<i>LAP</i> ${clamp(c.cross, 1, opts.laps)}<i>/${opts.laps}</i>` + (c.finished ? ' ✓' : '');
+    const el = $('hLap') as HTMLElement & { _h?: string };
+    if (el._h !== h) {
+      el._h = h;
+      el.innerHTML = h;
+    }
+  }
   {
     // no race clock in the panel; only "Get ready…" before the start
     const t = GS.state === 'countdown' ? 'Get ready…' : '';
