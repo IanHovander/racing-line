@@ -296,6 +296,8 @@ Playable build: https://matthewtorgerson.github.io/racing-line/ (GitHub Pages, b
 - **AI reaction:** 0.12–0.55 s, quicker for drivers with high consistency, so the field spreads off the line.
 
 ## v17.3 — tooling
+- Labels use title case (buttons, setting names, headings, awards, "Lap 1" on the main screen); sentences and messages stay in sentence case.
+- Main-screen demo race: the followed car sits at 48% of the screen height (was 64%), clear of the big buttons.
 
 - Circuit-map height exaggeration halved: relief ≈ 7% of the layout size, 1.25–3.5× true height (was 2.5–7×).
 

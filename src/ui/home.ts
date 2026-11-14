@@ -14,7 +14,7 @@ import { showToast } from './controls';
 
 export type PanelGroup = 'solo' | 'mp' | 'prefs';
 
-const TITLES: Record<PanelGroup, string> = { solo: 'Single player', mp: 'Multiplayer', prefs: 'Settings' };
+const TITLES: Record<PanelGroup, string> = { solo: 'Single Player', mp: 'Multiplayer', prefs: 'Settings' };
 
 export function showHome(): void {
   $('home').classList.remove('hide');
@@ -48,13 +48,13 @@ export function closePanel(): void {
   $('menu').classList.add('hide');
 }
 
-/** "LIVE · Ardennes Forest · lap 3" under the buttons, for the race running behind the menu */
+/** "LIVE · Ardennes Forest · Lap 3" under the buttons, for the race running behind the menu */
 function updateLive(): void {
   const el = $('hLive');
   if (!el || $('home').classList.contains('hide')) return;
   const lead = standings()[0];
   const lap = lead ? Math.max(1, lead.cross) : 1;
-  el.textContent = `LIVE · ${TRACKS[GS.trackIdx].name} · lap ${lap}`;
+  el.textContent = `LIVE · ${TRACKS[GS.trackIdx].name} · Lap ${lap}`;
 }
 
 function syncSound(): void {

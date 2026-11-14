@@ -51,7 +51,7 @@ export function wzGo(n) {
     .querySelectorAll<HTMLElement>('#sMode .g-mp')
     .forEach(e => (e.style.display = g === 'mp' ? '' : 'none'));
   $('mpNote').style.display = g === 'mp' ? '' : 'none';
-  $('wz0T').textContent = g === 'mp' ? 'Start a room or join one' : 'What kind of session?';
+  $('wz0T').textContent = g === 'mp' ? 'Start a Room or Join One' : 'What kind of session?';
   $('wzNav').style.display = g === 'solo' ? '' : 'none';
   document
     .querySelectorAll<HTMLElement>('#menu .wz[data-s="3"] .sect')
@@ -60,7 +60,7 @@ export function wzGo(n) {
     );
   document.querySelector<HTMLElement>('#menu .wz[data-s="3"] .wzT').textContent = prefs
     ? 'Settings'
-    : 'Race settings';
+    : 'Race Settings';
   $('wzBar').style.display = g === 'mp' ? 'none' : '';
   const last = n === 3;
   $('helpTxt').style.display = last && !prefs ? '' : 'none';

@@ -23,33 +23,33 @@ export function awardsHtml() {
     return w ? [w, bv] : null;
   };
   const A: [string, [any, number] | null, (v: number) => string][] = [
-    ['Fastest lap', best(c => c.best || null, true), v => fmt(v)],
-    ['Top speed', best(c => c.stat.vmax), v => kmh(v) + ' km/h'],
-    ['Most overtakes', best(c => c.stat.pass || null), v => v + ' pass' + (v > 1 ? 'es' : '')],
+    ['Fastest Lap', best(c => c.best || null, true), v => fmt(v)],
+    ['Top Speed', best(c => c.stat.vmax), v => kmh(v) + ' km/h'],
+    ['Most Overtakes', best(c => c.stat.pass || null), v => v + ' pass' + (v > 1 ? 'es' : '')],
     [
-      'Places gained',
+      'Places Gained',
       best(c => (c.out ? null : (c.grid ?? 0) - standings().indexOf(c) || null)),
       v => (v > 0 ? '▲' : '▼') + Math.abs(v),
     ],
-    ['Time in the lead', best(c => (c.stat.ledT > 1 ? c.stat.ledT : null)), v => Math.round(v) + ' s'],
+    ['Time in the Lead', best(c => (c.stat.ledT > 1 ? c.stat.ledT : null)), v => Math.round(v) + ' s'],
     [
-      'Cleanest race',
+      'Cleanest Race',
       best(c => (c.out ? null : c.stat.offT + (c.tlN || 0) * 2 + (c.hits || 0)), true),
       () => 'fewest offs and contacts',
     ],
     [
-      'Slipstream king',
+      'Slipstream King',
       best(c => (c.stat.towT > 2 ? c.stat.towT : null)),
       v => Math.round(v) + ' s in the tow',
     ],
-    ['DRS hunter', best(c => c.stat.drsN || null), v => v + ' DRS run' + (v > 1 ? 's' : '')],
-    ['Most contacts', best(c => c.hits || null), v => v + ' hit' + (v > 1 ? 's' : '')],
+    ['DRS Hunter', best(c => c.stat.drsN || null), v => v + ' DRS run' + (v > 1 ? 's' : '')],
+    ['Most Contacts', best(c => c.hits || null), v => v + ' hit' + (v > 1 ? 's' : '')],
   ];
   let h = '';
   for (const [k, r, f] of A) {
     if (!r) continue;
     const [c, v] = r;
-    if (k === 'Places gained' && v <= 0) continue;
+    if (k === 'Places Gained' && v <= 0) continue;
     h += `<div class="aw ${c.mine ? 'me' : ''}"><div class="k">${k}</div><b>${teamLogo(c.team, 14)}${c.name}</b><span class="v">${f(v)}</span></div>`;
   }
   return h;
@@ -58,9 +58,9 @@ export function runStr(o, st) {
   const lead = st[0];
   if (o === lead) return 'Lap ' + Math.min(opts.laps, Math.max(1, o.cross)) + '/' + opts.laps;
   const d = progress(lead) - progress(o);
-  if (d > GS.L) return '+' + Math.floor(d / GS.L) + ' lap' + (d >= 2 * GS.L ? 's' : '') + ' · running';
+  if (d > GS.L) return '+' + Math.floor(d / GS.L) + ' Lap' + (d >= 2 * GS.L ? 's' : '') + ' · Running';
   const g = gapT(lead, o);
-  return (g !== null ? '+' + g.toFixed(1) + ' s' : '') + ' · running';
+  return (g !== null ? '+' + g.toFixed(1) + ' s' : '') + ' · Running';
 }
 export function resRender() {
   const st = standings();

@@ -48,7 +48,7 @@ export const LB_RULES: [string, string, [number, string][]][] = [
   ],
   [
     'tyres',
-    'Tyre wear',
+    'Tyre Wear',
     [
       [0, 'Off'],
       [1, 'On'],
@@ -56,7 +56,7 @@ export const LB_RULES: [string, string, [number, string][]][] = [
   ],
   [
     'damage',
-    'Damage & knockouts',
+    'Damage & Knockouts',
     [
       [0, 'Off'],
       [1, 'On'],
@@ -80,16 +80,16 @@ export const LB_RULES: [string, string, [number, string][]][] = [
   ],
   [
     'limits',
-    'Track limits',
+    'Track Limits',
     [
       [0, 'Off'],
-      [3, 'Penalty every 3rd'],
+      [3, 'Penalty Every 3rd'],
       [2, 'Every 2nd'],
     ],
   ],
   [
     'yellow',
-    'Yellow flags',
+    'Yellow Flags',
     [
       [0, 'Off'],
       [3, '3 s'],
@@ -103,8 +103,8 @@ export const LB_CTRL: [string, string, [number, string][]][] = [
     'pedals',
     'Pedals',
     [
-      [0, 'Throttle only'],
-      [1, 'Brake only'],
+      [0, 'Throttle Only'],
+      [1, 'Brake Only'],
       [2, 'Throttle + Brake'],
       [3, 'Auto'],
     ],

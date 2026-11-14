@@ -7,8 +7,8 @@ import { cam } from '../render/camera';
 import { renderLaneInd } from '../sim/ai';
 import { GEARTOP, autoGear, isManual } from '../sim/car-model';
 import { syncAllSegs } from './widgets';
-export const PEDALS = ['Throttle only', 'Brake only', 'Throttle + Brake', 'Auto pedals'],
-  STEERS = ['Auto steering', 'Lane steering', 'Manual steering', 'Overtake steering'];
+export const PEDALS = ['Throttle Only', 'Brake Only', 'Throttle + Brake', 'Auto Pedals'],
+  STEERS = ['Auto Steering', 'Lane Steering', 'Manual Steering', 'Overtake Steering'];
 export const PED_NOTE = [
   'Hold the gas; lift off and the car brakes to the safe speed for the next corner.',
   'The car accelerates by itself; you choose when and how long to brake.',

@@ -22,11 +22,11 @@ export function showTeamStats() {
   const t = TEAMS[opts.team],
     st = TEAM_STATS[opts.team];
   const R: [string, number, number, number][] = [
-    ['Top speed', st.top, 0.96, 1.06],
+    ['Top Speed', st.top, 0.96, 1.06],
     ['Acceleration', st.acc, 0.97, 1.07],
     ['Braking', st.brk, 0.9, 1.4],
     ['Cornering', st.grip, 0.975, 1.035],
-    ['Tyre life', 2 - st.tyre, 0.8, 1.3],
+    ['Tyre Life', 2 - st.tyre, 0.8, 1.3],
     ['Durability', 2 - st.dur, 0.75, 1.2],
   ];
   let h = `<div class="tg" style="display:flex;gap:8px;align-items:center">${teamLogo(opts.team, 22)}<span><b>${t.name}</b> — ${st.tag}</span></div>`;
@@ -44,7 +44,7 @@ export function showTeamStats() {
       ['Defending', 'defend'],
       ['Consistency', 'consist'],
       ['Wet', 'wet'],
-      ['Tyre care', 'tyre'],
+      ['Tyre Care', 'tyre'],
     ])
       h += `<div class="sr"><span>${n}</span><div class="sb"><i style="width:${Math.round(ds[k] * 100)}%;background:${t.acc}"></i></div></div>`;
     h += `</div>`;
