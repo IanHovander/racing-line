@@ -319,7 +319,8 @@ export function init(): void {
     document.addEventListener(
       ev,
       () => {
-        if (!document.hidden && (!AC || AC.state !== 'running' || (silentEl && silentEl.paused))) unlockAudio();
+        if (!document.hidden && (!AC || AC.state !== 'running' || (silentEl && silentEl.paused)))
+          unlockAudio();
       },
       true,
     ),
