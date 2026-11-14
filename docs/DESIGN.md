@@ -295,11 +295,11 @@ Playable build: https://matthewtorgerson.github.io/racing-line/ (GitHub Pages, b
 - **Fallbacks:** if you don't react within 3 s the car goes anyway. After 8 s every car counts as launched (late join, swapped car).
 - **AI reaction:** 0.12–0.55 s, quicker for drivers with high consistency, so the field spreads off the line.
 
-## v17.3 — tooling and font
+## v17.3 — tooling
 
 - **oxfmt** formats the whole project (`.oxfmtrc.json`: 110 columns, single quotes, trailing commas). **oxlint** lints it (`.oxlintrc.json`: correctness errors, suspicious warnings, zero warnings allowed). CI runs both before typecheck/build/tests.
 - Lint clean-up: removed dead code left from the single-file days (the grandstand styles, stadium bowl and `placeStands`, unused locals).
-- **Digital Numbers** (Stephan Ahlf, SIL OFL 1.1) is the font for every monospaced readout: HUD timing, standings, speed and gear, lap card, live line, room codes. It's self-hosted in `public/fonts/` with its licence, through the `--mono` CSS variable, with the system monospace font as fallback.
+- All monospaced readouts use the `--mono` CSS variable (system monospace for now; a Geist Mono / Martian Mono / Reddit Mono comparison is at https://claude.ai/artifact/6E13K89Tqfcytor9NAnZqp).
 
 ## Model
 

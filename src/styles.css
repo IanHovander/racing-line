@@ -1,11 +1,6 @@
-/* Digital Numbers (Stephan Ahlf, SIL OFL 1.1 — public/fonts/DigitalNumbers-OFL.txt): the LCD-style font for every number and monospaced readout */
-@font-face {
-  font-family: 'Digital Numbers';
-  src: url('../fonts/DigitalNumbers-Regular.woff') format('woff');
-  font-display: swap;
-}
+/* monospaced readouts (timing, standings, speed, codes): one place to change the font */
 :root {
-  --mono: 'Digital Numbers', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 html,
 body {

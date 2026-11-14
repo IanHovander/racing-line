@@ -24,7 +24,7 @@ const options = {
   sourcemap: true,
   minify: !dev && !process.argv.includes('--no-minify'),
   legalComments: 'none',
-  // fonts live in public/fonts and are copied to dist/fonts as they are
+  // font files (public/fonts) are copied to dist/ as they are, not bundled
   external: ['*.woff', '*.woff2'],
   logLevel: 'info',
 };

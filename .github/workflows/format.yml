@@ -24,17 +24,13 @@ jobs:
       - run: npx oxfmt
       - name: Lint report
         run: |
-          npx oxlint --format=unix > lint-report.txt 2>&1 || true
-          tail -n 40 lint-report.txt
+          npx oxlint > lint-report.txt 2>&1 || true
           { echo '```'; tail -n 400 lint-report.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
-      - uses: actions/upload-artifact@v4
-        with:
-          name: lint-report
-          path: lint-report.txt
+          rm lint-report.txt
       - name: Commit
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
-          git diff --cached --quiet || git commit -m "Format with oxfmt, apply oxlint fixes, add package-lock.json"
+          git diff --cached --quiet || git commit -m "Format with oxfmt and apply oxlint fixes"
           git push
