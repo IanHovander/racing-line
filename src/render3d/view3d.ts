@@ -96,6 +96,16 @@ const flat = (col, extra?) =>
   new THREE.MeshBasicMaterial({ color: new THREE.Color(col), side: THREE.DoubleSide, ...extra });
 
 /** a band along the track between signed offsets a(i) .. b(i) (positive = right), lifted dz */
+/** Ground layers (grass, run-off, gravel, paint, lines, asphalt, kerbs) are drawn in order, like the
+ *  canvas, without writing depth: on tight corners an inner run-off edge folds back over the track, and
+ *  on hills it can sit above the asphalt it overlaps. Drawn in order, the later layer always wins, so
+ *  there's no flicker or banding. (A track with a bridge keeps depth, so the crossing works.) */
+let GORD = -10000;
+function ground<T>(m: T & { renderOrder: number; material: any }): T {
+  m.renderOrder = GORD++;
+  for (const mt of [].concat(m.material)) mt.depthWrite = !!GS.BRIDGE;
+  return m;
+}
 function band(
   a: (i: number) => number,
   b: (i: number) => number,
@@ -122,7 +132,7 @@ function band(
   g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
   g.setIndex(idx);
   g.computeVertexNormals();
-  return new THREE.Mesh(g, typeof col === 'string' ? flat(col) : col);
+  return ground(new THREE.Mesh(g, typeof col === 'string' ? flat(col) : col));
 }
 
 function buildWorld() {
@@ -135,6 +145,7 @@ function buildWorld() {
   }
   for (const o of carObjs.values()) scene.remove(o);
   carObjs.clear();
+  GORD = -10000;
   world = new THREE.Group();
   scene.add(world);
   const TR = GS.TR,
@@ -148,26 +159,18 @@ function buildWorld() {
     const cx = (GS.minX + GS.maxX) / 2,
       cy = (GS.minY + GS.maxY) / 2,
       span = Math.max(GS.maxX - GS.minX, GS.maxY - GS.minY) + 1200;
-    const g = new THREE.Mesh(new THREE.PlaneGeometry(span, span), flat(TR.bg));
+    const g = ground(new THREE.Mesh(new THREE.PlaneGeometry(span, span), flat(TR.bg)));
     g.position.set(cx, cy, hmin - 0.3);
     world.add(g);
   }
   // water
   for (const poly of GS.WATER || []) {
     const sh = new THREE.Shape(poly.map(q => new THREE.Vector2(q[0], q[1])));
-    const m = new THREE.Mesh(new THREE.ShapeGeometry(sh), flat('#1f6f9a'));
+    const m = ground(new THREE.Mesh(new THREE.ShapeGeometry(sh), flat('#1f6f9a')));
     m.position.z = hmin - 0.25;
     world.add(m);
   }
   // run-off, its sides down to the ground, gravel, paint, white lines, asphalt, kerbs
-  world.add(
-    band(
-      i => OVR(GS.SIDES, i),
-      i => -OVL(GS.SIDES, i),
-      0,
-      TR.run,
-    ),
-  );
   for (const sg of [1, -1]) {
     const A = sg > 0 ? GS.BARR : GS.BARL;
     const pos: number[] = [],
@@ -185,8 +188,16 @@ function buildWorld() {
     g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
     g.setIndex(idx);
     g.computeVertexNormals();
-    world.add(new THREE.Mesh(g, mat(shade(TR.run, 0.7))));
+    world.add(ground(new THREE.Mesh(g, mat(shade(TR.run, 0.7)))));
   }
+  world.add(
+    band(
+      i => OVR(GS.SIDES, i),
+      i => -OVL(GS.SIDES, i),
+      0,
+      TR.run,
+    ),
+  );
   for (const sg of [1, -1]) {
     world.add(
       band(
@@ -199,20 +210,23 @@ function buildWorld() {
     );
   }
   if (TR.paint) {
+    // painted run-off stripes, each SWR/SWL wide (1.6 m default), colours cycling through TR.paint
     for (const sg of [1, -1]) {
-      const Wd = sg > 0 ? GS.PWR : GS.PWL;
-      TR.paint.forEach((col, b) => {
-        const sw = 1.6;
+      const Wd = sg > 0 ? GS.PWR : GS.PWL,
+        Sw = sg > 0 ? GS.SWR : GS.SWL;
+      const sw = (i: number) => (Sw && Sw[i]) || 1.6;
+      let nB = 0;
+      for (let i = 0; i < N; i++) nB = Math.max(nB, Math.ceil(Wd[i] / sw(i)));
+      for (let b = 0; b < nB; b++)
         world.add(
           band(
-            i => sg * (HW + 1 + Math.min(b * sw, Wd[i])),
-            i => sg * (HW + 1 + Math.min((b + 1) * sw, Wd[i])),
+            i => sg * (HW + 1 + Math.min(b * sw(i), Wd[i])),
+            i => sg * (HW + 1 + Math.min((b + 1) * sw(i), Wd[i])),
             0.015,
-            col,
-            (i, j) => Wd[i] > 0.05 && Wd[j] > 0.05 && Wd[i] > b * sw,
+            TR.paint[b % TR.paint.length],
+            (i, j) => Wd[i] > 0.05 && Wd[j] > 0.05 && (Wd[i] > b * sw(i) || Wd[j] > b * sw(j)),
           ),
         );
-      });
     }
   }
   world.add(
@@ -259,7 +273,7 @@ function buildWorld() {
         const o1 = -HW + q * 1.4,
           a = r * 1.2;
         const g = new THREE.PlaneGeometry(1.4, 1.2);
-        const m = new THREE.Mesh(g, flat((q + r) % 2 ? '#111' : '#fff'));
+        const m = ground(new THREE.Mesh(g, flat((q + r) % 2 ? '#111' : '#fff')));
         const o = o1 + 0.7,
           s = a + 0.6;
         m.position.set(
