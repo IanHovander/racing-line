@@ -40,11 +40,6 @@ export function hud(dt) {
       el.innerHTML = h;
     }
   }
-  {
-    // no race clock in the panel; only "Get ready…" before the start
-    const t = GS.state === 'countdown' ? 'Get ready…' : '';
-    if ($('hTime').textContent !== t) $('hTime').textContent = t;
-  }
   const kmh = Math.round(c.v * 3.6);
   const gear = isManual(c) ? c.gear : c.v < 1 ? 'N' : autoGear(c.v);
   {
