@@ -34,10 +34,14 @@ export function start(): void {
   renderer = new THREE.WebGLRenderer({ canvas: gl, antialias: true });
   renderer.setPixelRatio(Math.min(2, devicePixelRatio || 1));
   scene = new THREE.Scene();
+  // The canvas projection is a left-handed map from the world to the screen. Mirroring the scene in z (and
+  // the camera matrix's z column back) makes it right-handed for three.js, so front faces, normals and
+  // lighting come out the right way round.
+  scene.scale.set(1, 1, -1);
   camera = new THREE.Camera();
   camera.matrixAutoUpdate = false;
-  scene.add(new THREE.HemisphereLight(0xeef4ff, 0x4a5a3a, 1.6));
-  const sun = new THREE.DirectionalLight(0xffffff, 1.9);
+  scene.add(new THREE.HemisphereLight(0xffffff, 0x8a8f80, 2.2));
+  const sun = new THREE.DirectionalLight(0xffffff, 1.6);
   sun.position.set(-0.5, -0.8, 1.4);
   scene.add(sun);
 }
@@ -63,11 +67,11 @@ function updateCamera3d() {
     (2 / W) * (OX + zm * (s * cx - c * cy)) - 1,
     (2 * zm * t * c) / H,
     (2 * zm * t * s) / H,
-    (2 * zm * hz) / H,
+    (-2 * zm * hz) / H,
     1 - (2 / H) * (OY + zm * (t * (c * cx + s * cy) + hz * cz)),
     (hz * c) / R,
     (hz * s) / R,
-    -t / R,
+    t / R,
     (-hz * (c * cx + s * cy) + t * cz) / R,
     0,
     0,
@@ -84,8 +88,12 @@ export function show(on: boolean): void {
 // ---------- track geometry ----------
 const OVR = (o, i) => (typeof o === 'number' ? o : o.R ? o.R[i] : o[i]),
   OVL = (o, i) => (typeof o === 'number' ? o : o.L ? o.L[i] : o[i]);
+/** lit material for things with height (walls, buildings, trees, cars) */
 const mat = (col, extra?) =>
   new THREE.MeshLambertMaterial({ color: new THREE.Color(col), side: THREE.DoubleSide, ...extra });
+/** unlit material for the flat ground layers, so they match the canvas colours exactly */
+const flat = (col, extra?) =>
+  new THREE.MeshBasicMaterial({ color: new THREE.Color(col), side: THREE.DoubleSide, ...extra });
 
 /** a band along the track between signed offsets a(i) .. b(i) (positive = right), lifted dz */
 function band(
@@ -93,7 +101,7 @@ function band(
   b: (i: number) => number,
   dz: number,
   col,
-  keep?: (i: number) => boolean,
+  keep?: (i: number, j: number) => boolean,
 ) {
   const pos: number[] = [],
     idx: number[] = [];
@@ -107,14 +115,14 @@ function band(
   }
   for (let i = 0; i < N; i++) {
     const j = (i + 1) % N;
-    if (keep && !(keep(i) && keep(j))) continue;
+    if (keep && !keep(i, j)) continue;
     idx.push(2 * i, 2 * j, 2 * j + 1, 2 * i, 2 * j + 1, 2 * i + 1);
   }
   const g = new THREE.BufferGeometry();
   g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
   g.setIndex(idx);
   g.computeVertexNormals();
-  return new THREE.Mesh(g, typeof col === 'string' ? mat(col) : col);
+  return new THREE.Mesh(g, typeof col === 'string' ? flat(col) : col);
 }
 
 function buildWorld() {
@@ -140,14 +148,14 @@ function buildWorld() {
     const cx = (GS.minX + GS.maxX) / 2,
       cy = (GS.minY + GS.maxY) / 2,
       span = Math.max(GS.maxX - GS.minX, GS.maxY - GS.minY) + 1200;
-    const g = new THREE.Mesh(new THREE.PlaneGeometry(span, span), mat(TR.bg));
+    const g = new THREE.Mesh(new THREE.PlaneGeometry(span, span), flat(TR.bg));
     g.position.set(cx, cy, hmin - 0.3);
     world.add(g);
   }
   // water
   for (const poly of GS.WATER || []) {
     const sh = new THREE.Shape(poly.map(q => new THREE.Vector2(q[0], q[1])));
-    const m = new THREE.Mesh(new THREE.ShapeGeometry(sh), mat('#1f6f9a'));
+    const m = new THREE.Mesh(new THREE.ShapeGeometry(sh), flat('#1f6f9a'));
     m.position.z = hmin - 0.25;
     world.add(m);
   }
@@ -186,7 +194,7 @@ function buildWorld() {
         i => sg * (GS.gout[i] || 0),
         0.01,
         '#cbb68a',
-        i => GS.gside[i] === sg,
+        (i, j) => GS.gside[i] === sg && GS.gside[j] === sg,
       ),
     );
   }
@@ -201,7 +209,7 @@ function buildWorld() {
             i => sg * (HW + 1 + Math.min((b + 1) * sw, Wd[i])),
             0.015,
             col,
-            i => Wd[i] > 0.05 && Wd[i] > b * sw,
+            (i, j) => Wd[i] > 0.05 && Wd[j] > 0.05 && Wd[i] > b * sw,
           ),
         );
       });
@@ -228,7 +236,7 @@ function buildWorld() {
       i => GS.off[i] + 1.1,
       i => GS.off[i] - 1.1,
       0.035,
-      mat('#000', { transparent: true, opacity: 0.16, depthWrite: false }),
+      flat('#000', { transparent: true, opacity: 0.16, depthWrite: false }),
     ),
   );
   for (const sg of [1, -1]) {
@@ -239,7 +247,7 @@ function buildWorld() {
           () => sg * (HW + 1.4),
           0.04,
           red ? '#d42a2a' : '#f4f4f4',
-          i => GS.kerb[i] && (Math.floor(i / 2) % 2 === 1) === red,
+          (i, j) => GS.kerb[i] && GS.kerb[j] && (Math.floor(i / 2) % 2 === 1) === red,
         ),
       );
   }
@@ -251,7 +259,7 @@ function buildWorld() {
         const o1 = -HW + q * 1.4,
           a = r * 1.2;
         const g = new THREE.PlaneGeometry(1.4, 1.2);
-        const m = new THREE.Mesh(g, mat((q + r) % 2 ? '#111' : '#fff'));
+        const m = new THREE.Mesh(g, flat((q + r) % 2 ? '#111' : '#fff'));
         const o = o1 + 0.7,
           s = a + 0.6;
         m.position.set(
@@ -263,7 +271,7 @@ function buildWorld() {
         world.add(m);
       }
   }
-  // racing line: one ribbon whose vertex colours are set every frame (dashed: every other 2 m sample)
+  // racing line: one continuous ribbon whose vertex colours are set every frame
   {
     const pos: number[] = [],
       idx: number[] = [];
@@ -274,7 +282,7 @@ function buildWorld() {
         pos.push(GS.cx[i] + GS.nx[i] * v, GS.cy[i] + GS.ny[i] * v, z);
       }
     }
-    for (let i = 0; i < N; i += 2) {
+    for (let i = 0; i < N; i++) {
       const j = (i + 1) % N;
       idx.push(2 * i, 2 * j, 2 * j + 1, 2 * i, 2 * j + 1, 2 * i + 1);
     }
