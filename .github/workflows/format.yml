@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: write
+  actions: write
 
 jobs:
   format:
@@ -32,3 +33,8 @@ jobs:
           git add -A
           git diff --cached --quiet || git commit -m "Format with oxfmt and apply oxlint fixes"
           git push
+      # pushes made with GITHUB_TOKEN don't start other workflows, so start the build/deploy explicitly
+      - name: Build and deploy the formatted code
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run deploy.yml --ref "${{ github.ref_name }}"
