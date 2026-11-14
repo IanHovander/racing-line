@@ -22,13 +22,29 @@ const HUD: {
   gr?: any;
   rows?: Map<number, HTMLElement>;
   rowsInit?: number;
+  order?: any[];
+  orderAt?: number;
 } = {};
 export function hud(dt) {
   hudT -= dt;
   if (hudT > 0 || attract) return;
   hudT = 0.1;
   const c = cars[GS.ctrl];
-  const st = standings();
+  // the order shown in the timing panel refreshes once a second, like the gaps (at once if cars join or leave,
+  // and every frame once the race is over so the finishing order is exact)
+  const live = standings(),
+    now0 = performance.now();
+  if (
+    !HUD.order ||
+    now0 - HUD.orderAt >= 1000 ||
+    HUD.order.length !== live.length ||
+    HUD.order.some(o => !live.includes(o)) ||
+    GS.state !== 'race'
+  ) {
+    HUD.order = live;
+    HUD.orderAt = now0;
+  }
+  const st: any[] = HUD.order;
   {
     // current lap bright, the rest ("LAP", "/", total) faded
     const h = GS.PRACTICE

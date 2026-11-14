@@ -365,6 +365,7 @@ Playable build: https://matthewtorgerson.github.io/racing-line/ (GitHub Pages, b
 
 - Notifications show **one at a time** by priority (`PRI` in `ui/notify.ts`): penalty 100 > track-limits / jump-start warning 90 > Go! 85 > car out 80 > DRS 60 > circuit record 55 > lap 50 > sector 40 > coach 30 > info 20. A note of equal or higher priority (or the same `key`) replaces the one showing; a lower one waits up to 3 s for it to finish, else is dropped.
 - "Nice move on X" only once the pass sticks: X still behind 3 s later (`PASS_HOLD`); repassed means no message.
+- Timing panel order refreshes once a second too (`HUD.order`), at once when cars join or leave and every frame outside the race.
 - Timing panel gaps refresh once a second per car (immediately when a car changes side of you).
 - Penalty badge sits flush against the timing panel's right edge, like a tab.
 - Touch layout C (throttle only, no steering/brake/gear/DRS pads): everything on the right thumb. GAS bottom right (`min(52vw, 210px)` × 94), Swap to its left at the same height, the compact speed panel above them (at least 210 px, centred on the screen; in landscape on the bottom edge, centred unless that would reach Swap, so it doesn't cover the car), notifications above that (`--notesB`). Other control sets keep the previous layout.
