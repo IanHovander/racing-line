@@ -1,0 +1,19 @@
+#!/bin/sh
+# Pre-commit: format the staged files with oxfmt, re-stage them, then lint with oxlint.
+# Installed by `npm install` (the "prepare" script sets core.hooksPath to .githooks).
+# Skip once with `git commit --no-verify`.
+set -e
+root=$(git rev-parse --show-toplevel)
+cd "$root"
+if [ ! -x node_modules/.bin/oxfmt ] || [ ! -x node_modules/.bin/oxlint ]; then
+  echo "pre-commit: oxfmt/oxlint not installed (run npm install); skipping format and lint" >&2
+  exit 0
+fi
+files=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '\.(ts|mjs|js|json|css|html|md|ya?ml)$' | grep -v '^src/vendor/' || true)
+if [ -n "$files" ]; then
+  # shellcheck disable=SC2086
+  node_modules/.bin/oxfmt $files
+  # shellcheck disable=SC2086
+  git add $files
+fi
+node_modules/.bin/oxlint

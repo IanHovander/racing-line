@@ -20,7 +20,9 @@ npm test            # Playwright smoke tests against dist/ — run `npm run buil
 npm run check       # fmt:check + lint + typecheck + build + test, what CI runs
 ```
 
-Run `npm run fmt` and `npm run lint` before committing; CI fails on unformatted code or any lint warning.
+A pre-commit hook (`.githooks/pre-commit`, enabled by `npm install` through the `prepare` script) formats the
+staged files with oxfmt, re-stages them and runs oxlint; the commit stops on any lint error or warning. CI fails
+on unformatted code or any lint warning too. Without local Node, run the Format workflow (below) after pushing.
 
 `CHROME_PATH=/path/to/chrome npm test` uses an installed Chrome instead of Playwright's Chromium.
 Never edit `dist/`; it is generated and git-ignored.

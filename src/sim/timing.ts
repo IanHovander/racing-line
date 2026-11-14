@@ -2,6 +2,7 @@ import { GS } from '../state';
 import { attract, cars } from '../game/race';
 import { standings } from './step';
 import { fmt } from '../ui/hud';
+import { NCOL, notify } from '../ui/notify';
 // sector times: purple = fastest of anyone this race, green = your best or within 0.15 s of it, yellow = slower
 export const fmtS = t => (t < 60 ? t.toFixed(3) : fmt(t));
 export function secDone(c, k) {
@@ -25,6 +26,13 @@ export function secDone(c, k) {
   }
   if (!pb || t < pb) c.secBest[k] = t;
   c.secCur[k] = { t, col };
+  // coach: a personal best sector (purple when it is also the fastest of anyone)
+  if (pb && t < pb && !attract && c === cars[GS.ctrl] && !c.remote)
+    notify(
+      `Best sector ${k + 1} · <span class="m">${t.toFixed(2)}</span>`,
+      col === 'p' ? NCOL.best : NCOL.good,
+      { sub: `<span class="m">−${(pb - t).toFixed(2)}</span>&#8239;s on your best`, key: 'sector' },
+    );
   if (k === 2) {
     c.secPrev = c.secCur;
     c.secHold = GS.raceTime + 4;
