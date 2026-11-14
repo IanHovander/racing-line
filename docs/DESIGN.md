@@ -337,7 +337,8 @@ Playable build: https://matthewtorgerson.github.io/racing-line/ (GitHub Pages, b
 - Every in-race message uses the coaching pill (dark, rounded, coloured dot, optional second line) in one place: top centre on desktop, above the pedals on touch screens (centred right of the Swap button), top centre in the menus. `notify(text, col, {sub, ttl, key, strong})` in `ui/notify.ts`; `showToast` and `rcBanner` are thin wrappers. Up to 3 stack, newest nearest the anchor; a note with the same `key` replaces the older one (`rc`, `lap`, `coach`).
 - Dot colours (`NCOL`): purple best/fastest, green good, yellow slow, red off track / out, orange lost place, white race-control warning, orange (with outline) penalty, grey info.
 - Lap complete is now one line: laps done and the gap to the leader ("Lap 2 of 5 · 3.4 s behind Vance", or "Leading by 1.8 s"); the dot colour still grades the lap. The big lap card, the old centre toast and the race-control banner are gone.
-- Timing panel: no Last / Best lines.
+- Timing panel: no Last / Best lines. Time penalties are a yellow "+5" / "+10" badge floating just right of the panel on that driver's row. Your teammate's row is outlined instead of filled grey.
+- Race-control notes: a black-and-white track-limits flag icon for track-limits warnings, a warning-triangle icon (and orange outline) for time penalties.
 - Coach: a personal-best sector shows "Best sector 2 · 22.56" with the gain on your previous best (purple dot when it is also the fastest of anyone).
 
 ## Model

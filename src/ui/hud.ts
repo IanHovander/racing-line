@@ -108,7 +108,6 @@ export function hud(dt) {
         bar(c.dmg, c.dmg < 0.35 ? '#5ad16b' : c.dmg < 0.7 ? '#ffc23d' : '#ff4b3e') +
         Math.round(c.dmg * 100) +
         '%';
-    if (c.pen) h += `<br><b style="color:#ff8a80">+${c.pen} s penalty</b>`;
     $('cond').innerHTML = h;
   }
   $('yflag').classList.toggle('hide', !inYellow(c) || c.out);
@@ -159,7 +158,6 @@ export function hud(dt) {
       }
     }
     if (o.out) gap = '<b style="color:#ff6b5e">OUT</b>';
-    else if (o.pen) gap = `<span style="color:#ff8a80">${gap}</span>`;
     const ln =
       (o.name.split(' ').pop() || o.name)
         .replace(/[^A-Za-zÀ-ÿ]/g, '')
@@ -180,7 +178,7 @@ export function hud(dt) {
       el = document.createElement('div');
       rows.set(k, el);
     }
-    const h = `<span class="pos">${i + 1}</span>${teamLogo(o.team, 12)}<span class="nm">${ln}</span><span class="gap">${g}</span>`;
+    const h = `<span class="pos">${i + 1}</span>${teamLogo(o.team, 12)}<span class="nm">${ln}</span><span class="gap">${g}</span>${o.pen && !o.out ? `<span class="pb">+${o.pen}</span>` : ''}`;
     if (el._h !== h) {
       el._h = h;
       el.innerHTML = h;

@@ -1,5 +1,4 @@
 import { GS } from '../state';
-import { $ } from '../core/dom';
 import { cars, opts } from '../game/race';
 import { PROF } from '../sim/profile';
 import { standings } from '../sim/step';

@@ -1,7 +1,7 @@
 import { START } from '../sim/start';
 import type { Car } from '../types';
 import { GS } from '../state';
-import { $, H, W, clamp, store } from '../core/dom';
+import { H, W, clamp, store } from '../core/dom';
 import { MP } from '../net/multiplayer';
 import { cam } from '../render/camera';
 import { FW } from '../render/effects';

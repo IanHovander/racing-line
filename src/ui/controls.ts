@@ -24,7 +24,13 @@ export const STEER_NOTE = [
 ];
 /** race control: a track-limits / jump-start warning, or a time penalty */
 export function rcBanner(type: 'warn' | 'pen', title: string, sub: string) {
-  notify(title, type === 'pen' ? NCOL.pen : NCOL.warn, { sub, ttl: 4, key: 'rc', strong: type === 'pen' });
+  notify(title, type === 'pen' ? NCOL.pen : NCOL.warn, {
+    sub,
+    ttl: 4,
+    key: 'rc',
+    strong: type === 'pen',
+    icon: type === 'pen' ? 'pen' : title.startsWith('Track limits') ? 'flag' : undefined,
+  });
 }
 export function showToast(t: string) {
   notify(t);

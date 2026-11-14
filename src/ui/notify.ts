@@ -23,7 +23,14 @@ export interface NoteOpts {
   key?: string;
   /** stronger pill (penalties) */
   strong?: boolean;
+  /** an icon in place of the dot */
+  icon?: keyof typeof NICON;
 }
+/** track-limits flag (black and white, split diagonally) and penalty (warning triangle) */
+export const NICON = {
+  flag: '<svg viewBox="0 0 20 20"><path d="M4 2v16" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/><path d="M5 3h12v9H5z" fill="#fff"/><path d="M5 12L17 3v9z" fill="#111"/><path d="M5 3h12v9H5z" fill="none" stroke="#fff" stroke-width="1"/></svg>',
+  pen: '<svg viewBox="0 0 20 20"><path d="M10 2.2L18.6 17H1.4z" fill="#ffb000" stroke="#ffb000" stroke-width="1.4" stroke-linejoin="round"/><path d="M10 7.2v4.6" stroke="#111" stroke-width="2" stroke-linecap="round"/><circle cx="10" cy="14.4" r="1.2" fill="#111"/></svg>',
+};
 const MAX = 3;
 /** show a notification; `text` and `sub` may hold simple inline HTML */
 export function notify(text: string, col: string = NCOL.info, o: NoteOpts = {}): void {
@@ -35,7 +42,8 @@ export function notify(text: string, col: string = NCOL.info, o: NoteOpts = {}):
   el.className = 'nt' + (o.strong ? ' strong' : '');
   if (o.key) el.dataset.k = o.key;
   el.innerHTML =
-    `<i style="background:${col}"></i><div class="tx"><div class="h">${text}</div>` +
+    (o.icon ? `<span class="ic">${NICON[o.icon]}</span>` : `<i style="background:${col}"></i>`) +
+    `<div class="tx"><div class="h">${text}</div>` +
     (o.sub ? `<div class="s">${o.sub}</div>` : '') +
     '</div>';
   box.prepend(el);
