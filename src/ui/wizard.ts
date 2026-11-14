@@ -7,7 +7,7 @@ import { hostStart } from '../net/netcode';
 import { cycleMode, cycleSteer, resetCar, showToast, swapCar, toggleCam, toggleLine, togglePause } from './controls';
 // ---- menu wizard: Mode -> Team -> Circuit -> Settings ----
 export let WZ: any;
-export function wzSteps() { return WZ.mode === 'solo' || WZ.mode === 'practice' ? [0, 1, 2, 3] : [0, 1, 3]; }
+export function wzSteps() { return WZ.group === 'mp' ? [0] : WZ.group === 'prefs' ? [3] : [0, 1, 2, 3]; }
 export function wzGo(n) {
   WZ.s = n;
   WZ.max = Math.max(WZ.max, n);
@@ -20,11 +20,23 @@ export function wzGo(n) {
       b.querySelector('i').textContent = String(k++); });
   }
   ['bSolo', 'bHost', 'bJoin'].forEach(id => $(id).classList.remove('sel'));
+  // which panel: Single player (session, team, circuit, settings), Multiplayer (host or join), or Settings (driving + display only)
+  const g = WZ.group || 'solo', prefs = g === 'prefs';
+  document.querySelectorAll<HTMLElement>('#sMode .g-solo').forEach(e => e.style.display = g === 'solo' ? '' : 'none');
+  document.querySelectorAll<HTMLElement>('#sMode .g-mp').forEach(e => e.style.display = g === 'mp' ? '' : 'none');
+  $('mpNote').style.display = g === 'mp' ? '' : 'none';
+  $('wz0T').textContent = g === 'mp' ? 'Start a room or join one' : 'What kind of session?';
+  $('wzNav').style.display = g === 'solo' ? '' : 'none';
+  document.querySelectorAll<HTMLElement>('#menu .wz[data-s="3"] .sect').forEach(e => e.style.display = prefs && (e.dataset.grp === 'race' || e.dataset.grp === 'rules') ? 'none' : '');
+  document.querySelector<HTMLElement>('#menu .wz[data-s="3"] .wzT').textContent = prefs ? 'Settings' : 'Race settings';
+  $('wzBar').style.display = g === 'mp' ? 'none' : '';
   const last = n === 3;
-  $('helpTxt').style.display = last ? '' : 'none';
+  $('helpTxt').style.display = last && !prefs ? '' : 'none';
   $('wzBack').style.visibility = n === 0 ? 'hidden' : 'visible';
+  $('wzBack').style.display = prefs ? 'none' : '';
   $('wzNext').style.display = last || n === 0 ? 'none' : '';
-  $('bStart').style.display = last ? '' : 'none';
+  $('bStart').style.display = last && !prefs ? '' : 'none';
+  $('wzDone').style.display = prefs ? '' : 'none';
   $('bStart').textContent = WZ.mode === 'host' ? 'HOST RACE' : WZ.mode === 'join' ? 'JOIN RACE' : WZ.mode === 'practice' ? 'START PRACTICE' : 'START RACE';
   const c = $('menu');
   c.scrollTop = 0;
@@ -41,9 +53,9 @@ export const wzMode = m => { if (m === 'host') {
   return;
 } WZ.mode = m; store.set('wzmode', m); WZ.max = 0; wzGo(1); };
 export const wzHost = () => { unlockAudio(); enterRoom(mpCode(), true); };
-export const wzJoin = () => { $('menu').classList.add('hide'); $('joinDlg').classList.remove('hide'); $('joinCode').focus(); };
+export const wzJoin = () => { $('menu').classList.add('hide'); $('home').classList.add('hide'); $('joinDlg').classList.remove('hide'); $('joinCode').focus(); };
 export function init(): void {
-  WZ = { s: 0, mode: store.get('wzmode', 'solo'), max: 0 };
+  WZ = { s: 0, mode: store.get('wzmode', 'solo'), max: 0, group: 'solo' };
   $('bSolo').onclick = () => wzMode('solo');
   $('bPrac').onclick = () => wzMode('practice');
   $('bHost').onclick = () => wzMode('host');
@@ -52,10 +64,10 @@ export function init(): void {
   $('wzNext').onclick = () => wzStep(1);
   $('wzNav').onclick = e => { const b = (e.target as HTMLElement).closest('button'); if (b && !b.disabled)
     wzGo(+b.dataset.s); };
-  if (!['solo', 'practice', 'host', 'join'].includes(WZ.mode))
+  if (!['solo', 'practice'].includes(WZ.mode))
     WZ.mode = 'solo';
   wzGo(0);
-  $('bJoinCancel').onclick = () => { $('joinDlg').classList.add('hide'); $('menu').classList.remove('hide'); };
+  $('bJoinCancel').onclick = () => { $('joinDlg').classList.add('hide'); $('home').classList.remove('hide'); };
   $('bJoinGo').onclick = () => { unlockAudio(); const c = normCode($('joinCode').value); if (!c) {
     showToast('Room codes are 5 letters and numbers, like AB3K9');
     return;

@@ -262,6 +262,14 @@ Playable build: https://matthewtorgerson.github.io/racing-line/ (GitHub Pages, b
 - **Race awards** on the results screen (`statTick`, `awardsHtml`): fastest lap, top speed, most overtakes (pair-wise with ±3.5 m hysteresis), places gained, time in the lead, cleanest race (off-track time + strikes + contacts), slipstream time, DRS runs, most contacts. Your car's awards are white.
 - **Racing-line colours fixed**: no red when you're over the speed cap on a straight (DRS/tow) or slightly over the line's speed; in testing, red under a car not braking fell from ~45% of samples to ~2.5% and red on straights from ~5% to 0.
 
+## v17.1 — main screen (option A)
+- **Main screen** (`src/ui/home.ts`, `#home`): the attract race runs behind the logo, with a dark gradient at top and bottom. Two big pill buttons sit in the thumb zone: **Single player** (white) and **Multiplayer** (outline). Under them is a live line, "LIVE · circuit · lap n". Top corners hold round sound (mutes/unmutes music and effects together) and settings buttons. Chosen from https://claude.ai/artifact/XHFhBAh2rJgL2oujg7cALA (option A).
+- **Setup panel**: each button opens the wizard as a panel, a bottom sheet on phones (≤640 px wide) and a centred card on wider screens. Close it with ✕, Escape or a tap outside.
+  - Single player: Session (Race / Practice) → Team → Circuit → Settings.
+  - Multiplayer: one step with "Host a room" (opens the lobby) or "Join with a code" (code box inline).
+  - The gear opens the same panel with only the Driving and Display & sound settings and a Done button.
+- The "Tap anywhere to start the music" hint is gone; music still starts on the first tap, click or key.
+
 ## Model
 - Tracks: control points → Catmull-Rom → smoothed and resampled every 2 m (`buildTrack()`). Long straights need intermediate control points: without them the spline overshoots at the next tight corner and makes a near-cusp (a 4–7 m radius). That happened on the first Mexico and Vegas drafts.
 - Per-track options: `hw`, `smooth`, `street`, `water`, `tunnel`, `night`, `palms`, `runoffAsphalt`, `elev`, `paint`. New in v13:

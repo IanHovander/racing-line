@@ -12,16 +12,27 @@ async function open(page: Page) {
   return errors;
 }
 
-test('menu loads with every circuit and team', async ({ page }) => {
+test('main screen opens the single-player and multiplayer panels', async ({ page }) => {
   const errors = await open(page);
+  await expect(page.locator('#hSolo')).toBeVisible();
+  await page.click('#hSolo');
   await expect(page.locator('#bSolo')).toBeVisible();
+  await expect(page.locator('#bHost')).toBeHidden();
+  await page.click('#pnlClose');
+  await page.click('#hMulti');
+  await expect(page.locator('#bHost')).toBeVisible();
+  await expect(page.locator('#bSolo')).toBeHidden();
+  await page.click('#pnlClose');
+  await expect(page.locator('#menu')).toBeHidden();
   expect(await page.evaluate(() => [window.TRACKS.length, window.TEAMS.length])).toEqual([8, 5]);
   expect(errors).toEqual([]);
 });
 
 test('a single-player race runs, finishes and shows awards', async ({ page }) => {
   const errors = await open(page);
-  await page.evaluate(() => { window.WZ.mode = 'solo'; window.opts.laps = 1; window.wzGo(3); });
+  await page.click('#hSolo');
+  await page.click('#bSolo');
+  await page.evaluate(() => { window.opts.laps = 1; window.wzGo(3); });
   await page.click('#bStart');
   const r = await page.evaluate(() => {
     window.opts.pedals = 3; window.opts.steer = 0;          // let the car drive itself
@@ -40,7 +51,9 @@ test('a single-player race runs, finishes and shows awards', async ({ page }) =>
 
 test('practice mode puts only your car on track', async ({ page }) => {
   const errors = await open(page);
-  await page.evaluate(() => { window.wzMode('practice'); window.wzGo(3); });
+  await page.click('#hSolo');
+  await page.click('#bPrac');
+  await page.evaluate(() => window.wzGo(3));
   await page.click('#bStart');
   expect(await page.evaluate(() => [window.cars.length, window.PRACTICE])).toEqual([1, true]);
   expect(errors).toEqual([]);

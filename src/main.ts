@@ -12,6 +12,7 @@ import { init as init9 } from './ui/widgets';
 import { init as init10 } from './ui/menu';
 import { init as init11 } from './ui/wizard';
 import { init as init12 } from './game/loop';
+import { init as initHome } from './ui/home';
 import { installDebug } from './debug';
 
 // Run every module's start-up code in the original order.
@@ -27,6 +28,7 @@ init8(); // net/lobby
 init9(); // ui/widgets
 init10(); // ui/menu
 init11(); // ui/wizard
+initHome(); // ui/home
 init12(); // game/loop
 
 if (/[?&]debug\b/.test(location.search) || /^(localhost|127\.0\.0\.1)$/.test(location.hostname) || (window as any).__RL_DEBUG) installDebug();

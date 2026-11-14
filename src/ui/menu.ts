@@ -46,6 +46,7 @@ export function startRace() {
   GS.PRACTICE = WZ.mode === 'practice';
   unlockAudio();
   $('menu').classList.add('hide');
+  $('home').classList.add('hide');
   $('results').classList.add('hide');
   $('pause').classList.add('hide');
   setupRace(false);
@@ -64,7 +65,8 @@ export function toMenu() {
   $('lights').style.display = 'none';
   setupRace(true);
   updatePads();
-  $('menu').classList.remove('hide');
+  $('home').classList.remove('hide');
+  $('menu').classList.add('hide');
 }
 export const backToLobby = () => { MP.phase = 'lobby'; mpPresence(); MP.room && MP.room.presence({ me: null, ai: null, start: null, grid: null }).catch(() => { }); ['tl', 'board', 'spd', 'btns'].forEach(id => $(id).classList.add('hide')); $('yflag').classList.add('hide'); $('lights').style.display = 'none'; setupRace(true); showLobby(); };
 export function init(): void {

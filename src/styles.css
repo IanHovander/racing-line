@@ -141,3 +141,42 @@ body.touch #spd{bottom:auto;top:auto;bottom:110px}
 :is(#wzNav,#lbNav) button.done i{background:#8a93a3;color:#111}
 #sMode button:active{background:rgba(255,255,255,.14);border-color:#fff}
 #bAudio{background:#f2f4f7;color:#111}
+
+/* ---- main screen (home): live race behind, logo, two big buttons ---- */
+#home{position:fixed;inset:0;z-index:9;pointer-events:none;color:#fff}
+#home::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,12,16,.55) 0%,rgba(10,12,16,0) 30%,rgba(10,12,16,0) 50%,rgba(10,12,16,.85) 78%,rgba(10,12,16,.96) 100%)}
+#home.hide{display:none}
+#home>*{pointer-events:auto}
+.hTop{position:absolute;top:calc(18px + env(safe-area-inset-top));left:18px;right:18px;display:flex;justify-content:space-between;pointer-events:none}
+.hTop button{pointer-events:auto}
+.hIco{width:44px;height:44px;border-radius:22px;border:1px solid rgba(255,255,255,.18);background:rgba(12,14,19,.6);color:#fff;display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer}
+.hIco .mx{display:none}.hIco.off .w1,.hIco.off .w2{display:none}.hIco.off .mx{display:inline}
+.hLogo{position:absolute;top:calc(max(80px,11vh) + env(safe-area-inset-top));left:0;right:0;margin:0 auto;width:min(326px,84vw);pointer-events:none}
+.hLogo svg{display:block;width:100%;height:auto}
+.hBot{position:absolute;left:24px;right:24px;bottom:calc(40px + env(safe-area-inset-bottom));max-width:420px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
+.hb{height:64px;border-radius:32px;border:1.5px solid rgba(255,255,255,.75);background:rgba(12,14,19,.55);color:#fff;font:800 19px/1 system-ui,-apple-system,sans-serif;letter-spacing:.5px;display:flex;align-items:center;justify-content:center;gap:10px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .08s}
+.hb.pri{background:#fff;color:#0c0e13;border-color:#fff}
+.hb:active{transform:scale(.98)}
+#hLive{margin:6px 0 0;text-align:center;font:500 12px/1.4 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#c4c9d1;min-height:17px}
+@media (min-height:700px) and (min-width:700px){.hBot{bottom:64px}}
+
+/* ---- setup panel: bottom sheet on phones, centred card on wider screens ---- */
+#menu{background:rgba(6,7,10,.55)}
+#menu .card{background:#14171d}
+#menu[data-group=prefs] .wz[data-s="3"] .wzT{display:none}
+#pnlHead{display:flex;align-items:center;justify-content:space-between;margin:0 0 12px}
+#pnlTitle{font-size:20px;font-weight:800}
+#pnlClose{width:40px;height:40px;border-radius:20px;padding:0;display:flex;align-items:center;justify-content:center}
+#joinRow{display:flex;flex-direction:column;gap:10px;padding:14px;border:1px solid rgba(255,255,255,.25);border-radius:9px}
+#sMode #joinRow label{font-size:15px;font-weight:700;text-transform:none;letter-spacing:0;opacity:1;margin:0}
+#joinRow>div{display:flex;gap:8px}
+#joinCode2{flex:1 1 auto;width:100%;box-sizing:border-box;min-width:0;height:46px;border-radius:9px;border:1px solid rgba(255,255,255,.25);background:#0c0e13;color:#fff;font:700 20px/1 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:4px;padding:0 12px;text-transform:uppercase}
+#sMode #bJoin2{display:block;flex:0 0 auto;width:auto;height:46px;margin:0;padding:0 20px;font-size:15px;font-weight:800}
+#sMode button{grid-template-columns:1fr}
+#sMode button small{grid-column:1}
+@keyframes sheetUp{from{transform:translateY(40px);opacity:0}}
+@media (max-width:640px){
+  #menu{align-items:flex-end;padding:0}
+  #menu .card{border-radius:22px 22px 0 0;max-height:88vh;padding-bottom:calc(18px + env(safe-area-inset-bottom));animation:sheetUp .25s ease-out}
+  #menu .card::before{content:"";display:block;width:40px;height:5px;border-radius:3px;background:rgba(255,255,255,.25);margin:-6px auto 10px}
+}

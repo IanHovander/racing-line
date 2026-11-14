@@ -120,6 +120,7 @@ export function startMpRace(grid, cfg, hostId) {
   $('lobby').classList.add('hide');
   $('results').classList.add('hide');
   $('menu').classList.add('hide');
+  $('home').classList.add('hide');
   setupRace(false, grid.map(e => ({ p: e.p, t: clamp(e.t | 0, 0, 4), d: e.d ? 1 : 0, n: e.n, owner: e.p || hostId })));
   ['tl', 'board', 'spd', 'btns'].forEach(id => $(id).classList.remove('hide'));
   updatePads();

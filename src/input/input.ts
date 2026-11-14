@@ -5,6 +5,8 @@ import { mpOn } from '../net/multiplayer';
 import { laneShift, passPick } from '../sim/ai';
 import { resetCar, sfxShift, shift, swapCar, togglePause } from '../ui/controls';
 import { startRace } from '../ui/menu';
+import { $ } from '../core/dom';
+import { WZ } from '../ui/wizard';
 // ================= Input =================
 export const input = { thr: false, brk: false, left: false, right: false };
 export function pressDRS() { const c = cars[GS.ctrl]; if (!c || attract || opts.drs !== 1 || GS.state !== 'race')
@@ -38,9 +40,11 @@ export function init(): void {
     }
     else if (e.code === 'KeyR')
       resetCar();
+    else if (e.code === 'Escape' && GS.state === 'menu' && !$('menu').classList.contains('hide'))
+      $('menu').classList.add('hide');
     else if (e.code === 'KeyP' || e.code === 'Escape')
       togglePause();
-    else if (e.code === 'Enter' && GS.state === 'menu')
+    else if (e.code === 'Enter' && GS.state === 'menu' && !$('menu').classList.contains('hide') && WZ.group === 'solo' && WZ.s === 3)
       startRace();
   });
   addEventListener('keyup', e => { if (typing(e))

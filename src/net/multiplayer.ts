@@ -210,7 +210,8 @@ export function mpAvail() {
   const ok = !!MP.api;
   $('bHost').disabled = !ok;
   $('bJoin').disabled = !ok;
-  $('mpNote').textContent = ok ? 'Single player races the AI. Host to race friends live: they join with your code or QR code.' : 'Online play isn\'t available in this view (it needs the game opened from claude.ai while signed in).';
+  $('bJoin2').disabled = !ok;
+  $('mpNote').textContent = ok ? 'Friends join with your 5-character room code, the invite link or the QR code.' : 'Online play isn\'t available right now — check your connection and try again.';
 }
 // room codes: 5 letters/digits, no ambiguous characters; old gp-xxxxx links still work
 export const normCode = v => { v = String(v || '').toLowerCase().replace(/[^a-z0-9]/g, ''); if (/^gp[a-z0-9]{5}$/.test(v))
@@ -288,6 +289,7 @@ export function mpPresence(full?) {
 // --- lobby UI ---
 export let showLobby = function () {
   $('menu').classList.add('hide');
+  $('home').classList.add('hide');
   $('results').classList.add('hide');
   $('pause').classList.add('hide');
   $('joinDlg').classList.add('hide');
