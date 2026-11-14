@@ -48,30 +48,7 @@ canvas {
   font-weight: 800;
   letter-spacing: 0.5px;
 }
-#teamStats .drvs {
-  display: flex;
-  gap: 10px;
-  margin-top: 8px;
-}
-#teamStats .drv {
-  flex: 1;
-  min-width: 0;
-}
-#teamStats .drv b {
-  font-size: 12px;
-  white-space: nowrap;
-}
-#teamStats .dtag {
-  font-size: 10.5px;
-  opacity: 0.7;
-  margin: 2px 0 3px;
-  min-height: 2.8em;
-  line-height: 1.35;
-}
-#teamStats .drv .sr span {
-  font-size: 10.5px;
-  flex: 0 0 68px;
-}
+
 #tl .dim {
   opacity: 0.75;
   font-size: 11px;
@@ -1023,47 +1000,7 @@ body.touch #rcb .v {
   background: #ff3b30;
   border-color: #ff6a60;
 }
-.teams {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 8px;
-}
-.teams button {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  text-align: left;
-  padding: 8px !important;
-  border-width: 2px !important;
-  height: 84px;
-  overflow: hidden;
-}
-.teams button > span:last-child {
-  min-width: 0;
-}
-.teams button.sel {
-  background: rgba(255, 255, 255, 0.12) !important;
-  border-color: #ffe066 !important;
-  box-shadow: 0 0 0 1px #ffe066;
-}
-.teams .tn {
-  font-weight: 800;
-  font-size: 13px;
-  line-height: 1.2;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-.teams .td {
-  font-size: 11px;
-  opacity: 0.8;
-  font-weight: 500;
-  line-height: 1.5;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
+
 svg.flag {
   border-radius: 2px;
   vertical-align: middle;
@@ -1233,64 +1170,12 @@ svg.logo {
 button:disabled {
   opacity: 0.45;
 }
-#teamStats {
-  margin-top: 8px;
-  font-size: 12px;
-}
-#teamStats .tg {
-  opacity: 0.8;
-  margin-bottom: 5px;
-  min-height: 2.7em;
-  line-height: 1.35;
-}
-#teamStats .sr {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 2px 0;
-}
-#teamStats .sr span {
-  flex: 0 0 90px;
-  opacity: 0.75;
-}
-#teamStats .sb {
-  flex: 1;
-  height: 7px;
-  background: rgba(255, 255, 255, 0.12);
-  border-radius: 4px;
-  overflow: hidden;
-}
-#teamStats .sb i {
-  display: block;
-  height: 100%;
-  border-radius: 4px;
-}
+
 .trk {
   font-size: 12px;
   opacity: 0.75;
   margin-top: 6px;
   line-height: 1.4;
-}
-#trkInfo {
-  opacity: 1;
-}
-#trkInfo .tname {
-  font-size: 15px;
-  font-weight: 800;
-}
-#trkInfo .tname span {
-  font-weight: 500;
-  opacity: 0.65;
-  font-size: 12px;
-  margin-left: 4px;
-}
-#trkInfo .tdesc {
-  opacity: 0.75;
-  margin: 3px 0 5px;
-}
-#trkInfo .tstats {
-  opacity: 0.85;
-  font-variant-numeric: tabular-nums;
 }
 
 :is(#wzNav, #lbNav) {
@@ -1407,145 +1292,7 @@ button:disabled {
   flex: 0 0 auto;
   padding: 0 16px;
 }
-#sTrack {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
-  gap: 6px;
-}
-#sTrack button {
-  display: block;
-  padding: 0 !important;
-  border: 0 !important;
-  background: none !important;
-  box-shadow: none !important;
-  border-radius: 4px;
-  opacity: 0.72;
-  transition:
-    opacity 0.15s,
-    transform 0.15s;
-}
-#sTrack button.sel {
-  opacity: 1;
-  transform: translateY(-2px);
-}
-#sTrack button.sel .pst svg {
-  outline: 2px solid #fff;
-  outline-offset: 2px;
-}
-#sTrack .pst svg {
-  display: block;
-  width: 100%;
-  height: auto;
-  border-radius: 3px;
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.45);
-}
-#sTrack .cn {
-  margin-top: 5px;
-  font-size: 11px !important;
-}
-#sTrack .fb {
-  display: flex;
-  width: 42px;
-  height: 3px;
-  border-radius: 2px;
-  overflow: hidden;
-  margin: 4px 0 3px;
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.35);
-}
-#sTrack .fb i {
-  flex: 1;
-}
-#sTrack .ci {
-  grid-row: 1/3;
-  width: 38px;
-  height: 38px;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
-}
-#sTrack .cn {
-  display: block;
-  font-size: 12px;
-  font-weight: 700;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-#sTrack .cl {
-  width: 100%;
-  height: 46px;
-  display: block;
-  opacity: 0.85;
-}
-#sTrack .cl path {
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 2.2;
-  stroke-linejoin: round;
-}
-#sTrack button.sel .cl {
-  opacity: 1;
-}
-#trkMap {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  margin-top: 8px;
-}
-#trkMap canvas {
-  position: static !important;
-  inset: auto !important;
-  z-index: auto !important;
-}
-#trkMap .mapcol {
-  flex: 0 0 auto;
-  width: min(360px, 62vw);
-  display: grid;
-  gap: 6px;
-}
-#trkMap .prof {
-  width: 100%;
-  height: auto;
-  display: block;
-  background: rgba(0, 0, 0, 0.22);
-  border-radius: 8px;
-}
-#trkMap .big {
-  width: 100%;
-  height: auto;
-  background: radial-gradient(ellipse at 50% 60%, #1b222d, #0f1218);
-  border-radius: 10px;
-  touch-action: pan-y;
-  cursor: grab;
-}
-#trkMap .lg {
-  font-size: 11px;
-  line-height: 1.7;
-  opacity: 0.85;
-}
-#trkMap .lg i {
-  display: inline-block;
-  width: 14px;
-  height: 4px;
-  border-radius: 2px;
-  margin-right: 5px;
-  vertical-align: middle;
-}
-@media (max-width: 520px) {
-  #trkMap {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  #trkMap .big,
-  #trkMap .mapcol {
-    width: 100%;
-  }
-  #trkMap .lg {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0 12px;
-  }
-}
+
 #laneInd {
   display: flex;
   gap: 4px;
@@ -1693,8 +1440,7 @@ body.touch #spd {
 }
 
 /* monochrome UI accents (menu, pause, results, lobby, prompts) */
-.seg button.sel,
-#sTrack button.sel {
+.seg button.sel {
   background: #f2f4f7;
   border-color: #fff;
   color: #111;
@@ -1704,10 +1450,7 @@ body.touch #spd {
   border-color: #fff !important;
   color: #111 !important;
 }
-.teams button.sel {
-  border-color: #fff !important;
-  box-shadow: 0 0 0 1px #fff;
-}
+
 :is(#wzNav, #lbNav) button.cur {
   border-color: #fff;
   background: rgba(255, 255, 255, 0.12);
@@ -1981,4 +1724,375 @@ body.touch #spd {
   border-radius: 16px;
   white-space: nowrap;
   pointer-events: none;
+}
+
+/* ---- team step: compact list + summary card ---- */
+.stepCols {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 0;
+}
+.tlist {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.tlist button {
+  display: grid;
+  grid-template-columns: 32px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  height: 46px;
+  padding: 0 12px;
+  border-radius: 12px;
+  text-align: left;
+}
+.tlist button > svg:first-child {
+  width: 30px;
+  height: 30px;
+}
+.tlist button.sel {
+  border: 2px solid #fff;
+  background: rgba(255, 255, 255, 0.08);
+}
+.tlist .tn {
+  font-size: 15px;
+  font-weight: 800;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tlist .tdc {
+  display: flex;
+  gap: 10px;
+  font: 600 12px/1 var(--mono);
+  color: #c4c9d1;
+}
+.tlist .tdc span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+#teamStats {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+}
+#teamStats .tg {
+  font-size: 13px;
+  line-height: 1.35;
+  color: #dde1e6;
+}
+#teamStats .tg b {
+  color: #fff;
+}
+#teamStats .bars {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 16px;
+  row-gap: 4px;
+}
+#teamStats .sr {
+  display: grid;
+  grid-template-columns: 82px 1fr;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  color: #c4c9d1;
+}
+#teamStats .sb {
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+#teamStats .sb i {
+  display: block;
+  height: 100%;
+  border-radius: 3px;
+}
+#teamStats .drvs {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+#teamStats .drv {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  min-width: 0;
+}
+#teamStats .drv b {
+  white-space: nowrap;
+}
+#teamStats .drv span {
+  color: #9aa1aa;
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ---- circuit step: map first ---- */
+#trkMap {
+  position: relative;
+  min-height: 120px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #0c0e13;
+}
+#trkMap canvas {
+  position: static;
+  display: block;
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 720 / 440;
+  object-fit: contain;
+  touch-action: none;
+  cursor: grab;
+}
+#trkMap .lg {
+  position: absolute;
+  left: 8px;
+  bottom: 6px;
+  display: flex;
+  gap: 8px;
+  font-size: 10px;
+  color: #c4c9d1;
+  pointer-events: none;
+}
+#trkMap .lg div {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+#trkMap .lg i {
+  width: 8px;
+  height: 3px;
+  border-radius: 2px;
+  display: block;
+}
+.cside {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.chead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.carr {
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  border-radius: 22px;
+  padding: 0;
+  font-size: 22px;
+  line-height: 1;
+}
+#trkInfo {
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+}
+#trkInfo .tname {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 18px;
+  font-weight: 800;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#trkInfo .cb {
+  display: flex;
+  flex: 0 0 auto;
+  width: 22px;
+  height: 13px;
+  border-radius: 3px;
+  overflow: hidden;
+}
+#trkInfo .cb i {
+  flex: 1;
+}
+#trkInfo .tplace {
+  font-size: 12px;
+  color: #9aa1aa;
+  margin-top: 3px;
+}
+#trkElev svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+}
+#trkStats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+}
+#trkStats div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 7px 9px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+}
+#trkStats b {
+  font: 700 14px/1 var(--mono);
+  white-space: nowrap;
+}
+#trkStats span {
+  font-size: 10px;
+  color: #9aa1aa;
+}
+#trkDots {
+  display: flex;
+  justify-content: center;
+  gap: 2px;
+}
+#trkDots button {
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 0;
+  background: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#trkDots button::after {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.3);
+  transition: width 0.15s;
+}
+#trkDots button.sel::after {
+  width: 16px;
+  background: #fff;
+}
+
+/* ---- the panel fills its height so the team and circuit steps fit without scrolling ---- */
+#menu .card {
+  display: flex;
+  flex-direction: column;
+}
+#menu .wz.on {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+#menu .wz[data-s='1'].on,
+#menu .wz[data-s='2'].on {
+  overflow: hidden;
+}
+#menu .wz[data-s='0'].on,
+#menu .wz[data-s='3'].on {
+  overflow: auto;
+}
+#menu .wz[data-s='2'] .stepCols {
+  flex: 1;
+}
+#menu .wz[data-s='2'] #trkMap {
+  flex: 1;
+}
+@media (max-width: 640px) {
+  #menu .card {
+    height: 88vh;
+    overflow: hidden;
+  }
+}
+
+/* ---- phones held sideways: full-screen panel, two columns ---- */
+@media (max-height: 520px) and (orientation: landscape) {
+  #menu {
+    padding: 0;
+    align-items: stretch;
+  }
+  #menu .card {
+    max-width: none;
+    height: 100vh;
+    height: 100dvh;
+    max-height: none;
+    box-sizing: border-box;
+    border-radius: 0;
+    padding: 10px 20px calc(8px + env(safe-area-inset-bottom));
+    overflow: hidden;
+    position: relative;
+    animation: none;
+  }
+  #menu .card::before {
+    display: none;
+  }
+  #pnlHead {
+    margin: 0 0 8px;
+  }
+  #wzNav {
+    position: absolute;
+    top: 10px;
+    left: 190px;
+    right: 76px;
+    margin: 0;
+  }
+  #menu .wz .wzT {
+    font-size: 15px;
+    margin: 0 0 6px;
+  }
+  #menu .wz[data-s='1'] .stepCols,
+  #menu .wz[data-s='2'] .stepCols {
+    flex-direction: row;
+    flex: 1;
+    gap: 18px;
+  }
+  .tlist {
+    flex: 0 0 340px;
+    gap: 3px;
+  }
+  .tlist button {
+    height: 38px;
+  }
+  #teamStats {
+    flex: 1;
+    min-width: 0;
+  }
+  #menu .wz[data-s='2'] #trkMap {
+    flex: 1.15;
+  }
+  .cside {
+    flex: 1;
+    min-width: 0;
+  }
+  #wzBar {
+    padding-top: 6px;
+  }
+}
+
+/* short phones (iPhone SE and similar): tighter team list and card */
+@media (max-width: 640px) and (max-height: 720px) {
+  .tlist {
+    gap: 4px;
+  }
+  .tlist button {
+    height: 40px;
+  }
+  #teamStats {
+    padding: 9px 11px;
+    gap: 6px;
+  }
+  #menu .wz .wzT {
+    margin-bottom: 6px;
+  }
 }

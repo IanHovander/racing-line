@@ -59,7 +59,7 @@ export function layoutPath(pts, w, h, pad) {
 // circuit-step map: seen from a low angle (28°), track raised to its true height, walls beneath, ground shadow, corner numbers; drag to turn
 export let MAPYAW = 30;
 export function drawTrackMap() {
-  return `<div class="mapcol"><canvas class="big" width="720" height="440"></canvas>${elevProfile()}</div><div class="lg"><div><i style="background:#ff5a5a"></i>Sector 1</div><div><i style="background:#ffd166"></i>Sector 2</div><div><i style="background:#5ab0ff"></i>Sector 3</div><div><i style="background:#2ecc71"></i>DRS Zone</div></div>`;
+  return `<canvas class="big" width="720" height="440" aria-label="Circuit map — drag to turn it"></canvas><div class="lg"><div><i style="background:#ff5a5a"></i>S1</div><div><i style="background:#ffd166"></i>S2</div><div><i style="background:#5ab0ff"></i>S3</div><div><i style="background:#2ecc71"></i>DRS</div></div>`;
 }
 export function elevProfile() {
   const W = 360,

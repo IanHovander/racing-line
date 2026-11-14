@@ -306,6 +306,19 @@ Playable build: https://matthewtorgerson.github.io/racing-line/ (GitHub Pages, b
 - Lint clean-up: removed dead code left from the single-file days (the grandstand styles, stadium bowl and `placeStands`, unused locals).
 - **Geist Mono** (Vercel, SIL OFL 1.1) is the font for every monospaced readout (HUD timing, standings, lap card, live line, room codes). It's self-hosted in `public/fonts/` with its licence, via the `--mono` CSS variable, and was picked over Martian Mono and Reddit Mono (https://claude.ai/artifact/6E13K89Tqfcytor9NAnZqp).
 
+## v17.4 — team and circuit steps without scrolling (option A of both)
+- **Team step:**
+  - Teams are a compact list: one row per team with logo, name and driver codes with flags.
+  - Under the list, a summary card for the selected team: tagline, the six car bars in two columns, and one line per driver (flag, name, trait summary). The per-driver trait bars are gone from this step.
+- **Circuit step:** map first. The angled map fills the space left (still draggable to turn), with a small S1/S2/S3/DRS legend.
+  - ‹ › buttons beside the circuit name change circuit, under the host-colour bar and place.
+  - Below are the elevation profile and four tiles: Length, Corners, DRS Zones, and Climb (or Your Best once you have one).
+  - Dots show the circuit's position in the list and jump to a circuit.
+  - The posters are no longer used in this step (the lobby still has them).
+- **Panel:** a fixed-height flex column (88vh sheet on phones). The team and circuit steps never scroll; the session and settings steps do.
+  - Phones held sideways (≤520 px tall) get a full-screen panel: the steps sit in the header row, with two columns (team list | summary, map | circuit details).
+  - Checked with no overflow at 390×844, 375×667, 844×390, 667×375 and desktop.
+
 ## Model
 
 - Tracks: control points → Catmull-Rom → smoothed and resampled every 2 m (`buildTrack()`). Long straights need intermediate control points: without them the spline overshoots at the next tight corner and makes a near-cusp (a 4–7 m radius). That happened on the first Mexico and Vegas drafts.

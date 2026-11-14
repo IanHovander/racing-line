@@ -261,17 +261,25 @@
         </div>
         <div class="wz" data-s="1">
           <div class="wzT">Choose Your Team</div>
-          <div class="row">
-            <div class="teams" id="sTeam"></div>
+          <div class="stepCols">
+            <div class="tlist" id="sTeam"></div>
             <div id="teamStats"></div>
           </div>
         </div>
         <div class="wz" data-s="2">
           <div class="wzT">Choose a Circuit</div>
-          <div class="row">
-            <div class="seg" id="sTrack"></div>
-            <div class="trk" id="trkInfo"></div>
+          <div class="stepCols cstep">
             <div id="trkMap"></div>
+            <div class="cside">
+              <div class="chead">
+                <button id="trkPrev" class="carr" aria-label="Previous circuit">‹</button>
+                <div id="trkInfo"></div>
+                <button id="trkNext" class="carr" aria-label="Next circuit">›</button>
+              </div>
+              <div id="trkElev"></div>
+              <div id="trkStats"></div>
+              <div id="trkDots"></div>
+            </div>
           </div>
         </div>
         <div class="wz" data-s="3">

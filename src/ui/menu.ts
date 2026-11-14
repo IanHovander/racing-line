@@ -12,10 +12,10 @@ import { TEAMS, flag, teamLogo } from '../teams/teams';
 import { buildTrack } from '../track/build';
 import { TRACKS } from '../track/circuits';
 import { WX } from '../track/track';
-import { CIRCUIT_PLACE, bindTrackMap, drawTrackMap } from './circuit-map';
+import { CIRCUIT_PLACE, bindTrackMap, drawTrackMap, elevProfile } from './circuit-map';
+import { CIRCUIT_COLS } from './circuits';
 import { showToast, syncCtrlMenu, updatePads } from './controls';
 import { fmt, updateLights } from './hud';
-import { POSTERS } from './posters';
 import { segInit, syncAllSegs } from './widgets';
 import { WZ, wzHost, wzJoin } from './wizard';
 export function showTeamStats() {
@@ -29,28 +29,16 @@ export function showTeamStats() {
     ['Tyre Life', 2 - st.tyre, 0.8, 1.3],
     ['Durability', 2 - st.dur, 0.75, 1.2],
   ];
-  let h = `<div class="tg" style="display:flex;gap:8px;align-items:center">${teamLogo(opts.team, 22)}<span><b>${t.name}</b> — ${st.tag}</span></div>`;
+  // summary card: tagline, car bars in two columns, one line per driver
+  let h = `<div class="tg"><b>${t.name}</b> — ${st.tag}</div><div class="bars">`;
   for (const [n, v, a, b] of R) {
     const p = Math.round(clamp((v - a) / (b - a), 0.06, 1) * 100);
     h += `<div class="sr"><span>${n}</span><div class="sb"><i style="width:${p}%;background:${t.col};box-shadow:inset -3px 0 ${t.acc}"></i></div></div>`;
   }
-  h += `<div class="drvs">`;
-  for (let d = 0; d < 2; d++) {
-    const ds = DRIVER_STATS[opts.team][d];
-    h += `<div class="drv"><b>${flag(t.nat[d], 11)} ${t.drivers[d]}</b><div class="dtag">${ds.tag}</div>`;
-    for (const [n, k] of [
-      ['Pace', 'pace'],
-      ['Aggression', 'aggr'],
-      ['Defending', 'defend'],
-      ['Consistency', 'consist'],
-      ['Wet', 'wet'],
-      ['Tyre Care', 'tyre'],
-    ])
-      h += `<div class="sr"><span>${n}</span><div class="sb"><i style="width:${Math.round(ds[k] * 100)}%;background:${t.acc}"></i></div></div>`;
-    h += `</div>`;
-  }
-  h += `</div>`;
-  $('teamStats').innerHTML = h;
+  h += `</div><div class="drvs">`;
+  for (let d = 0; d < 2; d++)
+    h += `<div class="drv">${flag(t.nat[d], 13)}<b>${t.drivers[d]}</b><span>${DRIVER_STATS[opts.team][d].tag}</span></div>`;
+  $('teamStats').innerHTML = h + '</div>';
 }
 export function startRace() {
   GS.PRACTICE = WZ.mode === 'practice';
@@ -93,44 +81,51 @@ export const backToLobby = () => {
   showLobby();
 };
 export function init(): void {
+  // circuit step: map first, ‹ › to change circuit, elevation profile, stat tiles, dots
   {
-    const el = $('sTrack');
+    const dots = $('trkDots');
     TRACKS.forEach((t, i) => {
       const b = document.createElement('button');
-      b.dataset.v = String(i);
-      b.innerHTML = `<span class="pst">${POSTERS[t.id] || ''}</span>`;
-      b.title = t.name;
       b.setAttribute('aria-label', t.name);
-      el.appendChild(b);
+      b.onclick = () => pick(i);
+      dots.appendChild(b);
     });
     const sync = () => {
-      ([...el.children] as HTMLElement[]).forEach((b, i) => b.classList.toggle('sel', i === GS.trackIdx));
       const t = TRACKS[GS.trackIdx];
       const best = store.get('best_' + t.id, 0);
+      ([...dots.children] as HTMLElement[]).forEach((b, i) => b.classList.toggle('sel', i === GS.trackIdx));
       $('trkMap').innerHTML = drawTrackMap();
       bindTrackMap();
-      {
-        let hmin = 1e9,
-          hmax = -1e9;
-        for (let i = 0; i < GS.N; i++) {
-          hmin = Math.min(hmin, GS.HT[i]);
-          hmax = Math.max(hmax, GS.HT[i]);
-        }
-        $('trkInfo').innerHTML =
-          `<div class="tname">${t.name} <span>${CIRCUIT_PLACE[t.id] || ''}</span></div><div class="tdesc">${t.sub}</div><div class="tstats">${(GS.L / 1000).toFixed(2)} km · ${GS.CORNERS.length} corners · ${GS.DRSZ.length} DRS zone${GS.DRSZ.length === 1 ? '' : 's'} · ${Math.round(hmax - hmin)} m elevation${t.night ? ' · night race' : ''}${t.street ? ' · street circuit' : ''}${best ? ' · <b>Your best ' + fmt(best) + '</b>' : ''}</div>`;
+      $('trkElev').innerHTML = elevProfile();
+      let hmin = 1e9,
+        hmax = -1e9;
+      for (let i = 0; i < GS.N; i++) {
+        hmin = Math.min(hmin, GS.HT[i]);
+        hmax = Math.max(hmax, GS.HT[i]);
       }
+      const cols = CIRCUIT_COLS[t.id] || [];
+      $('trkInfo').innerHTML =
+        `<div class="tname"><span class="cb">${cols.map(c => `<i style="background:${c}"></i>`).join('')}</span>${t.name}</div>` +
+        `<div class="tplace">${CIRCUIT_PLACE[t.id] || ''}${t.night ? ' · Night Race' : ''}${t.street ? ' · Street Circuit' : ''}</div>`;
+      const tiles: [string, string][] = [
+        [(GS.L / 1000).toFixed(2) + ' km', 'Length'],
+        [String(GS.CORNERS.length), 'Corners'],
+        [String(GS.DRSZ.length), GS.DRSZ.length === 1 ? 'DRS Zone' : 'DRS Zones'],
+        [best ? fmt(best) : Math.round(hmax - hmin) + ' m', best ? 'Your Best' : 'Climb'],
+      ];
+      $('trkStats').innerHTML = tiles.map(([v, k]) => `<div><b>${v}</b><span>${k}</span></div>`).join('');
     };
-    el.addEventListener('click', e => {
-      const b = (e.target as HTMLElement).closest('button');
-      if (!b) return;
-      const i = +b.dataset.v;
+    const pick = (i: number) => {
+      i = (i + TRACKS.length) % TRACKS.length;
       if (i === GS.trackIdx) return;
       GS.trackIdx = i;
       store.set('track', i);
       buildTrack(TRACKS[i]);
       setupRace(true);
       sync();
-    });
+    };
+    $('trkPrev').onclick = () => pick(GS.trackIdx - 1);
+    $('trkNext').onclick = () => pick(GS.trackIdx + 1);
     sync();
   }
   $('sTeam').addEventListener('click', () => setTimeout(showTeamStats, 0));
@@ -203,7 +198,8 @@ export function init(): void {
     TEAMS.forEach((t, i) => {
       const b = document.createElement('button');
       b.dataset.v = String(i);
-      b.innerHTML = `${teamLogo(i, 34)}<span><div class="tn">${t.name}</div><div class="td">${flag(t.nat[0], 10)} ${t.drivers[0]}</div><div class="td">${flag(t.nat[1], 10)} ${t.drivers[1]}</div></span>`;
+      const code = (n: string) => n.split(' ').pop().slice(0, 3).toUpperCase();
+      b.innerHTML = `${teamLogo(i, 30)}<span class="tn">${t.name}</span><span class="tdc"><span>${flag(t.nat[0], 12)}${code(t.drivers[0])}</span><span>${flag(t.nat[1], 12)}${code(t.drivers[1])}</span></span>`;
       el.appendChild(b);
     });
     segInit('sTeam', 'team', Number);
