@@ -438,7 +438,7 @@ export function init(): void {
     }
     if (MP.p2p)
       $('lbHelp').textContent =
-      'Friends open this page (or scan the QR code) and join with the code. Players connect directly to the host.';
+        'Friends open this page (or scan the QR code) and join with the code. Players connect directly to the host.';
     mpAvail();
     const h = (location.hash || '').slice(1);
     if (MP.api && normCode(h)) enterRoom(normCode(h), false);

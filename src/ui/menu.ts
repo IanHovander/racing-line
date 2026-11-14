@@ -103,7 +103,9 @@ export function placeCircuitPicker(slotId: string) {
 export function syncCircuit() {
   const t = TRACKS[GS.trackIdx];
   const best = store.get('best_' + t.id, 0);
-  ([...$('trkDots').children] as HTMLElement[]).forEach((b, i) => b.classList.toggle('sel', i === GS.trackIdx));
+  ([...$('trkDots').children] as HTMLElement[]).forEach((b, i) =>
+    b.classList.toggle('sel', i === GS.trackIdx),
+  );
   $('trkMap').innerHTML = drawTrackMap();
   bindTrackMap();
   $('trkElev').innerHTML = elevProfile();

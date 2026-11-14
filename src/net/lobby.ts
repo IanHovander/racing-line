@@ -225,7 +225,11 @@ export function renderLobbySettings(cfg) {
       }),
     );
   }
-  $('lbTrackTitle').textContent = MP.host ? 'Choose a Circuit' : cfg ? 'Circuit — Chosen by the Host' : 'Circuit — Waiting for the Host';
+  $('lbTrackTitle').textContent = MP.host
+    ? 'Choose a Circuit'
+    : cfg
+      ? 'Circuit — Chosen by the Host'
+      : 'Circuit — Waiting for the Host';
 }
 // ---- every player races a different team: earlier arrivals keep their pick, later ones move to a free team
 export function lobbyOrder() {

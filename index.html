@@ -509,7 +509,20 @@
       <div class="card">
         <div id="lbHead">
           <span id="lbTitle">Multiplayer <small id="lbRoomTag"></small></span
-          ><button id="bLbClose" aria-label="Leave room"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18" /></svg></button>
+          ><button id="bLbClose" aria-label="Leave room">
+            <svg
+              aria-hidden="true"
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+            >
+              <path d="M6 6l12 12M18 6 6 18" />
+            </svg>
+          </button>
         </div>
         <div id="lbNav">
           <button data-s="0"><i>1</i>Room</button><button data-s="1"><i>2</i>Team</button
@@ -519,25 +532,27 @@
           <div class="wzT">Invite Friends</div>
           <div class="roomCols">
             <div class="roomA">
-          <div class="lbwrap">
-            <div id="qr"></div>
-            <div style="flex: 1; min-width: 0">
-              <div class="trk">Room Code</div>
-              <div class="code" id="lbCode"></div>
-              <button id="bCopy">Copy Invite Link</button>
-              <div class="trk" id="lbLink" style="word-break: break-all"></div>
-            </div>
-          </div>
+              <div class="lbwrap">
+                <div id="qr"></div>
+                <div style="flex: 1; min-width: 0">
+                  <div class="trk">Room Code</div>
+                  <div class="code" id="lbCode"></div>
+                  <button id="bCopy">Copy Invite Link</button>
+                  <div class="trk" id="lbLink" style="word-break: break-all"></div>
+                </div>
+              </div>
             </div>
             <div class="roomB">
-          <div class="row lbname"><label for="nick">Your Name</label><input id="nick" maxlength="16" autocomplete="off" /></div>
-          <div class="sh">Players</div>
-          <div id="lbPlayers"></div>
-          <div class="trk" id="lbInfo"></div>
-          <div class="help" id="lbHelp">
-            Everyone picks a team and their own controls; the host picks the circuit and race settings.
-          </div>
-                    </div>
+              <div class="row lbname">
+                <label for="nick">Your Name</label><input id="nick" maxlength="16" autocomplete="off" />
+              </div>
+              <div class="sh">Players</div>
+              <div id="lbPlayers"></div>
+              <div class="trk" id="lbInfo"></div>
+              <div class="help" id="lbHelp">
+                Everyone picks a team and their own controls; the host picks the circuit and race settings.
+              </div>
+            </div>
           </div>
         </div>
         <div class="wz" data-s="1">

@@ -6,7 +6,10 @@ export const skids = [],
   parts = [];
 export function init(): void {
   // the menu shows the last raced circuit (and plays its music); Spa (Ardennes) the first time
-  const spa = Math.max(0, TRACKS.findIndex(t => t.id === 'spa'));
+  const spa = Math.max(
+    0,
+    TRACKS.findIndex(t => t.id === 'spa'),
+  );
   GS.trackIdx = clamp(store.get('lastTrack', spa), 0, TRACKS.length - 1);
   buildTrack(TRACKS[GS.trackIdx]);
   GS.musId = TRACKS[GS.trackIdx].id;
