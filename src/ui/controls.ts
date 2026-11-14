@@ -178,25 +178,36 @@ export function layoutPads() {
   document.body.style.removeProperty('--notesB');
   if (!isTouch || GS.state === 'menu') return;
   // throttle only, no steering pads: everything on the right thumb. GAS bottom right, Swap to its left at the
-  // same height, the speed panel above GAS, notifications above that.
+  // same height, the speed panel above them centred on the screen, notifications above that.
   if (vis('pThr') && !['pBrk', 'pL', 'pR', 'pUp', 'pDn', 'pDRS'].some(vis)) {
     const g = $('pThr').getBoundingClientRect(),
       W = innerWidth,
       H = innerHeight;
     const w = Math.max(g.width, 210);
-    spd.style.left = 'auto';
-    spd.style.right = W - g.right + 'px';
+    const swW = vis('pSwap') ? g.height : 0,
+      swL = g.left - 12 - swW; // left edge of Swap
+    spd.style.right = 'auto';
     spd.style.width = w + 'px';
     spd.style.transform = 'none';
-    spd.style.bottom = H - g.top + 10 + 'px';
     spd.classList.add('compact');
+    let pb: number; // speed panel bottom
+    if (H > W) {
+      // portrait: centred on the screen, above GAS and Swap
+      spd.style.left = Math.round((W - w) / 2) + 'px';
+      pb = H - g.top + 10;
+    } else {
+      // landscape: above GAS would cover the car, so on the bottom edge, centred unless that reaches Swap
+      spd.style.left = Math.round(Math.max(10, Math.min((W - w) / 2, swL - 12 - w))) + 'px';
+      pb = H - g.bottom;
+    }
+    spd.style.bottom = pb + 'px';
     if (vis('pSwap')) {
       sw.style.left = 'auto';
       sw.style.right = W - g.left + 12 + 'px';
       sw.style.bottom = H - g.bottom + 'px';
       sw.style.width = sw.style.height = g.height + 'px';
     }
-    const top = H - g.top + 10 + spd.getBoundingClientRect().height;
+    const top = pb + spd.getBoundingClientRect().height;
     document.body.style.setProperty('--notesB', Math.round(top + 12) + 'px');
     return;
   }
