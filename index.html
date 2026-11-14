@@ -47,6 +47,7 @@ canvas{display:block;position:fixed;inset:0;width:100vw;height:100vh}
 #btns{position:fixed;top:10px;right:10px;display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;max-width:60vw}
 #btns button,.ov button{font:inherit;color:#fff;background:rgba(10,12,18,.7);border:1px solid rgba(255,255,255,.25);border-radius:9px;padding:7px 10px;font-size:13px;font-weight:600;cursor:pointer}
 #btns button:active{background:rgba(255,255,255,.25)}
+#lbTeams{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}#lbTeams button{display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 3px!important;font-size:10.5px;line-height:1.15;min-height:74px}#lbTeams button.sel{background:#f2f4f7!important;color:#111!important;border-color:#fff!important}#lbTeams button:disabled{opacity:.45;cursor:default}#lbTeams button small{font-size:9.5px;opacity:.8;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #rcb{position:fixed;top:auto;bottom:128px;left:50%;transform:translate(-50%,8px);z-index:6;display:flex;align-items:stretch;border-radius:7px;overflow:hidden;box-shadow:0 4px 16px #0009;opacity:0;transition:opacity .25s,transform .25s;pointer-events:none;white-space:nowrap;max-width:calc(100vw - 20px)}
 #rcb.on{opacity:1;transform:translate(-50%,0)}#rcb .k{display:grid;place-items:center;padding:0 10px;background:#f2f4f7}#rcb.pen .k{background:#ff8a00}#rcb .k svg{display:block;width:24px;height:24px}
 #rcb .v{background:rgba(12,14,19,.93);color:#fff;padding:6px 12px;display:flex;align-items:center;gap:9px;font-size:12px}#rcb .v b{font-size:13px;letter-spacing:.5px}#rcb.pen .v b{font-size:16px}#rcb .v span{opacity:.8;font-size:11px;line-height:1.3}
@@ -245,6 +246,7 @@ body.touch #spd{bottom:auto;top:auto;bottom:110px}
     <button id="bCopy">Copy invite link</button><div class="trk" id="lbLink" style="word-break:break-all"></div></div></div>
   <div id="lbHostOpts" class="row"><label>Circuit</label><div class="seg" id="lbTrack"></div><label style="margin-top:8px">Laps</label><div class="seg" id="lbLaps"><button data-v="3">3</button><button data-v="5">5</button><button data-v="10">10</button></div></div>
   <div class="row"><label>Your name</label><input id="nick" maxlength="16" autocomplete="off"></div>
+  <div class="row"><label>Your team</label><div id="lbTeams"></div><div class="trk" id="lbTeamNote"></div></div>
   <div class="row"><label>Players</label><div id="lbPlayers"></div></div>
   <button class="go" id="bLbStart">Start race</button>
   <div class="help" id="lbWait"></div>
@@ -3028,14 +3030,14 @@ function makeP2PApi(PeerCls){PeerCls=PeerCls||window.Peer;const opt=()=>({debug:
   try{if(window.claude&&window.claude.use)MP.api=await window.claude.use('room');}catch(e){MP.api=null;}
   if(!MP.api&&window.RTCPeerConnection&&location.protocol!=='file:'){try{await loadPeerJS();MP.api=makeP2PApi();MP.p2p=true;ARTIFACT_URL=location.origin+location.pathname;}catch(e){MP.api=null;}}
   if(MP.p2p)$('lbHelp').textContent='Friends open this page (or scan the QR code) and join with the code. Players connect directly to the host over WebRTC. Team, controls and race rules come from each player\'s main menu; the host picks the circuit, laps and race rules.';
-  mpAvail();const h=(location.hash||'').slice(1);if(MP.api&&/^gp-[a-z0-9]{4,8}$/.test(h))enterRoom(h,false);})();
+  mpAvail();const h=(location.hash||'').slice(1);if(MP.api&&/^gp-[a-z0-9]{4,8}$/.test(h))enterRoom(h,false);addEventListener('hashchange',()=>{const h2=(location.hash||'').slice(1);if(MP.api&&!MP.room&&/^gp-[a-z0-9]{4,8}$/.test(h2))enterRoom(h2,false);});})();
 function mpAvail(){const ok=!!MP.api;$('bHost').disabled=!ok;$('bJoin').disabled=!ok;
   $('mpNote').textContent=ok?'Single player races the AI. Host to race friends live: they join with your code or QR code.':'Online play isn\'t available in this view (it needs the game opened from claude.ai while signed in).';}
 const mpCode=()=>'gp-'+Array.from({length:5},()=>'abcdefghjkmnpqrstuvwxyz23456789'[Math.floor(Math.random()*31)]).join('');
 async function enterRoom(code,asHost){
   if(!MP.api)return;try{if(MP.room)await leaveRoom(true);
     MP.room=await MP.api.join(code);}catch(e){const t=e&&e.type;showToast(t==='peer-unavailable'?'No race found with code '+code:t==='timeout'?'Couldn\'t reach the host for '+code+' — their network may block direct connections':t==='network'||t==='server-error'||t==='socket-error'?'Can\'t reach the matchmaking server right now':'Could not join '+code);MP.room=null;return;}
-  MP.code=code;MP.host=asHost;MP.phase='lobby';MP.lastStart=null;try{location.hash=code;}catch(e){}
+  MP.code=code;MP.host=asHost;MP.phase='lobby';MP.jt=Date.now();MP.lastStart=null;try{location.hash=code;}catch(e){}
   MP.unsub=MP.room.onPeers(ch=>{MP.peers=ch.peers;const me=ch.peers.find(p=>p.sameTab);if(me)MP.me=me.peer;mpPeers(ch);},()=>{showToast('Lost connection to the room');leaveRoom();});
   mpPresence(true);showLobby();}
 async function leaveRoom(quiet){const r=MP.room;MP.room=null;MP.phase='off';MP.host=false;if(MP.unsub)MP.unsub();MP.unsub=null;try{if(r)await r.leave();}catch(e){}
@@ -3043,13 +3045,25 @@ async function leaveRoom(quiet){const r=MP.room;MP.room=null;MP.phase='off';MP.h
   $('lobby').classList.add('hide');if(!quiet)toMenu();}
 function hostPeer(){const hs=MP.peers.filter(p=>p.presence&&p.presence.role==='host');if(!hs.length)return null;hs.sort((a,b)=>a.peer<b.peer?-1:1);return hs[0];}
 function mpCfg(){return {track:trackIdx,laps:opts.laps,rain:opts.rain,tyres:opts.tyres,damage:opts.damage,yellow:opts.yellow,diff:opts.diff,tow:opts.tow};}
-function mpPresence(full){if(!MP.room)return;const p={v:1,nick:NICK.slice(0,16),team:opts.team,role:MP.host?'host':'guest',phase:MP.phase};
+function mpPresence(full){if(!MP.room)return;const p={v:1,nick:NICK.slice(0,16),team:opts.team,role:MP.host?'host':'guest',phase:MP.phase,jt:MP.jt||0};
   if(MP.host)p.cfg=mpCfg();MP.room.presence(p).catch(()=>{});}
 // --- lobby UI ---
 var showLobby=function(){$('menu').classList.add('hide');$('results').classList.add('hide');$('pause').classList.add('hide');$('joinDlg').classList.add('hide');$('lobby').classList.remove('hide');
   const link=ARTIFACT_URL+'#'+MP.code;$('lbCode').textContent=MP.code;$('lbLink').textContent=link;$('nick').value=NICK;
   drawQR(link);renderLobby();}
-function renderLobby(){if(!MP.room)return;const hp=hostPeer(),list=$('lbPlayers');list.textContent='';
+// ---- every player races a different team: earlier arrivals keep their pick, later ones move to a free team
+function lobbyOrder(){return MP.peers.filter(p=>p.kind==='viewer'&&p.presence&&p.presence.nick).sort((a,b)=>{const ra=a.presence.role==='host'?0:1,rb=b.presence.role==='host'?0:1;
+  return ra-rb||((a.presence.jt||0)-(b.presence.jt||0))||(a.peer<b.peer?-1:1);});}
+function teamOwners(){const own={};for(const p of lobbyOrder()){const t=clamp(+p.presence.team||0,0,4);if(own[t]===undefined)own[t]=p;}return own;}
+function resolveTeam(){if(!MP.room||MP.phase!=='lobby')return;const own=teamOwners();const mine=own[opts.team];
+  if(mine&&!mine.sameTab){const free=[0,1,2,3,4].find(t=>own[t]===undefined);MP.full=free===undefined;
+    if(!MP.full){const was=TEAMS[opts.team].name;opts.team=free;store.set('team',free);mpPresence();showToast(String(mine.presence.nick)+' already has '+was+' — you\'re now '+TEAMS[free].name);}}
+  else MP.full=false;}
+function renderLobbyTeams(){const el=$('lbTeams');if(!el)return;const own=teamOwners();el.textContent='';
+  TEAMS.forEach((t,i)=>{const b=document.createElement('button');const o=own[i];const mine=o&&o.sameTab;b.innerHTML=teamLogo(i,26)+'<span>'+t.name+'</span>'+(o&&!mine?'<small>'+String(o.presence.nick).replace(/[<>&]/g,'')+'</small>':'');
+    b.classList.toggle('sel',i===opts.team&&!MP.full);b.disabled=!!(o&&!mine);b.onclick=()=>{if(b.disabled||!MP.room)return;opts.team=i;store.set('team',i);mpPresence();renderLobby();};el.appendChild(b);});
+  $('lbTeamNote').textContent=MP.full?'All five teams are taken — this race is full, so you can watch the lobby but not race.':'Every player drives a different team; your teammate is driven by the AI.';}
+function renderLobby(){if(!MP.room)return;resolveTeam();renderLobbyTeams();const hp=hostPeer(),list=$('lbPlayers');list.textContent='';
   for(const p of MP.peers){if(p.kind!=='viewer')continue;const pr=p.presence||{};const d=document.createElement('div');d.className='lbp';
     const sw=document.createElement('span');sw.style.flex='0 0 auto';sw.innerHTML=teamLogo(clamp(+pr.team||0,0,4),18);d.appendChild(sw);
     const n=document.createElement('span');n.textContent=String(pr.nick||'Joining…').slice(0,16)+(p.sameTab?' (you)':'')+(p.guest?' · guest':'');d.appendChild(n);
@@ -3071,9 +3085,8 @@ function mpPeers(ch){if(!MP.room)return;
     if(Array.isArray(pr.ai)&&hp&&p.peer===hp.peer&&!MP.host)for(const e of pr.ai){const c=cars[e[0]|0];if(c&&c.owner===p.peer)netSet(c,e.slice(1));}}
   if(MP.phase==='race')for(const c of cars){if(c.remote&&c.human&&!MP.peers.some(p=>p.peer===c.owner)&&!c.out){c.out=true;c.outT=0;c.net=null;showToast(c.name+' disconnected');}}}
 function hostStart(){if(!MP.host||!MP.room)return;unlockAudio();
-  const humans=MP.peers.filter(p=>p.kind==='viewer').sort((a,b)=>a.sameTab?-1:b.sameTab?1:(a.peer<b.peer?-1:1)).slice(0,10);
   const used={};const grid=[];
-  for(const p of humans){const t=clamp(+(p.presence.team)||0,0,4);const d=used[t]||0;used[t]=d+1;grid.push({p:p.peer,t,d:d%2,n:String(p.presence.nick||'Driver').slice(0,16)});}
+  for(const p of lobbyOrder()){const t=clamp(+(p.presence.team)||0,0,4);if(used[t])continue;used[t]=1;grid.push({p:p.peer,t,d:0,n:String(p.presence.nick||'Driver').slice(0,16)});}   // one team per player
   const ai=[];for(let t=0;t<5;t++)for(let d=0;d<2;d++){if((used[t]||0)>d)continue;ai.push({p:null,t,d});}
   const slots=[];const nAI=10-grid.length;for(let i=0;i<nAI;i++)slots.push(ai[i]);
   // humans start mid-grid, AI around them
@@ -3082,6 +3095,7 @@ function hostStart(){if(!MP.host||!MP.room)return;unlockAudio();
   MP.room.presence({phase:'countdown',start,grid:order,cfg:mpCfg(),me:null,ai:null}).catch(()=>{});
   startMpRace(order,mpCfg(),MP.me);}
 function startMpRace(grid,cfg,hostId){
+  if(!MP.host&&MP.me&&!grid.some(e=>e.p===MP.me)){showToast('This race is full (all five teams taken) — wait for the next one');return;}
   if(cfg){if((cfg.track|0)!==trackIdx&&TRACKS[cfg.track|0]){trackIdx=cfg.track|0;buildTrack(TRACKS[trackIdx]);}
     opts.laps=clamp(cfg.laps|0,1,20);opts.tyres=cfg.tyres?1:0;opts.damage=cfg.damage?1:0;opts.yellow=[0,3,10,30].includes(cfg.yellow)?cfg.yellow:10;opts.diff=clamp(cfg.diff|0,0,2);opts.rain=cfg.rain?1:0;if(cfg.tow!==undefined)opts.tow=cfg.tow?1:0;WX.rain=opts.rain;buildProfile();}
   MP.phase='race';if(!MP.host)mpPresence();
