@@ -67,7 +67,10 @@ export const FLAGS = {
     'Sweden',
     '<rect width="30" height="20" fill="#006aa7"/><rect x="9" width="4" height="20" fill="#fecc00"/><rect y="8" width="30" height="4" fill="#fecc00"/>',
   ],
-  MC: ['Monaco', '<rect width="30" height="10" fill="#ce1126"/><rect y="10" width="30" height="10" fill="#fff"/>'],
+  MC: [
+    'Monaco',
+    '<rect width="30" height="10" fill="#ce1126"/><rect y="10" width="30" height="10" fill="#fff"/>',
+  ],
   BH: [
     'Bahrain',
     '<rect width="30" height="20" fill="#ce1126"/><path d="M0 0H8L11 1L8 3L11 5L8 7L11 9L8 11L11 13L8 15L11 17L8 19L8 20H0Z" fill="#fff"/>',
