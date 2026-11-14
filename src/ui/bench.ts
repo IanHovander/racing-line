@@ -5,7 +5,7 @@ import { $, H, W } from '../core/dom';
 import { opts } from '../game/race';
 import { PERF } from '../game/loop';
 import { GS } from '../state';
-import { setRenderer3d } from '../render3d/switch';
+import { R3, setRenderer3d } from '../render3d/switch';
 import { NCOL, notify } from './notify';
 
 const wait = (ms: number) => new Promise(r => setTimeout(r, ms));
@@ -15,6 +15,9 @@ const pct = (a: number[], p: number) => {
 };
 export interface BenchResult {
   renderer: string;
+  /** frames actually drawn by three.js during the run (0 means the 3D renderer didn't run) */
+  frames3d: number;
+  note: string;
   frames: number;
   fps: number;
   renderMean: number;
@@ -24,6 +27,7 @@ export interface BenchResult {
 async function measure(three: boolean, secs: number): Promise<BenchResult> {
   await setRenderer3d(three);
   await wait(1200); // warm up: scene build, shader compile, JIT
+  const f0 = R3.frames;
   PERF.render.length = 0;
   PERF.frame.length = 0;
   PERF.prev = performance.now();
@@ -34,8 +38,11 @@ async function measure(three: boolean, secs: number): Promise<BenchResult> {
     f = PERF.frame.slice(1);
   const mean = r.reduce((a, b) => a + b, 0) / Math.max(1, r.length);
   const fm = f.reduce((a, b) => a + b, 0) / Math.max(1, f.length);
+  const frames3d = R3.frames - f0;
   return {
     renderer: three ? 'three.js' : 'Canvas',
+    frames3d,
+    note: three && !frames3d ? '3D did not run' + (R3.err ? ': ' + R3.err : '') : '',
     frames: r.length,
     fps: fm ? 1000 / fm : 0,
     renderMean: mean,
@@ -65,7 +72,7 @@ export async function bench(secs = 6): Promise<BenchResult[]> {
       res
         .map(
           b =>
-            `<div><b>${b.renderer}</b> <span class="m">${b.fps.toFixed(0)}</span> fps · draw <span class="m">${b.renderMean.toFixed(1)}</span> ms avg, <span class="m">${b.renderP95.toFixed(1)}</span> ms p95 · frame p95 <span class="m">${b.frameP95.toFixed(1)}</span> ms</div>`,
+            `<div><b>${b.renderer}</b> <span class="m">${b.fps.toFixed(0)}</span> fps · draw <span class="m">${b.renderMean.toFixed(1)}</span> ms avg, <span class="m">${b.renderP95.toFixed(1)}</span> ms p95 · frame p95 <span class="m">${b.frameP95.toFixed(1)}</span> ms${b.note ? ` · <b style="color:#ff6b5e">${b.note}</b>` : ''}</div>`,
         )
         .join('') + `<div class="trk">${GS.TR.name} · ${W}×${H} · ${devicePixelRatio}x</div>`;
   return res;
