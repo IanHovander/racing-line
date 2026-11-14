@@ -29,10 +29,10 @@ export function lightsOut(): void {
     // anticipated the lights
     START.jump = true;
     launch(c, null);
-    if (GS.PRACTICE) rcBanner('warn', 'JUMP START', 'Throttle before lights out — no penalty in practice');
+    if (GS.PRACTICE) rcBanner('warn', 'Jump start', 'Throttle before lights out · no penalty in practice');
     else {
       c.pen = (c.pen || 0) + 5;
-      rcBanner('pen', '+5 SEC', 'JUMP START — throttle before lights out');
+      rcBanner('pen', '<span class="m">+5</span>&#8239;s Jump start', 'Throttle before lights out');
     }
   }
 }

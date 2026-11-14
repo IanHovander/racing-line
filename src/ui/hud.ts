@@ -33,13 +33,6 @@ export function hud(dt) {
     ? 'PRACTICE · LAP ' + Math.max(1, c.cross)
     : 'LAP ' + clamp(c.cross, 1, opts.laps) + '/' + opts.laps + (c.finished ? ' ✓' : '');
   $('hTime').textContent = GS.state === 'countdown' ? 'Get ready…' : fmt(GS.raceTime);
-  {
-    const sh = t => (t ? fmt(t).replace(/(\.\d\d)\d$/, '$1') : '—');
-    {
-      const t = 'Last ' + sh(c.last) + '\nBest ' + sh(c.best);
-      if ($('hLast').textContent !== t) $('hLast').textContent = t;
-    }
-  }
   const kmh = Math.round(c.v * 3.6);
   const gear = isManual(c) ? c.gear : c.v < 1 ? 'N' : autoGear(c.v);
   {

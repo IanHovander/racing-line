@@ -230,7 +230,7 @@ export function netFollow(c, dt) {
   if (n.out && !c.out) {
     c.out = true;
     c.outT = 0;
-    showToast(c.name + ' is OUT!');
+    showToast(c.name + ' is out');
   }
   if (n.fin && !c.finished) {
     c.finished = true;

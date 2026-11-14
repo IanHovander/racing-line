@@ -72,7 +72,6 @@ export interface State {
   musId: string;
   PRACTICE: any;
   RES_T: any;
-  LAPC_T: any;
   ctrl: any;
   mateIdx: any;
   state: any;
@@ -95,7 +94,6 @@ export interface State {
   CARDEP: any;
   AHEAD: any;
   HMUL: any;
-  FB_T: any;
   FB_LAST: any;
   musStep: any;
   musNext: any;

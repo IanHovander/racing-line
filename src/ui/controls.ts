@@ -1,4 +1,5 @@
 import { GS } from '../state';
+import { NCOL, notify } from './notify';
 import { AC, sfxG } from '../audio/audio';
 import { $, clamp, isTouch, store } from '../core/dom';
 import { attract, cars, opts } from '../game/race';
@@ -21,32 +22,12 @@ export const STEER_NOTE = [
   'You steer: hold left/right.',
   'The car follows the racing line and sits behind the car ahead. Tap left or right to pass on that side; it rejoins the line once you are clear.',
 ];
-// race-control banner: warning (white block, chequered-diagonal track-limits flag) or penalty (orange block, stopwatch)
-export const RC_ICON = {
-  warn: '<svg viewBox="0 0 24 24"><path d="M5 2v20" stroke="#111" stroke-width="2"/><path d="M6 3h14v11H6z" fill="#fff" stroke="#111" stroke-width="1.4"/><path d="M6 14L20 3v11z" fill="#111"/></svg>',
-  pen: '<svg viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="14" r="7.5"/><path d="M12 14V9.5M9.5 2.8h5M12 3v3.5M18.2 7.2l1.6-1.6"/></svg>',
-};
-/** pending hide timers for the toast and race-control banner */
-const UI_T: {
-  rc?: ReturnType<typeof setTimeout>;
-  toast?: ReturnType<typeof setTimeout>;
-} = {};
-export function rcBanner(type, title, sub) {
-  const el = $('rcb');
-  el.className = type;
-  el.querySelector('.k').innerHTML = RC_ICON[type];
-  el.querySelector('.v').innerHTML = `<b>${title}</b><span>${sub}</span>`;
-  void el.offsetWidth;
-  el.classList.add('on');
-  clearTimeout(UI_T.rc);
-  UI_T.rc = setTimeout(() => el.classList.remove('on'), 3800);
+/** race control: a track-limits / jump-start warning, or a time penalty */
+export function rcBanner(type: 'warn' | 'pen', title: string, sub: string) {
+  notify(title, type === 'pen' ? NCOL.pen : NCOL.warn, { sub, ttl: 4, key: 'rc', strong: type === 'pen' });
 }
-export function showToast(t) {
-  const el = $('toast');
-  el.textContent = t;
-  el.style.opacity = '1';
-  clearTimeout(UI_T.toast);
-  UI_T.toast = setTimeout(() => (el.style.opacity = '0'), 1500);
+export function showToast(t: string) {
+  notify(t);
 }
 // single player only: time nearly stops while the camera pans over to the other car
 GS.SWAP = null;

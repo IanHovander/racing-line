@@ -11,13 +11,13 @@ import { locate } from '../sim/physics';
 import { TEAM_STATS } from '../teams/team-stats';
 import { TEAMS } from '../teams/teams';
 import { parts, skids } from '../track/active';
+import { clearNotes } from '../ui/notify';
 export let opts: any;
 export let cars = [],
   attract = true,
   goAt = 0;
 GS.PRACTICE = false;
 GS.RES_T = 0;
-GS.LAPC_T = 0;
 GS.ctrl = 0;
 GS.mateIdx = 1;
 GS.state = 'menu';
@@ -55,11 +55,8 @@ export function setupRace(isAttract, mpGrid?) {
   cars = [];
   GS.PAIRS = new Map();
   GS.STAT_T = 0;
-  GS.LAPC_T = 0;
-  $('lapc').classList.add('hide');
-  GS.FB_T = 0;
   GS.FB_LAST = -99;
-  $('fb').classList.add('hide');
+  clearNotes();
   skids.length = 0;
   parts.length = 0;
   GS.raceTime = 0;

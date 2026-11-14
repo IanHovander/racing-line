@@ -49,10 +49,12 @@ import * as m46 from './game/loop';
 
 import * as m47 from './sim/start';
 import * as m48 from './ui/home';
+import * as m49 from './ui/notify';
 
 const MODS: any[] = [
   m47,
   m48,
+  m49,
   m0,
   m1,
   m2,

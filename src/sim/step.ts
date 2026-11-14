@@ -16,6 +16,7 @@ import { parts, skids } from '../track/active';
 import { cornerAt, hAt } from '../track/track';
 import { rcBanner, showToast, swapCar } from '../ui/controls';
 import { coach, lapCard } from '../ui/feedback';
+import { NCOL, notify } from '../ui/notify';
 import { fmt, updateLights } from '../ui/hud';
 import { resRender, showResults } from '../ui/results';
 export function collide() {
@@ -117,7 +118,7 @@ export function step(dt) {
     GS.cdT += dt;
     if (GS.cdT >= goAt) {
       GS.state = 'race';
-      showToast('GO!');
+      notify('Go!', NCOL.good, { ttl: 1.5 });
       cheer(0.8);
     }
     updateLights();
@@ -262,7 +263,7 @@ export function step(dt) {
             }
             if (best / Math.max(c.v, 10) < 1.0) c.drsEl = k;
           }
-          if (c === cars[GS.ctrl] && !attract && c.drsEl === k) showToast('DRS enabled');
+          if (c === cars[GS.ctrl] && !attract && c.drsEl === k) notify('DRS enabled', NCOL.good, { ttl: 2 });
         }
       }
       if (zi < 0 || zi !== c.drsEl) c.drs = false;
@@ -280,29 +281,29 @@ export function step(dt) {
       const outL = Math.abs(c.lat) > GS.HW + 1.3;
       if (outL && !c.tlOut && GS.raceTime - (c.bumpT ?? -99) < 3) {
         c.tlOut = true;
-        if (!attract && c === cars[GS.ctrl]) showToast('Forced off after contact — no track-limits strike');
+        if (!attract && c === cars[GS.ctrl]) notify('Forced off after contact', NCOL.warn, { sub: 'No track-limits strike', key: 'rc' });
       }
       if (outL && !c.tlOut) {
         c.tlN = (c.tlN || 0) + 1;
         const ca = cornerAt(c.idx),
           me = !attract && c === cars[GS.ctrl];
         if (GS.PRACTICE) {
-          if (me) rcBanner('warn', 'TRACK LIMITS' + (ca ? ' · ' + ca : ''), 'Practice — no penalty');
+          if (me) rcBanner('warn', 'Track limits' + (ca ? ' at ' + ca : ''), 'Practice · no penalty');
         } else if (c.tlN % opts.limits === 0) {
           c.pen = (c.pen || 0) + 5;
           if (me)
             rcBanner(
               'pen',
-              '+5 SEC',
-              'TIME PENALTY<br>Track limits' + (ca ? ' at ' + ca : '') + ' (offence ' + c.tlN + ')',
+              '<span class="m">+5</span>&#8239;s Track limits' + (ca ? ' at ' + ca : ''),
+              'Time penalty · offence ' + c.tlN,
             );
         } else if (me) {
           const w = c.tlN % opts.limits,
             of = opts.limits - 1;
           rcBanner(
             'warn',
-            'TRACK LIMITS' + (ca ? ' · ' + ca : ''),
-            'Warning ' + w + ' of ' + of + (w === of ? ' — next one is +5 s' : ''),
+            'Track limits' + (ca ? ' at ' + ca : ''),
+            'Warning ' + w + ' of ' + of + (w === of ? ' · next one is +5 s' : ''),
           );
         }
       }
@@ -329,7 +330,7 @@ export function step(dt) {
             pb = store.get(k, 0);
           if (!pb || lt < pb) {
             store.set(k, lt);
-            if (pb) showToast('New circuit record ' + fmt(lt));
+            if (pb) notify('New circuit record <span class="m">' + fmt(lt) + '</span>', NCOL.best);
           }
         }
       }
@@ -409,14 +410,6 @@ export function step(dt) {
     GS.finishTimer -= dt;
     if (GS.finishTimer <= 0) showResults();
   }
-  if (GS.FB_T > 0) {
-    GS.FB_T -= dt;
-    if (GS.FB_T <= 0) $('fb').classList.add('hide');
-  }
-  if (GS.LAPC_T > 0) {
-    GS.LAPC_T -= dt;
-    if (GS.LAPC_T <= 0) $('lapc').classList.add('hide');
-  }
   if (GS.state === 'finished' && !attract) {
     GS.RES_T -= dt;
     if (GS.RES_T <= 0) {
@@ -454,7 +447,7 @@ export function knockOut(c) {
   for (let q = 0; q < 14; q++) spawn(c.x, c.y, 0.8, q % 2 ? '#ffd27a' : 'rgba(70,70,70,1)', 1, 6);
   {
     const ca = cornerAt(c.idx);
-    showToast(c.name + ' is OUT' + (ca ? ' at ' + ca : '') + '!' + (opts.yellow ? ' Yellow flag' : ''));
+    notify(c.name + ' is out' + (ca ? ' at ' + ca : ''), NCOL.bad, { sub: opts.yellow ? 'Yellow flag · no overtaking' : undefined });
   }
   const me = cars[GS.ctrl];
   if (c === me && GS.mateIdx >= 0 && !cars[GS.mateIdx].out && !cars[GS.mateIdx].finished) {
@@ -497,7 +490,7 @@ export function yellowPolice(dt) {
       for (const k in now) {
         if (c.yel[k] !== undefined && c.yel[k] > 0 && now[k] < 0) {
           c.pen += 5;
-          rcBanner('pen', '+5 SEC', 'TIME PENALTY<br>Overtaking under yellow');
+          rcBanner('pen', '<span class="m">+5</span>&#8239;s Overtaking under yellow', 'Time penalty');
           cheer(0.15);
         }
       }

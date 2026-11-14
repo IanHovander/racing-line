@@ -3,23 +3,15 @@ import { $ } from '../core/dom';
 import { cars, opts } from '../game/race';
 import { PROF } from '../sim/profile';
 import { standings } from '../sim/step';
-import { fmtS, gapT, progress } from '../sim/timing';
+import { gapT, progress } from '../sim/timing';
+import { NCOL, notify } from './notify';
 import { cornerAt } from '../track/track';
-// lap complete card: laps to go, the lap time (purple = fastest of anyone, green = your best or close to it, yellow = slower), gaps to the cars around you
 // coaching: short comments on notably good or poor corners and on passes made or lost (your car only)
-GS.FB_T = 0;
 GS.FB_LAST = -99;
 export function feedback(txt, col) {
   if (GS.raceTime - GS.FB_LAST < 2.5) return;
   GS.FB_LAST = GS.raceTime;
-  const el = $('fb');
-  el.innerHTML = '<i style="background:' + col + '"></i>' + txt;
-  el.classList.toggle('top2', GS.LAPC_T > 0);
-  el.classList.remove('hide');
-  el.style.animation = 'none';
-  void el.offsetWidth;
-  el.style.animation = '';
-  GS.FB_T = 3;
+  notify(txt, col, { key: 'coach' });
 }
 export function coach(c, dt) {
   if (!GS.CORNERS.length || c.v < 1) return;
@@ -56,17 +48,17 @@ export function coach(c, dt) {
       const ca = 'T' + K.n;
       if (K.bump !== c.bumpT) {
       } // contact in the corner: no grade
-      else if (K.off) feedback('Ran wide at ' + ca, '#ff6b5e');
+      else if (K.off) feedback('Ran wide at ' + ca, NCOL.bad);
       else if (!K.traffic && C.R < 150 && K.minV >= K.minP * 0.98) {
         const cb = c.cBest || (c.cBest = {}),
           pb = cb[K.n];
         if (pb !== undefined && K.minV > pb + 0.6)
           feedback(
             'Best yet at ' + ca + ' — ' + kmh(K.minV) + ' km/h, +' + (kmh(K.minV) - kmh(pb)) + ' km/h',
-            '#2ecc71',
+            NCOL.good,
           );
       } else if (!K.traffic && C.R < 150 && K.minV < K.minP * 0.86)
-        feedback('Slow through ' + ca + ' (−' + (kmh(K.minP) - kmh(K.minV)) + ' km/h)', '#ffd60a');
+        feedback('Slow through ' + ca + ' (−' + (kmh(K.minP) - kmh(K.minV)) + ' km/h)', NCOL.slow);
       if (!K.off && K.bump === c.bumpT) {
         const cb = c.cBest || (c.cBest = {});
         cb[K.n] = Math.max(cb[K.n] || 0, K.minV);
@@ -97,41 +89,35 @@ export function coach(c, dt) {
     r.t = GS.raceTime;
     if (!flip || o.out || GS.raceTime < 8) continue;
     const at = cornerAt(c.idx);
-    if (side < 0) feedback('Nice move on ' + nm(o) + (at ? ' into ' + at : ''), '#c77dff');
-    else feedback(nm(o) + ' gets past' + (at ? ' at ' + at : ''), '#ff8a3d');
+    if (side < 0) feedback('Nice move on ' + nm(o) + (at ? ' into ' + at : ''), NCOL.best);
+    else feedback(nm(o) + ' gets past' + (at ? ' at ' + at : ''), NCOL.lost);
   }
 }
+/** lap complete: laps done and the gap to the leader (or, when leading, the margin over P2).
+ *  The dot is purple for the fastest lap of anyone, green for your best (or close), yellow for slower. */
 export function lapCard(c) {
   const lt = c.last;
   if (!lt) return;
   const done = c.cross - 1,
     left = opts.laps - done;
   const fast = Math.min(...cars.filter(o => o.best).map(o => o.best));
-  const col = lt <= fast + 1e-6 ? 'p' : lt <= c.best + 0.3 ? 'g' : 'y';
-  const st = standings(),
+  const col = lt <= fast + 1e-6 ? NCOL.best : lt <= c.best + 0.3 ? NCOL.good : NCOL.slow;
+  const st = standings().filter(o => !o.out),
     i = st.indexOf(c);
-  const ah = i > 0 ? st[i - 1] : null,
-    bh = st[i + 1] && !st[i + 1].out ? st[i + 1] : null;
-  const nm = o => (o.name.split(' ').pop() || o.name).slice(0, 3).toUpperCase();
-  let d = '';
-  if (ah) {
-    const g = gapT(ah, c);
-    d += `<span><b>P${i} ${nm(ah)}</b>${g !== null ? '+' + g.toFixed(1) : '—'}</span>`;
-  }
-  if (bh) {
-    const g = gapT(c, bh);
-    d += `<span><b>P${i + 2} ${nm(bh)}</b>${g !== null ? '−' + g.toFixed(1) : '—'}</span>`;
+  const nm = o => o.name.split(' ').pop() || o.name;
+  const m = (v: number) => `<span class="m">${v.toFixed(1)}</span>&#8239;s`;
+  let gap = '';
+  if (i > 0) {
+    const g = gapT(st[0], c);
+    if (g !== null) gap = `${m(g)} behind ${nm(st[0])}`;
+  } else if (st[1]) {
+    const g = gapT(c, st[1]);
+    if (g !== null) gap = `Leading by ${m(g)}`;
   }
   const lab = GS.PRACTICE
-    ? 'LAP ' + done + (c.best === lt && done > 1 ? ' · NEW BEST' : '')
+    ? `Lap ${done}`
     : left <= 0
-      ? 'FINISH'
-      : `LAP ${done}/${opts.laps} · ` + (left === 1 ? 'FINAL LAP' : left + ' LAPS TO GO');
-  const el = $('lapc');
-  el.innerHTML = `<div class="l">${lab}</div><div class="t ${col}">${fmtS(lt)}</div>${d ? '<div class="d">' + d + '</div>' : ''}`;
-  el.classList.remove('hide');
-  el.style.animation = 'none';
-  void el.offsetWidth;
-  el.style.animation = '';
-  GS.LAPC_T = 4.5;
+      ? 'Finished'
+      : `Lap ${done} of ${opts.laps}` + (left === 1 ? ' · Final lap' : '');
+  notify(GS.PRACTICE || !gap ? lab : `${lab} · ${gap}`, col, { key: 'lap', ttl: 4 });
 }

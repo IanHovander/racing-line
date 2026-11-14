@@ -332,6 +332,13 @@ Playable build: https://matthewtorgerson.github.io/racing-line/ (GitHub Pages, b
 - The menu shows the **last raced circuit** behind it (stored as `lastTrack`; Ardennes Forest / Spa the first time) and plays its music. Browsing circuits changes the demo race but not the music (`GS.musId`); the selected circuit's theme takes over at race start (`raceTrackStarted()` in `track/active.ts`).
 - Track limits default to **Off** (a stored choice is kept).
 
+## v17.6 — one notification style
+
+- Every in-race message uses the coaching pill (dark, rounded, coloured dot, optional second line) in one place: top centre on desktop, above the pedals on touch screens (centred right of the Swap button), top centre in the menus. `notify(text, col, {sub, ttl, key, strong})` in `ui/notify.ts`; `showToast` and `rcBanner` are thin wrappers. Up to 3 stack, newest nearest the anchor; a note with the same `key` replaces the older one (`rc`, `lap`, `coach`).
+- Dot colours (`NCOL`): purple best/fastest, green good, yellow slow, red off track / out, orange lost place, white race-control warning, orange (with outline) penalty, grey info.
+- Lap complete is now one line: laps done and the gap to the leader ("Lap 2 of 5 · 3.4 s behind Vance", or "Leading by 1.8 s"); the dot colour still grades the lap. The big lap card, the old centre toast and the race-control banner are gone.
+- Timing panel: no Last / Best lines.
+
 ## Model
 
 - Tracks: control points → Catmull-Rom → smoothed and resampled every 2 m (`buildTrack()`). Long straights need intermediate control points: without them the spline overshoots at the next tight corner and makes a near-cusp (a 4–7 m radius). That happened on the first Mexico and Vegas drafts.
