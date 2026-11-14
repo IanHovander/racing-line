@@ -2108,3 +2108,17 @@ body.touch #notes:not(.menu) {
 #benchOut .m {
   font-family: var(--mono);
 }
+
+/* square HUD panels (timing, speed, minimap, notifications, pause); touch pads stay round */
+#tl,
+#spd,
+.panel,
+#notes .nt,
+#bPause,
+#board div,
+#board .pb,
+#drsI,
+#spd .gbx,
+#revs b {
+  border-radius: 0 !important;
+}

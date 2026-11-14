@@ -672,7 +672,7 @@ export function minimap() {
     oy = y0 + (s - (GS.maxY - GS.minY) * sc) / 2;
   ctx.fillStyle = 'rgba(10,12,18,0.55)';
   ctx.beginPath();
-  ctx.roundRect ? ctx.roundRect(x0 - 6, y0 - 6, s + 12, s + 12, 8) : ctx.rect(x0 - 6, y0 - 6, s + 12, s + 12);
+  ctx.rect(x0 - 6, y0 - 6, s + 12, s + 12); // square, like the other HUD panels
   ctx.fill();
   ctx.strokeStyle = '#ddd';
   ctx.lineWidth = 3;
