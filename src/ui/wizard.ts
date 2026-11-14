@@ -40,7 +40,9 @@ export function wzGo(n) {
       if (b.style.display !== 'none') b.querySelector('i').textContent = String(k++);
     });
   }
-  ['bSolo', 'bHost', 'bJoin'].forEach(id => $(id).classList.remove('sel'));
+  // keep the chosen session type marked when coming back to the first step
+  $('bSolo').classList.toggle('sel', WZ.picked && WZ.mode === 'solo');
+  $('bPrac').classList.toggle('sel', WZ.picked && WZ.mode === 'practice');
   // which panel: Single player (session, team, circuit, settings), Multiplayer (host or join), or Settings (driving + display only)
   const g = WZ.group || 'solo',
     prefs = g === 'prefs';
@@ -96,9 +98,10 @@ export const wzMode = m => {
     wzJoin();
     return;
   }
+  if (WZ.mode !== m) WZ.max = 0;
   WZ.mode = m;
+  WZ.picked = true;
   store.set('wzmode', m);
-  WZ.max = 0;
   wzGo(1);
 };
 export const wzHost = () => {
