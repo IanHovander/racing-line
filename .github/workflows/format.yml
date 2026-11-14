@@ -4,6 +4,8 @@ name: Format and lint-fix
 
 on:
   workflow_dispatch:
+  push:
+    branches: [tooling]
 
 permissions:
   contents: write
