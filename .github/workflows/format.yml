@@ -1,0 +1,38 @@
+# One-off / on-demand: format with oxfmt, apply oxlint's safe fixes, refresh package-lock.json,
+# and commit the result back to the branch. Run it from the Actions tab (or the API).
+name: Format and lint-fix
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - run: npx oxfmt
+      - run: npx oxlint --fix || true
+      - run: npx oxfmt
+      - name: Lint report
+        run: |
+          npx oxlint > lint-report.txt 2>&1 || true
+          tail -n 40 lint-report.txt
+          { echo '```'; tail -n 400 lint-report.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: lint-report
+          path: lint-report.txt
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A ':!lint-report.txt'
+          git diff --cached --quiet || git commit -m "Format with oxfmt, apply oxlint fixes, add package-lock.json"
+          git push

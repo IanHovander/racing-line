@@ -1,0 +1,9 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "printWidth": 110,
+  "singleQuote": true,
+  "trailingComma": "all",
+  "arrowParens": "avoid",
+  "sortPackageJson": false,
+  "ignorePatterns": ["dist/**", "public/vendor/**", "src/vendor/**", "src/ui/posters.ts", "package-lock.json"]
+}
