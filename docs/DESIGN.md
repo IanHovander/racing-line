@@ -367,6 +367,7 @@ Playable build: https://matthewtorgerson.github.io/racing-line/ (GitHub Pages, b
 - "Nice move on X" only once the pass sticks: X still behind 3 s later (`PASS_HOLD`); repassed means no message.
 - Timing panel gaps refresh once a second per car (immediately when a car changes side of you).
 - Penalty badge sits flush against the timing panel's right edge, like a tab.
+- Touch layout C (throttle only, no steering/brake/gear/DRS pads): everything on the right thumb. GAS bottom right (`min(52vw, 210px)` × 94), Swap to its left at the same height, the compact speed panel above GAS (at least 210 px, right-aligned), notifications above that (`--notesB`). Other control sets keep the previous layout.
 - HUD panels are square (timing panel and rows, speed panel, gear box, rev bars, minimap, notifications, pause button, penalty badge); touch pads stay round.
 - Settings step: no help text under Start Race, so the button sits at the bottom like the other steps.
 

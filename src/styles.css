@@ -166,7 +166,7 @@ canvas {
 }
 #pThr.big,
 body #pThr.big {
-  width: min(40vw, 190px);
+  width: min(52vw, 210px);
   height: 94px;
   border-radius: 47px;
   right: 10px;
@@ -648,6 +648,10 @@ body #pThr.big {
   line-height: 1;
   background: rgba(242, 244, 247, 0.22);
   border-color: rgba(255, 255, 255, 0.7);
+}
+#pSwap svg,
+#pSwap {
+  box-sizing: border-box;
 }
 #pSwap small {
   font-size: 9px;
@@ -1943,12 +1947,12 @@ body.touch #spd {
 }
 body.touch #notes:not(.menu) {
   top: auto;
-  bottom: 220px;
+  bottom: var(--notesB, 220px);
   flex-direction: column-reverse;
 }
 @media (max-height: 520px) {
   body.touch #notes:not(.menu) {
-    bottom: 66px;
+    bottom: var(--notesB, 66px);
     max-width: 300px;
   }
 }

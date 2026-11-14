@@ -175,7 +175,31 @@ export function layoutPads() {
   spd.style.cssText = '';
   sw.style.cssText = '';
   spd.classList.remove('compact');
+  document.body.style.removeProperty('--notesB');
   if (!isTouch || GS.state === 'menu') return;
+  // throttle only, no steering pads: everything on the right thumb. GAS bottom right, Swap to its left at the
+  // same height, the speed panel above GAS, notifications above that.
+  if (vis('pThr') && !['pBrk', 'pL', 'pR', 'pUp', 'pDn', 'pDRS'].some(vis)) {
+    const g = $('pThr').getBoundingClientRect(),
+      W = innerWidth,
+      H = innerHeight;
+    const w = Math.max(g.width, 210);
+    spd.style.left = 'auto';
+    spd.style.right = W - g.right + 'px';
+    spd.style.width = w + 'px';
+    spd.style.transform = 'none';
+    spd.style.bottom = H - g.top + 10 + 'px';
+    spd.classList.add('compact');
+    if (vis('pSwap')) {
+      sw.style.left = 'auto';
+      sw.style.right = W - g.left + 12 + 'px';
+      sw.style.bottom = H - g.bottom + 'px';
+      sw.style.width = sw.style.height = g.height + 'px';
+    }
+    const top = H - g.top + 10 + spd.getBoundingClientRect().height;
+    document.body.style.setProperty('--notesB', Math.round(top + 12) + 'px');
+    return;
+  }
   const right = ['pThr', 'pBrk'].filter(vis).map(id => $(id).getBoundingClientRect());
   const W = innerWidth,
     H = innerHeight;
