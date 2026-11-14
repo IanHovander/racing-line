@@ -1,12 +1,25 @@
-/* Geist Mono (Vercel, SIL OFL 1.1: public/fonts/GeistMono-OFL.txt) for every monospaced readout */
+/* Geist (sans) for text and Geist Mono for every number and monospaced readout (Vercel, SIL OFL 1.1: public/fonts/) */
 @font-face {
   font-family: 'Geist Mono';
   src: url('../fonts/GeistMono-Variable.woff2') format('woff2');
   font-weight: 100 900;
   font-display: swap;
 }
+@font-face {
+  font-family: 'Geist';
+  src: url('../fonts/Geist-Variable.woff2') format('woff2');
+  font-weight: 100 900;
+  font-display: swap;
+}
 :root {
+  --sans: 'Geist', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --mono: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
 }
 html,
 body {
@@ -14,7 +27,7 @@ body {
   height: 100%;
   overflow: hidden;
   background: #24481f;
-  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-family: var(--sans);
   color: #fff;
   touch-action: none;
   user-select: none;
@@ -1303,7 +1316,7 @@ body.touch #spd {
   background: rgba(12, 14, 19, 0.55);
   color: #fff;
   font:
-    800 19px/1 system-ui,
+    800 19px/1 var(--sans),
     -apple-system,
     sans-serif;
   letter-spacing: 0.5px;
@@ -1453,7 +1466,7 @@ body.touch #spd {
   background: rgba(12, 14, 19, 0.85);
   color: #fff;
   font:
-    700 13px/1 system-ui,
+    700 13px/1 var(--sans),
     -apple-system,
     sans-serif;
   letter-spacing: 0.5px;
@@ -1944,7 +1957,7 @@ body.touch #notes:not(.menu) {
   color: #fff;
   border-radius: 16px;
   padding: 5px 13px 5px 10px;
-  font: 600 13px system-ui;
+  font: 600 13px var(--sans);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
   animation: noteIn 0.25s ease-out;
   transition:

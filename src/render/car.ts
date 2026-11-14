@@ -250,7 +250,7 @@ export function drawCar0(c, isMe, isMate) {
     ctx.fill();
     ctx.stroke();
     if (isMate) {
-      ctx.font = 'bold 10px system-ui';
+      ctx.font = 'bold 10px Geist,system-ui';
       ctx.textAlign = 'center';
       ctx.fillStyle = '#fff';
       ctx.fillText('2', m[0], m[1] - s);
@@ -260,7 +260,7 @@ export function drawCar0(c, isMe, isMate) {
   else if (c.human && !attract && !c.gone) {
     const m = P(c.x, c.y, 3.0);
     const nm = c.name;
-    ctx.font = 'bold 11px system-ui';
+    ctx.font = 'bold 11px Geist,system-ui';
     const tw = ctx.measureText(nm).width + 14,
       th = 17,
       x = m[0] - tw / 2,

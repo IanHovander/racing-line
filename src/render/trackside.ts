@@ -100,7 +100,7 @@ export function drawWalls(z) {
             ctx.save();
             ctx.translate(mx, my);
             ctx.rotate(ang);
-            ctx.font = '900 ' + Math.round(fh * 0.62) + 'px system-ui,sans-serif';
+            ctx.font = '900 ' + Math.round(fh * 0.62) + 'px Geist,system-ui,sans-serif';
             const tw = ctx.measureText(ad[0]).width;
             const fx = Math.min(1, (len * 0.88) / Math.max(tw, 1));
             ctx.scale(fx, 1);
@@ -268,7 +268,7 @@ export function signBoard(i, sg, txt, bg) {
   ctx.lineTo(bx, top);
   ctx.stroke();
   const fs = Math.max(9, Math.min(22, z * 1.25));
-  ctx.font = '800 ' + fs + 'px system-ui,sans-serif';
+  ctx.font = '800 ' + fs + 'px Geist,system-ui,sans-serif';
   const w = Math.max(fs * 1.1, ctx.measureText(txt).width + fs * 0.6),
     h = fs * 1.25;
   ctx.fillStyle = bg;

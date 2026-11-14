@@ -145,7 +145,6 @@ export function hud(dt) {
     if ($('hMode').textContent !== t) $('hMode').textContent = t;
     $('hMode').style.visibility = t ? 'visible' : 'hidden';
   }
-  const lead = st[0];
   const bd = $('board');
   const rows = HUD.rows || (HUD.rows = new Map());
   const now = performance.now();
@@ -157,16 +156,18 @@ export function hud(dt) {
   }
   st.forEach((o, i) => {
     const cls = o === c ? 'me' : o === cars[GS.mateIdx] ? 'mate' : o.human && mpOn() ? 'hum' : '';
+    // gaps are relative to your car: −x.x for cars ahead of you, +x.x for cars behind
     let gap = '';
-    if (i > 0) {
-      if (o.finished && lead.finished) gap = '+' + (o.ftime - lead.ftime).toFixed(1);
+    if (o !== c) {
+      const ahead = st.indexOf(o) < st.indexOf(c);
+      const [a, b] = ahead ? [o, c] : [c, o];
+      const sg = ahead ? '−' : '+';
+      if (a.finished && b.finished) gap = sg + (b.ftime + b.pen - (a.ftime + a.pen)).toFixed(1);
       else {
-        const d = progress(lead) - progress(o);
-        const gt = gapT(lead, o);
+        const d = progress(a) - progress(b);
+        const gt = gapT(a, b);
         gap =
-          d > GS.L
-            ? '+' + Math.floor(d / GS.L) + 'L'
-            : '+' + (gt !== null ? gt : d / Math.max(lead.v, 30)).toFixed(1);
+          d > GS.L ? sg + Math.floor(d / GS.L) + 'L' : sg + (gt !== null ? gt : d / Math.max(a.v, 30)).toFixed(1);
       }
     }
     if (o.out) gap = '<b style="color:#ff6b5e">OUT</b>';
@@ -179,7 +180,7 @@ export function hud(dt) {
     if (o.lastPos !== undefined && o.lastPos !== i && GS.state === 'race' && o.mine)
       o.posChg = { d: o.lastPos - i, t: now };
     o.lastPos = i;
-    let g = i ? gap : 'LEAD';
+    let g = gap;
     if (o.posChg && now - o.posChg.t < 2600 && !o.out) {
       const d = o.posChg.d;
       g = `<b class="${d > 0 ? 'pu' : 'pd'}">${d > 0 ? '▲' : '▼'}${Math.abs(d)}</b>`;

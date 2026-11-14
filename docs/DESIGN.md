@@ -341,6 +341,8 @@ Playable build: https://matthewtorgerson.github.io/racing-line/ (GitHub Pages, b
 - Race-control notes: a black-and-white track-limits flag icon for track-limits warnings, a warning-triangle icon (and orange outline) for time penalties.
 - Touch layout (`layoutPads()` in `ui/controls.ts`, run by `updatePads` and on resize): the speed panel sits left of the pedal pads, bottom-aligned (compact: no pedal bars, when narrower than 250 px; above the steering pads when those take the left side); Swap sits centred above the main pedal (above the gear-up / DRS pads if present). The big throttle-only GAS pad is `min(40vw, 190px)` wide.
 - Timing panel: no race clock (only "Get ready…" before the start).
+- Timing panel gaps are relative to your car: −x.x for cars ahead, +x.x behind, ±nL when lapped; your own row has no gap.
+- Fonts: **Geist** (sans, SIL OFL, `public/fonts/Geist-Variable.woff2`, CSS `--sans`) for all text, Geist Mono (`--mono`) for numbers; canvas labels use Geist too.
 - Coach: a personal-best sector shows "Best sector 2 · 22.56" with the gain on your previous best (purple dot when it is also the fastest of anyone).
 
 ## Model

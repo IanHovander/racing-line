@@ -94,7 +94,7 @@ export function elevProfile() {
     if (b > GS.N)
       g += `<line x1="${X(0)}" y1="${H - 3}" x2="${X(b - GS.N)}" y2="${H - 3}" stroke="#2ecc71" stroke-width="2.5" stroke-linecap="round"/>`;
   }
-  return `<svg class="prof" viewBox="0 0 ${W} ${H}"><path d="${d}L${W - 8} ${H - 6}L8 ${H - 6}Z" fill="rgba(255,255,255,.09)"/>${g}<text x="10" y="11" font-size="9" fill="#fff" opacity=".7" font-family="system-ui">Elevation · ${Math.round(rng)} m</text></svg>`;
+  return `<svg class="prof" viewBox="0 0 ${W} ${H}"><path d="${d}L${W - 8} ${H - 6}L8 ${H - 6}Z" fill="rgba(255,255,255,.09)"/>${g}<text x="10" y="11" font-size="9" fill="#fff" opacity=".7" font-family="Geist,system-ui">Elevation · ${Math.round(rng)} m</text></svg>`;
 }
 export function renderTrackMap(cv) {
   if (!cv) return;
@@ -225,7 +225,7 @@ export function renderTrackMap(cv) {
     ctx.stroke();
     ctx.setLineDash([]);
   }
-  ctx.font = `700 ${Math.round(lw * 3.1)}px system-ui,sans-serif`;
+  ctx.font = `700 ${Math.round(lw * 3.1)}px Geist,system-ui,sans-serif`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   for (const c of GS.CORNERS) {

@@ -88,7 +88,7 @@ contacts and time off track before and after, as the existing tests do.
   DRS, sectors purple/green/yellow, penalties).
 - Everything visual is drawn in code (SVG strings or canvas): no image assets. Team logos, flags and
   circuit posters are inline SVG; don't add artwork that copies real teams or brands.
-- Fonts: system UI font for text; **Geist Mono** (SIL OFL, self-hosted in `public/fonts/`) for every
+- Fonts: **Geist** (SIL OFL, self-hosted, `--sans`) for text; **Geist Mono** (SIL OFL, self-hosted in `public/fonts/`) for every
   number and monospaced readout, through the CSS variable `--mono`. No other web fonts.
 - Touch matters: big pads, no iOS long-press loupe (`touch-action`, `user-select: none`).
 - Multiplayer: each player simulates their own car; the host simulates the AI and its clock is the
