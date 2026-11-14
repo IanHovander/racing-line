@@ -100,8 +100,9 @@ canvas {
   align-items: center;
   white-space: nowrap;
   height: 17px;
-  padding: 0 4px;
-  margin: 0 -4px;
+  /* rows run the full width of the panel (its side padding is 8 px), so the highlight fills the bar */
+  padding: 0 8px;
+  margin: 0 -8px;
   border-radius: 4px;
 }
 #board .pos {
@@ -2011,8 +2012,8 @@ body.touch #notes:not(.menu) {
 /* time penalty badge, floating just right of the timing panel on the driver's row */
 #board .pb {
   position: absolute;
-  /* flush against the panel's right edge (row margin 4 px + panel padding 8 px), like a tab */
-  left: calc(100% + 4px);
+  /* flush against the panel's right edge (rows span the full panel width), like a tab */
+  left: 100%;
   top: 50%;
   transform: translateY(-50%);
   padding: 0 5px 0 4px;
