@@ -14,10 +14,12 @@ import { init as init11 } from './ui/wizard';
 import { init as init12 } from './game/loop';
 import { init as initHome } from './ui/home';
 import { init as initControls } from './ui/controls';
+import { init as init3d } from './render3d/view3d';
 import { installDebug } from './debug';
 
 // Run every module's start-up code in the original order.
 init0(); // core/dom
+init3d(); // render3d/view3d (only when ?three)
 init1(); // track/track
 init2(); // track/active
 init3(); // game/race
