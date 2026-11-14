@@ -281,7 +281,8 @@ export function step(dt) {
       const outL = Math.abs(c.lat) > GS.HW + 1.3;
       if (outL && !c.tlOut && GS.raceTime - (c.bumpT ?? -99) < 3) {
         c.tlOut = true;
-        if (!attract && c === cars[GS.ctrl]) notify('Forced off after contact', NCOL.warn, { sub: 'No track-limits strike', key: 'rc' });
+        if (!attract && c === cars[GS.ctrl])
+          notify('Forced off after contact', NCOL.warn, { sub: 'No track-limits strike', key: 'rc' });
       }
       if (outL && !c.tlOut) {
         c.tlN = (c.tlN || 0) + 1;
@@ -447,7 +448,9 @@ export function knockOut(c) {
   for (let q = 0; q < 14; q++) spawn(c.x, c.y, 0.8, q % 2 ? '#ffd27a' : 'rgba(70,70,70,1)', 1, 6);
   {
     const ca = cornerAt(c.idx);
-    notify(c.name + ' is out' + (ca ? ' at ' + ca : ''), NCOL.bad, { sub: opts.yellow ? 'Yellow flag · no overtaking' : undefined });
+    notify(c.name + ' is out' + (ca ? ' at ' + ca : ''), NCOL.bad, {
+      sub: opts.yellow ? 'Yellow flag · no overtaking' : undefined,
+    });
   }
   const me = cars[GS.ctrl];
   if (c === me && GS.mateIdx >= 0 && !cars[GS.mateIdx].out && !cars[GS.mateIdx].finished) {
