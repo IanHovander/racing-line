@@ -415,6 +415,23 @@ Full write-up: [dynamic-racing-line.md](dynamic-racing-line.md). Tools: [tools/R
 - **Racing Line is shown by default** in races as well as in practice (races used to start with it hidden). Practice and races still remember their own choice.
 - **Result:** AI time off the tarmac in test races fell from 0.7–2.3% of race time to 0.1–0.5%, and contacts fell with it (`node tools/ai-offs.cjs`).
 
+## v17.15 — remote cars where they really are
+
+Players saw each other's cars about 15–18 m behind where they really were (more than three car lengths at racing speed), so side-by-side racing didn't line up between screens. Two causes, both fixed in `net/netcode.ts`:
+
+- **Latency was assumed, not measured.** The extrapolation added a fixed 50 ms for the network. Every presence now carries the sender's clock (`ts`) and an echo of each peer's last `ts` with how long it was held; the peer that gets its own `ts` back computes the round trip in its own clock (`MP.rtt`, minimum seen drifting up slowly). Half of it is the one-way delay used to extrapolate remote cars (`oneWay()`) and to follow the host's race clock.
+- **The smoothing lagged.** On each new state the correction was measured against where the car was drawn on the previous frame, so every packet pulled the car back by a frame of travel. Now the correction is the gap between the previous state's prediction and the new one at the same moment (`predict()`), fading at 6/s, while the prediction moves the car at full speed in between.
+
+Measured with two games side by side in one page (fake PeerJS, 2 players, 20 s of racing at 40–90 m/s), error of each player's view of the other car along its heading:
+
+| One-way latency | Before | After |
+|---|---|---|
+| 30 ± 10 ms | — | +0.2 m median, 95% within 2 m |
+| 120 ± 30 ms | −17.5 m median, 5–8% within 2 m | 0.0 m median, 89–95% within 2 m |
+| 150 ± 60 ms, 2% stalls of 300 ms | — | −0.1 m median, 84–89% within 2 m |
+
+What remains is what any extrapolation has: when a driver brakes or turns in, the other screen finds out one latency later (≈ v × latency of error until the next state, a car length or two at 150 ms). Contacts with remote cars still only move the local car.
+
 ## Model
 
 - Tracks: control points → Catmull-Rom → smoothed and resampled every 2 m (`buildTrack()`). Long straights need intermediate control points: without them the spline overshoots at the next tight corner and makes a near-cusp (a 4–7 m radius). That happened on the first Mexico and Vegas drafts.
