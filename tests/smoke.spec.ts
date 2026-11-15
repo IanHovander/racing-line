@@ -99,7 +99,7 @@ test('every circuit builds and the AI laps it without leaving the track', async 
   expect(errors).toEqual([]);
 });
 
-test('the planner drives the car on a ready-made racing line; practice shows the line, races hide it', async ({
+test('the planner drives the car on a ready-made racing line; the line is shown by default', async ({
   page,
 }) => {
   const errors = await open(page);
@@ -143,7 +143,7 @@ test('the planner drives the car on a ready-made racing line; practice shows the
   });
   expect(r.level).toBe('Cautious Expert');
   expect(r.lineInPractice).toBe(1);
-  expect(r.lineInRace).toBe(0);
+  expect(r.lineInRace).toBe(1);
   expect(r.planned).toBe(1); // the planner drove the whole flying lap
   expect(r.wide).toBe(0); // and never left the tarmac
   expect(r.lap).toBeGreaterThan(50);

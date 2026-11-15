@@ -157,6 +157,11 @@ export function laneProfile(side, team) {
   GS.rk = save;
   return (LANEPROF[key] = v);
 }
+/** the curvature of the racing line per sample, when sim/lines.ts knows it better than the wide circle fit below (null: use the fit) */
+export let LINE_CURV: ArrayLike<number> | null = null;
+export function setLineCurv(k: ArrayLike<number> | null): void {
+  LINE_CURV = k;
+}
 export function buildProfile() {
   if (!GS.N) return;
   LANEPROF = {};
@@ -179,7 +184,7 @@ export function buildProfile() {
     for (let i = 0; i < GS.N; i++) {
       let s = 0;
       for (let k = -3; k <= 3; k++) s += raw[(i + k + GS.N) % GS.N];
-      GS.rk[i] = s / 7;
+      GS.rk[i] = LINE_CURV && LINE_CURV.length === GS.N ? Math.abs(LINE_CURV[i]) : s / 7;
     }
     const vr = F();
     for (let i = 0; i < GS.N; i++)
