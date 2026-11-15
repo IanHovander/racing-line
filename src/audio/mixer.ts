@@ -17,8 +17,6 @@ export function engineNote(v, thr?, g?) {
   const fr = clamp((v - lo) / (GEARTOP[g] - lo), 0, 1.05);
   return 0.4 + 0.6 * fr;
 }
-GS.sqg = null;
-GS.sqf = null;
 export function audio(dt) {
   if (!AC) return;
   const c = cars[GS.ctrl],
@@ -70,10 +68,6 @@ export function audio(dt) {
     [0.08, 520],
   ][c.surf || 0] || [0, 300];
   rgn.gain.setTargetAtTime(live ? sr[0] * sv : 0, t, 0.05);
-  if (GS.sqg) {
-    GS.sqg.gain.setTargetAtTime(live && c.lock > 0.5 ? 0.55 * clamp(c.v / 40, 0.3, 1) : 0, t, 0.03);
-    GS.sqf.frequency.setTargetAtTime(2000 + 300 * Math.sin(t * 23), t, 0.02);
-  }
   rflt.frequency.setTargetAtTime(sr[1] * (c.surf === 1 ? 1 + 0.5 * Math.sin(t * 60) : 1), t, 0.02);
   // crowd: louder near the grandstands, swells with cheers
   GS.cheerT = Math.max(0, GS.cheerT - dt * 0.35);

@@ -1,6 +1,6 @@
 // One notification style for everything during a race (and the few messages in the menus):
 // a dark pill with a coloured dot, a short title and an optional second line, one at a time by priority, at one
-// place: top centre on desktop, above the pedals on touch screens (top centre in the menus).
+// place: top centre on desktop, above the GAS pad on touch screens (top centre in the menus).
 import { GS } from '../state';
 import { $ } from '../core/dom';
 

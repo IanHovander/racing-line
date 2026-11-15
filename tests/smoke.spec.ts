@@ -38,13 +38,17 @@ test('a single-player race runs, finishes and shows awards', async ({ page }) =>
   });
   await page.click('#bStart');
   const r = await page.evaluate(() => {
-    window.opts.pedals = 3;
-    window.opts.steer = 0; // let the car drive itself
+    window.opts.steer = 0; // the car steers itself
     window.setupRace(false);
     window.state = 'race';
-    for (let i = 0; i < 120 * 150 && window.state === 'race'; i++) window.step(window.STEP);
-    for (let i = 0; i < 120 * 6; i++) window.step(window.STEP);
     const me = window.cars[window.ctrl];
+    // a one-button bot: hold the gas below the car's safe speed, lift otherwise (and wait for lights out)
+    for (let i = 0; i < 120 * 150 && window.state === 'race'; i++) {
+      window.input.thr = window.START.done && me.v < (me.safeV || 0) - 0.2;
+      window.step(window.STEP);
+    }
+    window.input.thr = false;
+    for (let i = 0; i < 120 * 6; i++) window.step(window.STEP);
     return {
       state: window.state,
       lap: me.cross,
@@ -77,16 +81,17 @@ test('every circuit builds and the AI laps it without leaving the track', async 
       window.trackIdx = t;
       window.buildTrack(window.TRACKS[t]);
       window.PRACTICE = true;
-      window.opts.pedals = 3;
       window.opts.steer = 0;
       window.setupRace(false);
       window.state = 'race';
       const me = window.cars[window.ctrl];
       let off = 0;
       for (let i = 0; i < 120 * 130; i++) {
+        window.input.thr = window.START.done && me.v < (me.safeV || 0) - 0.2; // one-button bot
         window.step(window.STEP);
         if (me.surf >= 2) off++;
       }
+      window.input.thr = false;
       res.push({ id: window.TRACKS[t].id, best: me.best, offSeconds: off / 120 });
     }
     window.PRACTICE = false;
@@ -106,7 +111,7 @@ test('the planner drives the car on a ready-made racing line; the line is shown 
   await page.waitForFunction(() => window.DYNLINES && Object.keys(window.DYNLINES).length > 0);
   const r = await page.evaluate(() => {
     const w = window;
-    Object.assign(w.opts, { pedals: 0, steer: 0, dynlv: 3, team: 0, rain: 0 });
+    Object.assign(w.opts, { steer: 0, dynlv: 3, team: 0, rain: 0 });
     w.WX.rain = 0;
     w.PRACTICE = true;
     w.buildTrack(w.TRACKS[1]); // Lone Star

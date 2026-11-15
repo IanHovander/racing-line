@@ -1,6 +1,6 @@
 import { GS } from '../state';
 import { clamp, wrapA } from '../core/dom';
-import { attract, cars, opts } from '../game/race';
+import { cars, opts } from '../game/race';
 import { BRK, GEARTOP, GRIP, VMAX, autoGear, gearEff, isManual } from './car-model';
 import { NEUTRAL } from '../teams/team-stats';
 import { WETB } from '../track/track';
@@ -58,20 +58,13 @@ export function physics(c, dt, thr, brk, kd) {
       Math.max(0, 1 - (v / (VMAX * st.top * (1 + 0.075 * c.tow + 0.055 * dr) * (1 - 0.12 * c.dmg))) ** 2) +
       0.9 * c.tow * (gE > 0 ? 1 : 0));
   if (thr < 0.05) a -= 2.5 + v * 0.02 + (man ? 2.2 * Math.min(1, v / GEARTOP[c.gear]) : 0); // engine braking is stronger in a lower gear
-  // lock-ups: braking hard while still turning asks more of the tyres than they have -> the fronts lock, braking and steering suffer
-  const canLock = c === cars[GS.ctrl] && !attract && !c.remote && (opts.pedals === 1 || opts.pedals === 2);
-  const bdem = brk * [BRK, 38, 18, 10, 30, 22][surf] * st.brk * (0.6 + 0.4 * c.gm) * WETB();
-  if (canLock && brk > 0.6 && v > 18 && surf !== 3 && bdem + v * v * Math.abs(kd) > grip * 1.32)
-    c.lock = Math.min(1, (c.lock || 0) + dt * 9);
-  else c.lock = Math.max(0, (c.lock || 0) - dt * 5);
-  const locked = c.lock > 0.5;
-  a -= locked ? Math.min(bdem, grip * 0.78) : bdem;
+  a -= brk * [BRK, 38, 18, 10, 30, 22][surf] * st.brk * (0.6 + 0.4 * c.gm) * WETB();
   a -= 9.81 * (GS.SL[c.idx] || 0);
   if (surf === 2) a -= 1.6 + v * 0.08 + v * v * 0.0018;
   else if (surf === 3) a -= 4 + v * 0.22;
   else if (surf === 4) a -= 1.0 + v * 0.05 + v * v * 0.0012;
   else if (surf === 5) a -= 1.2 + v * 0.06 + v * v * 0.0013;
-  const kmax = Math.min(grip / Math.max(v * v, 4), 1 / 7) * (locked ? 0.42 : 1);
+  const kmax = Math.min(grip / Math.max(v * v, 4), 1 / 7);
   let k = kd;
   c.slide = 0;
   if (Math.abs(k) > kmax) {

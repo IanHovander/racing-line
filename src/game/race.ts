@@ -39,7 +39,6 @@ export function prewarmFlags() {
 }
 export function setupRace(isAttract, mpGrid?) {
   START.done = false;
-  START.tap = false;
   setTimeout(prewarmFlags, 30);
   GS.LANE_SEL = 0;
   GS.SWAP = null;
@@ -173,7 +172,6 @@ export function setupRace(isAttract, mpGrid?) {
 }
 export function init(): void {
   opts = {
-    pedals: store.get('defv4', 0) ? store.get('pedals', 0) : (store.set('pedals', 0), 0),
     steer: store.get('defv4', 0) ? store.get('steer', 0) : (store.set('steer', 0), 0),
     team: store.get('team', 0),
     laps: store.get('laps', 5),

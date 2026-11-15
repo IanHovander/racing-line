@@ -136,17 +136,15 @@ export function hud(dt) {
   }
   {
     const t =
-      c.lock > 0.5
-        ? 'LOCK-UP'
-        : c.surf === 3
-          ? 'GRAVEL!'
-          : c.surf === 5
-            ? 'SLICK PAINT'
-            : c.surf === 2
-              ? 'OFF TRACK'
-              : c.slide > 0.3
-                ? 'SLIDING'
-                : '';
+      c.surf === 3
+        ? 'GRAVEL!'
+        : c.surf === 5
+          ? 'SLICK PAINT'
+          : c.surf === 2
+            ? 'OFF TRACK'
+            : c.slide > 0.3
+              ? 'SLIDING'
+              : '';
     if ($('hMode').textContent !== t) $('hMode').textContent = t;
     $('hMode').style.visibility = t ? 'visible' : 'hidden';
   }

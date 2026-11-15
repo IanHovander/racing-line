@@ -32,7 +32,7 @@ function mk(id, host, team, level, seed) {
   H.ctx.__host = host;
   H.ctx.__now = 1e6;
   H.ctx.__classic = process.argv.includes('--classic');
-  H.run(`Date.now=()=>__now;if(__classic)DynLine=undefined;opts.pedals=0;opts.steer=0;opts.team=__team;opts.dynlv=__lv;opts.gears=0;opts.damage=0;opts.diff=__host?__o.diff:0;opts.laps=__host?__o.laps:1;opts.rain=__host?__o.rain:0;WX.rain=opts.rain;
+  H.run(`Date.now=()=>__now;if(__classic)DynLine=undefined;opts.steer=0;opts.team=__team;opts.dynlv=__lv;opts.gears=0;opts.damage=0;opts.diff=__host?__o.diff:0;opts.laps=__host?__o.laps:1;opts.rain=__host?__o.rain:0;WX.rain=opts.rain;
     if(__host){trackIdx=__o.track;buildTrack(TRACKS[trackIdx]);setupRace(true);}
     MP.room={presence(p){Object.assign(__pres,p);return Promise.resolve();},leave(){return Promise.resolve();}};MP.me=__id;MP.host=__host;MP.phase='lobby';MP.jt=__host?1:2;
     if(__host)lbRulesInit();mpPresence();

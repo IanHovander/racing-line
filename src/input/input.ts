@@ -1,4 +1,3 @@
-import { START } from '../sim/start';
 import { cycleDyn } from '../sim/lines';
 import { GS } from '../state';
 import { audioStatus } from '../audio/audio';
@@ -10,7 +9,7 @@ import { startRace } from '../ui/menu';
 import { $ } from '../core/dom';
 import { WZ } from '../ui/wizard';
 // ================= Input =================
-export const input = { thr: false, brk: false, left: false, right: false };
+export const input = { thr: false, left: false, right: false };
 export function pressDRS() {
   const c = cars[GS.ctrl];
   if (!c || attract || opts.drs !== 1 || GS.state !== 'race') return;
@@ -24,8 +23,6 @@ export const KEYMAP = {
   ArrowUp: 'thr',
   KeyW: 'thr',
   Space: 'thr',
-  ArrowDown: 'brk',
-  KeyS: 'brk',
   ArrowLeft: 'left',
   KeyA: 'left',
   ArrowRight: 'right',
@@ -37,18 +34,6 @@ export const typing = e => {
   return !!t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable);
 };
 export function init(): void {
-  // any tap or key after lights out can launch the car in pedal modes without a GAS pad (capture phase: pads stop propagation)
-  const tap = () => {
-    if (GS.state === 'race') START.tap = true;
-  };
-  addEventListener('pointerdown', tap, true);
-  addEventListener(
-    'keydown',
-    e => {
-      if (!typing(e) && !e.repeat) tap();
-    },
-    true,
-  );
   addEventListener('keydown', e => {
     if (typing(e)) return;
     if (opts.steer === 1 && !e.repeat && (KEYMAP[e.code] === 'left' || KEYMAP[e.code] === 'right'))

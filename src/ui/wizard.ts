@@ -16,7 +16,7 @@ import {
   commitName,
 } from '../net/multiplayer';
 import { hostStart } from '../net/netcode';
-import { cycleMode, cycleSteer, resetCar, showToast, swapCar, toggleLine, togglePause } from './controls';
+import { cycleSteer, resetCar, showToast, swapCar, toggleLine, togglePause } from './controls';
 // ---- menu wizard: Mode -> Team -> Circuit -> Settings ----
 export let WZ: any;
 export function wzSteps() {
@@ -203,7 +203,6 @@ export function init(): void {
     $('pSwap').classList.add('on');
     setTimeout(() => $('pSwap').classList.remove('on'), 180);
   });
-  $('bMode').onclick = cycleMode;
   $('bSteer').onclick = cycleSteer;
   $('bLine').onclick = toggleLine;
   $('bSnd').onclick = () => {

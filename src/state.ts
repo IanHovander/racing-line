@@ -96,8 +96,6 @@ export interface State {
   musStep: any;
   musNext: any;
   cheerT: any;
-  sqg: any;
-  sqf: any;
   NICK: any;
 }
 export const GS = {} as State;

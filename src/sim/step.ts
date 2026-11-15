@@ -340,18 +340,7 @@ export function step(dt) {
     } else if (c.prevS < 80 && c.s > GS.L - 80) c.cross--;
     c.prevS = c.s;
     // effects
-    if (c.lock > 0.5 && c.v > 8) {
-      if (Math.random() < 0.7) {
-        const ch = Math.cos(c.h),
-          sh = Math.sin(c.h);
-        const w = Math.random() < 0.5 ? -0.8 : 0.8;
-        spawn(c.x + ch * 1.6 - sh * w, c.y + sh * 1.6 + ch * w, 0.5, 'rgba(236,240,248,1)', 0.9, 1.8);
-      }
-    }
-    if (
-      c.v > 12 &&
-      (c.slide > 0.2 || c.lock > 0.5 || (c.brk > 0.95 && c.v > 55 && c.surf === 0 && Math.random() < 0.15))
-    ) {
+    if (c.v > 12 && (c.slide > 0.2 || (c.brk > 0.95 && c.v > 55 && c.surf === 0 && Math.random() < 0.15))) {
       const ch = Math.cos(c.h),
         sh = Math.sin(c.h);
       for (let w = 0; w < 2; w++) {

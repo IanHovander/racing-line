@@ -17,7 +17,7 @@ function aiOffs(o) {
   const H = load({ seed: +o.seed });
   H.ctx.__o = o;
   H.run(
-    `${o.set || ''};opts.pedals=0;opts.steer=0;opts.team=__o.team|0;opts.diff=__o.diff|0;opts.laps=__o.laps|0;opts.rain=__o.rain|0;WX.rain=opts.rain;opts.damage=0;opts.dynlv=(__o.diff|0)+1;
+    `${o.set || ''};opts.steer=0;opts.team=__o.team|0;opts.diff=__o.diff|0;opts.laps=__o.laps|0;opts.rain=__o.rain|0;WX.rain=opts.rain;opts.damage=0;opts.dynlv=(__o.diff|0)+1;
     trackIdx=__o.track|0;buildTrack(TRACKS[trackIdx]);dynPrepare(true);PRACTICE=false;setupRace(false);
     var __ev=[],__in=new Map(),__offT=0,__aiT=0;
     function __tick(){const me=cars[ctrl];if(state==='race'&&START.done&&me&&!me.finished)input.thr=me.v<me.safeV-0.2;step(STEP);if(state!=='race')return;

@@ -174,19 +174,6 @@ export function initAudio() {
     rflt.connect(rgn);
     rgn.connect(sfxG);
     rs.start();
-    {
-      const qs = noiseSrc(true);
-      GS.sqf = AC.createBiquadFilter();
-      GS.sqf.type = 'bandpass';
-      GS.sqf.frequency.value = 2300;
-      GS.sqf.Q.value = 9;
-      GS.sqg = AC.createGain();
-      GS.sqg.gain.value = 0;
-      qs.connect(GS.sqf);
-      GS.sqf.connect(GS.sqg);
-      GS.sqg.connect(sfxG);
-      qs.start();
-    }
     // crowd: synthesised voice loop (built offline in buildCrowd) through one gain
     cgn = AC.createGain();
     cgn.gain.value = 0;
