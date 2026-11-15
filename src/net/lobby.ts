@@ -5,6 +5,8 @@ import { MP, hostPeer, mpCfg, mpPresence } from './multiplayer';
 import { qrSvg } from './qr';
 import { TEAMS, teamLogo } from '../teams/teams';
 import { TRACKS } from '../track/circuits';
+import { setMusic, setSfx, unlockAudio } from '../audio/audio';
+import { lineLoad, lineSave } from '../sim/lines';
 import { showToast } from '../ui/controls';
 import { syncAllSegs } from '../ui/widgets';
 import { placeCircuitPicker, showCircuit, teamCardHtml } from '../ui/menu';
@@ -145,6 +147,51 @@ export const LB_CTRL: [string, string, [number, string][]][] = [
     ],
   ],
 ];
+// What the pause menu offers under Display & Sound, so nothing has to wait until the race has started.
+// (Sound Effects and Music are on/off switches: 1 and 0 here, booleans in opts.)
+export const LB_VIEW: [string, string, [number, string][]][] = [
+  [
+    'cam',
+    'Camera',
+    [
+      [1, 'Isometric'],
+      [0, 'Chase'],
+    ],
+  ],
+  [
+    'line',
+    'Racing Line',
+    [
+      [0, 'Hidden'],
+      [2, 'Difficult Turns'],
+      [1, 'Shown'],
+    ],
+  ],
+  [
+    'turns',
+    'Turn Numbers',
+    [
+      [0, 'Hidden'],
+      [1, 'Shown'],
+    ],
+  ],
+  [
+    'sound',
+    'Sound Effects',
+    [
+      [1, 'On'],
+      [0, 'Off'],
+    ],
+  ],
+  [
+    'music',
+    'Music',
+    [
+      [1, 'On'],
+      [0, 'Off'],
+    ],
+  ],
+];
 export function lbRulesInit() {
   MP.rules = {
     practice: 0,
@@ -225,6 +272,31 @@ export function renderLobbySettings(cfg) {
       segRow(label, list, cur, false, v => {
         if (k === 'drsMode') {
           store.set('drs', v);
+        } else {
+          opts[k] = v;
+          store.set(k, v);
+        }
+        try {
+          syncAllSegs();
+        } catch (e) {}
+        renderLobby();
+      }),
+    );
+  }
+  // display and sound: the same switches as the pause menu
+  if (MP.phase === 'lobby') lineLoad(); // the Racing Line choice for the session the host has picked (practice or race)
+  const vw = $('lbView');
+  vw.textContent = '';
+  for (const [k, label, list] of LB_VIEW) {
+    const cur = k === 'sound' || k === 'music' ? (opts[k] ? 1 : 0) : opts[k];
+    vw.appendChild(
+      segRow(label, list, cur, false, v => {
+        if (k === 'sound' || k === 'music') {
+          unlockAudio();
+          (k === 'sound' ? setSfx : setMusic)(!!v);
+        } else if (k === 'line') {
+          opts.line = v;
+          lineSave();
         } else {
           opts[k] = v;
           store.set(k, v);
@@ -333,6 +405,7 @@ export function renderLobby() {
     ? `${TRACKS[clamp(cfg.track | 0, 0, TRACKS.length - 1)].name} · ${cfg.laps | 0} Laps · ${cfg.rain ? 'Rain' : 'Dry'}${cfg.practice ? ' · Practice' : ''}`
     : 'Waiting for the host…';
   $('lbRoomTag').textContent = MP.code ? '· Room ' + MP.code.toUpperCase() : '';
+  $('lobby').classList.toggle('guest', !MP.host);
   $('lbCrumb').innerHTML = cfg
     ? `<span class="crumb">›</span><span class="crumb2">${cfg.practice ? 'Practice' : 'Race'}</span>`
     : '';

@@ -42,6 +42,33 @@ export const store = {
     } catch (e) {}
   },
 };
+/**
+ * A year-long cookie, as a second place beside `store` for the little that should outlive a browser clearing a
+ * site's storage (the player's name). Same `hcgp_` prefix; kept to the game's own folder.
+ */
+export const cookie = {
+  get(k: string): string | null {
+    try {
+      const m = document.cookie.match(new RegExp('(?:^|; )hcgp_' + k + '=([^;]*)'));
+      return m ? decodeURIComponent(m[1]) : null;
+    } catch (e) {
+      return null;
+    }
+  },
+  set(k: string, v: string): void {
+    try {
+      document.cookie =
+        'hcgp_' +
+        k +
+        '=' +
+        encodeURIComponent(v) +
+        '; max-age=31536000; path=' +
+        location.pathname.replace(/[^/]*$/, '') +
+        '; SameSite=Lax' +
+        (location.protocol === 'https:' ? '; Secure' : '');
+    } catch (e) {}
+  },
+};
 export function init(): void {
   addEventListener('resize', resize);
   resize();

@@ -51,9 +51,11 @@ import * as m47 from './sim/start';
 import * as m48 from './ui/home';
 import * as m49 from './ui/notify';
 import * as m52 from './sim/lines';
+import * as m54 from './net/joining';
 import * as m53 from './sim/dynline';
 
 const MODS: any[] = [
+  m54,
   m52,
   m53,
   m47,

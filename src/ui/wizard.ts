@@ -4,7 +4,18 @@ import { setMusic, setSfx, unlockAudio } from '../audio/audio';
 import { $, clamp, store } from '../core/dom';
 import { opts } from '../game/race';
 import { placeCircuitPicker } from './menu';
-import { ARTIFACT_URL, MP, enterRoom, leaveRoom, mpCode, mpPresence, normCode } from '../net/multiplayer';
+import {
+  ARTIFACT_URL,
+  MP,
+  enterRoom,
+  leaveRoom,
+  mpCode,
+  mpPresence,
+  mpWarm,
+  normCode,
+  cleanName,
+  saveName,
+} from '../net/multiplayer';
 import { hostStart } from '../net/netcode';
 import {
   cycleMode,
@@ -122,6 +133,7 @@ export const wzJoin = () => {
   $('home').classList.add('hide');
   $('joinDlg').classList.remove('hide');
   $('joinCode').focus();
+  mpWarm(); // a join is coming: connect to the matchmaking server while the code is typed
 };
 export function init(): void {
   WZ = { s: 0, mode: store.get('wzmode', 'solo'), max: 0, group: 'solo' };
@@ -163,10 +175,28 @@ export function init(): void {
       showToast('Copy failed — select the link below');
     }
   };
-  $('nick').addEventListener('input', e => {
-    GS.NICK = (e.target as HTMLInputElement).value.replace(/[^\p{L}\p{N} ._-]/gu, '').slice(0, 16) || GS.NICK;
-    store.set('nick', GS.NICK);
+  const nick = $('nick') as HTMLInputElement;
+  nick.addEventListener('input', () => {
+    const name = cleanName(nick.value).trim();
+    if (!name) return; // an empty box keeps the name until a new one is typed
+    saveName(name);
     mpPresence();
+  });
+  nick.addEventListener('blur', () => {
+    nick.value = GS.NICK;
+  });
+  nick.addEventListener('keydown', e => {
+    if (e.key === 'Enter') nick.blur();
+  });
+  // text boxes with a clear button (.clrX): one tap empties the box and leaves the keyboard up for the new text
+  document.querySelectorAll<HTMLButtonElement>('.clrX').forEach(b => {
+    const box = $(b.dataset.for) as HTMLInputElement;
+    b.addEventListener('pointerdown', e => e.preventDefault()); // do not take the focus from the box
+    b.onclick = () => {
+      box.value = '';
+      box.focus();
+      box.dispatchEvent(new Event('input', { bubbles: true }));
+    };
   });
   $('bResume').onclick = togglePause;
   $('bReset').onclick = resetCar;

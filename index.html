@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
     <title>Racing Line</title>
     <link rel="stylesheet" href="./assets/main.css" />
+    <script>
+      // Opened from an invite link (#code): put the joining screen up with the first paint, before the game has loaded.
+      if (/^#[a-z0-9]{4,8}$/i.test(location.hash)) document.documentElement.classList.add('joining');
+    </script>
   </head>
   <body>
     <canvas id="c"></canvas>
@@ -236,14 +240,30 @@
               <div id="joinRow" class="g-mp">
                 <label for="joinCode2">Join with a Code</label>
                 <div>
-                  <input
-                    id="joinCode2"
-                    placeholder="AB3K9"
-                    maxlength="12"
-                    autocomplete="off"
-                    autocapitalize="characters"
-                    spellcheck="false"
-                  /><button id="bJoin2" class="go" disabled>Join</button>
+                  <span class="clr"
+                    ><input
+                      id="joinCode2"
+                      placeholder="AB3K9"
+                      maxlength="12"
+                      autocomplete="off"
+                      autocapitalize="characters"
+                      spellcheck="false" /><button
+                      type="button"
+                      class="clrX"
+                      data-for="joinCode2"
+                      aria-label="Clear code"
+                    >
+                      <svg aria-hidden="true" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="10" fill="currentColor" opacity="0.28" />
+                        <path
+                          d="M8.5 8.5l7 7M15.5 8.5l-7 7"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                        />
+                      </svg></button></span
+                  ><button id="bJoin2" class="go" disabled>Join</button>
                 </div>
               </div>
               <button id="bJoin" class="hide" disabled>Join</button>
@@ -560,7 +580,32 @@
             </div>
             <div class="roomB">
               <div class="row lbname">
-                <label for="nick">Your Name</label><input id="nick" maxlength="16" autocomplete="off" />
+                <label for="nick">Your Name</label
+                ><span class="clr"
+                  ><input
+                    id="nick"
+                    maxlength="16"
+                    placeholder="Your name"
+                    autocomplete="off"
+                    autocapitalize="words"
+                    spellcheck="false"
+                    enterkeyhint="done" /><button
+                    type="button"
+                    class="clrX"
+                    data-for="nick"
+                    aria-label="Clear name"
+                  >
+                    <svg aria-hidden="true" viewBox="0 0 24 24">
+                      <circle cx="12" cy="12" r="10" fill="currentColor" opacity="0.28" />
+                      <path
+                        d="M8.5 8.5l7 7M15.5 8.5l-7 7"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                      />
+                    </svg></button
+                ></span>
               </div>
               <div class="sh">Players</div>
               <div id="lbPlayers"></div>
@@ -592,6 +637,10 @@
             <div class="sh">Your Controls</div>
             <div class="rules" id="lbCtrl"></div>
           </div>
+          <div class="sect">
+            <div class="sh">Display &amp; Sound</div>
+            <div class="rules" id="lbView"></div>
+          </div>
         </div>
         <div class="help" id="lbWait"></div>
         <div id="lbBar">
@@ -606,16 +655,43 @@
         <div class="sub">
           Enter the room code from the host's lobby, or just scan their QR code with your phone camera.
         </div>
-        <input
-          id="joinCode"
-          placeholder="ab3k9"
-          maxlength="12"
-          style="text-transform: uppercase"
-          autocomplete="off"
-          autocapitalize="off"
-        />
+        <span class="clr"
+          ><input
+            id="joinCode"
+            placeholder="ab3k9"
+            maxlength="12"
+            style="text-transform: uppercase"
+            autocomplete="off"
+            autocapitalize="off" /><button
+            type="button"
+            class="clrX"
+            data-for="joinCode"
+            aria-label="Clear code"
+          >
+            <svg aria-hidden="true" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10" fill="currentColor" opacity="0.28" />
+              <path
+                d="M8.5 8.5l7 7M15.5 8.5l-7 7"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+              />
+            </svg></button
+        ></span>
         <button class="go" id="bJoinGo">Join</button>
         <div class="seg" style="margin-top: 8px"><button id="bJoinCancel">Cancel</button></div>
+      </div>
+    </div>
+    <div id="mpWait" class="ov hide" role="status" aria-live="polite">
+      <div class="card">
+        <h2 id="mwTitle">Joining Race</h2>
+        <div id="mwStep">Loading the game…</div>
+        <div id="mwProg" aria-hidden="true"><i id="mwFill"></i></div>
+        <div class="sub" id="mwHint"></div>
+        <div id="mwBar">
+          <button id="mwCancel">Cancel</button><button id="mwRetry" class="go hide">Try Again</button>
+        </div>
       </div>
     </div>
     <div id="results" class="ov hide" style="background: rgba(0, 0, 0, 0.22)">

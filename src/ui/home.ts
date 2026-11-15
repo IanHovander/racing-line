@@ -8,7 +8,7 @@ import { standings } from '../sim/step';
 import { setMusic, setSfx, unlockAudio } from '../audio/audio';
 import { SEG_SYNC, syncAllSegs } from './widgets';
 import { WZ, wzGo } from './wizard';
-import { normCode, enterRoom } from '../net/multiplayer';
+import { normCode, enterRoom, mpWarm } from '../net/multiplayer';
 import { showToast } from './controls';
 
 export type PanelGroup = 'solo' | 'mp' | 'prefs';
@@ -41,6 +41,7 @@ export function openPanel(group: PanelGroup): void {
   WZ.max = group === 'solo' ? Math.max(WZ.max, 0) : 0;
   wzGo(group === 'prefs' ? 3 : 0);
   syncAllSegs();
+  if (group === 'mp') mpWarm(); // a join may follow: connect to the matchmaking server ahead of it
 }
 
 export function closePanel(): void {
