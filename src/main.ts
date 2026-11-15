@@ -16,6 +16,7 @@ import { init as initHome } from './ui/home';
 import { init as initControls } from './ui/controls';
 import { init as init3d } from './render3d/switch';
 import { init as initBench } from './ui/bench';
+import { init as initLines } from './sim/lines';
 import { installDebug } from './debug';
 
 // Run every module's start-up code in the original order.
@@ -35,6 +36,7 @@ initHome(); // ui/home
 initControls(); // ui/controls
 init3d(); // render3d/switch: three.js renderer if chosen
 initBench(); // ui/bench
+initLines(); // sim/lines: the ready-made racing lines
 init12(); // game/loop
 
 if (

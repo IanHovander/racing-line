@@ -1,10 +1,11 @@
 import { START } from '../sim/start';
+import { cycleDyn } from '../sim/lines';
 import { GS } from '../state';
 import { audioStatus } from '../audio/audio';
 import { attract, cars, opts } from '../game/race';
 import { mpOn } from '../net/multiplayer';
 import { laneShift, passPick } from '../sim/ai';
-import { resetCar, sfxShift, shift, swapCar, togglePause } from '../ui/controls';
+import { resetCar, sfxShift, shift, swapCar, toggleLine, togglePause } from '../ui/controls';
 import { startRace } from '../ui/menu';
 import { $ } from '../core/dom';
 import { WZ } from '../ui/wizard';
@@ -64,6 +65,8 @@ export function init(): void {
       e.preventDefault();
       swapCar();
     } else if (e.code === 'KeyR') resetCar();
+    else if (e.code === 'KeyL' && GS.state !== 'menu') cycleDyn(); // the line you follow
+    else if (e.code === 'KeyH' && GS.state !== 'menu') toggleLine(); // the line on screen
     else if (e.code === 'Escape' && GS.state === 'menu' && !$('menu').classList.contains('hide'))
       $('menu').classList.add('hide');
     else if (e.code === 'KeyP' || e.code === 'Escape') togglePause();

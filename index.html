@@ -282,9 +282,13 @@
               <div>
                 <span>Opponents</span>
                 <div class="seg" id="sDiff">
-                  <button data-v="0">Easy</button><button data-v="1">Normal</button
+                  <button data-v="0">Easy</button><button data-v="1">Medium</button
                   ><button data-v="2">Hard</button>
                 </div>
+              </div>
+              <div class="note" id="diffNote">
+                Easy opponents drive the Novice line for their car, Medium the Intermediate line and Hard the
+                Cautious Expert line. The Perfect Expert line is yours alone.
               </div>
               <div>
                 <span>Laps</span>
@@ -319,6 +323,15 @@
                 </div>
               </div>
               <div class="note" id="steerNote"></div>
+              <div id="sDynRow">
+                <span>Line Difficulty</span>
+                <div class="seg" id="sDyn">
+                  <button data-v="1">Novice</button><button data-v="2">Intermediate</button
+                  ><button data-v="3">Cautious Expert</button><button data-v="4">Perfect Expert</button
+                  ><button data-v="0">Classic</button>
+                </div>
+              </div>
+              <div class="note" id="dynLvNote"></div>
               <div>
                 <span>Gearbox</span>
                 <div class="seg" id="sGears">
@@ -394,8 +407,15 @@
               <div>
                 <span>Racing Line</span>
                 <div class="seg" id="sLine">
-                  <button data-v="0">Hidden</button><button data-v="1">Shown</button>
+                  <button data-v="0">Hidden</button><button data-v="2">Difficult Turns</button
+                  ><button data-v="1">Shown</button>
                 </div>
+              </div>
+              <div class="note">
+                Starts shown in practice and hidden in races. Difficult Turns shows it only for the circuit's
+                three to five heaviest braking points, from about two seconds before each until you are
+                through the corner. Change it here or with H while driving; practice and races each remember
+                their own choice. The car follows the line either way.
               </div>
               <div>
                 <span>Turn Numbers</span>
@@ -446,6 +466,14 @@
                 ><button data-v="2">Manual</button><button data-v="3">Overtake</button>
               </div>
             </div>
+            <div id="pDynRow">
+              <span>Line Difficulty</span>
+              <div class="seg" id="pDyn">
+                <button data-v="1">Novice</button><button data-v="2">Intermediate</button
+                ><button data-v="3">Cautious Expert</button><button data-v="4">Perfect Expert</button
+                ><button data-v="0">Classic</button>
+              </div>
+            </div>
             <div>
               <span>Gearbox</span>
               <div class="seg" id="pGears">
@@ -482,7 +510,8 @@
             <div>
               <span>Racing Line</span>
               <div class="seg" id="pLine">
-                <button data-v="0">Hidden</button><button data-v="1">Shown</button>
+                <button data-v="0">Hidden</button><button data-v="2">Difficult Turns</button
+                ><button data-v="1">Shown</button>
               </div>
             </div>
             <div>

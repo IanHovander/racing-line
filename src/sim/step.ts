@@ -8,6 +8,7 @@ import { netFollow } from '../net/netcode';
 import { FW, startFireworks, updateRain } from '../render/effects';
 import { STEP, controlAI, pursuitLat } from './ai';
 import { locate, physics, towTarget } from './physics';
+import { refLine } from './lines';
 import { controlPlayer } from './player';
 import { progress, secDone, statTick, tpRec } from './timing';
 import { DRV } from '../teams/drivers';
@@ -174,7 +175,7 @@ export function step(dt) {
         dist = c.v * dt;
       const f =
         1 +
-        0.6 * Math.min(1, Math.abs(c.lat - GS.off[c.idx]) / 3) +
+        0.6 * Math.min(1, Math.abs(c.lat - refLine(c, !attract && i === GS.ctrl && !c.finished)[c.idx]) / 3) +
         c.slide * 2 +
         [0, 0.3, 1.5, 4, 0.8, 1.2][c.surf] +
         1.2 * c.brk;

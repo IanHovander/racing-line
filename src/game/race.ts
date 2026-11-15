@@ -7,6 +7,7 @@ import { cam } from '../render/camera';
 import { FW } from '../render/effects';
 import { flagFrames, flagImg } from '../render/scenery';
 import { renderLaneInd } from '../sim/ai';
+import { dynPrepare, lineLoad } from '../sim/lines';
 import { locate } from '../sim/physics';
 import { TEAM_STATS } from '../teams/team-stats';
 import { TEAMS } from '../teams/teams';
@@ -156,6 +157,8 @@ export function setupRace(isAttract, mpGrid?) {
     GS.mateIdx = cars.findIndex(c => c.mine && c.drv === 1);
   }
   if (isAttract) GS.PRACTICE = false;
+  dynPrepare(); // racing lines for this circuit, weather, Opponents level and the car you drive (now that the grid is known)
+  lineLoad(); // whether the line is drawn: practice and races each remember their own choice
   if (isAttract) {
     GS.ctrl = 0;
     GS.state = 'menu';
@@ -177,7 +180,10 @@ export function init(): void {
     laps: store.get('laps', 5),
     diff: store.get('diff', 1),
     cam: store.get('camv2', 0) ? store.get('cam', 1) : (store.set('camv2', 1), store.set('cam', 1), 1),
-    line: store.get('line', true),
+    /** the racing line on screen: 0 hidden, 1 shown, 2 difficult turns only. Set by lineLoad() for practice or races */
+    line: 0,
+    /** the line you follow: 0 classic, 1..4 Novice / Intermediate / Cautious Expert / Perfect Expert (sim/lines.ts) */
+    dynlv: clamp(store.get('dynlv', 3) | 0, 0, 4),
     crowd: store.get('crowd', 1),
     rain: store.get('rain', 0),
     tyres: store.get('tyres', 0),

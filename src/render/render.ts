@@ -21,7 +21,9 @@ import {
   signBoard,
 } from './trackside';
 import { laneOff } from '../sim/ai';
-import { liveZone, profileFor } from '../sim/profile';
+import { dynOn, hardMask } from '../sim/lines';
+import { PROF, liveZone, profileFor } from '../sim/profile';
+import { drawDynLine } from './line';
 import { clearTime } from '../sim/step';
 import { TEAMS } from '../teams/teams';
 import { parts, skids } from '../track/active';
@@ -367,14 +369,19 @@ export function render() {
     ctx.lineTo(b[0], b[1]);
   }
   ctx.stroke();
-  // racing line overlay
-  if (opts.line && !attract && cars[GS.ctrl] && GS.PZONE.team !== cars[GS.ctrl].team) {
+  // racing line overlay. A car the planner is driving draws its own live line (render/line.ts) instead of the classic one
+  const pc = cars[GS.ctrl],
+    dynLine = opts.line && !attract && !!pc && !pc.finished && !pc.out && opts.steer === 0 && dynOn(pc);
+  if (dynLine) drawDynLine(pc, z);
+  if (opts.line && !attract && !dynLine && cars[GS.ctrl] && GS.PZONE.team !== cars[GS.ctrl].team) {
     GS.PZONE = new Uint8Array(GS.N);
     GS.PZONE.team = cars[GS.ctrl].team;
     profileFor(cars[GS.ctrl].st, GS.PZONE);
   }
-  if (opts.line && !attract) {
-    const ZN = liveZone(cars[GS.ctrl], GS.PZONE.length === GS.N ? GS.PZONE : GS.zone);
+  if (opts.line && !attract && !dynLine) {
+    const ZB = GS.PZONE.length === GS.N ? GS.PZONE : GS.zone,
+      ZN = liveZone(cars[GS.ctrl], ZB),
+      HM = opts.line === 2 ? hardMask(PROF[cars[GS.ctrl].team] || GS.vf, ZB) : null; // Difficult Turns only
     const cols = ['rgba(120,255,120,0.55)', 'rgba(255,70,60,0.75)', 'rgba(255,214,10,0.65)'];
     ctx.lineWidth = Math.max(1.5, 0.3 * z);
     ctx.setLineDash([z * 1.6, z * 1.2]);
@@ -382,7 +389,7 @@ export function render() {
       ctx.strokeStyle = cols[zc];
       ctx.beginPath();
       for (let i = 0; i < GS.N; i++) {
-        if (ZN[i] !== zc) continue;
+        if (ZN[i] !== zc || (HM && !HM[i])) continue;
         const j = (i + 1) % GS.N;
         if (!onScr(GS.TSX[i], GS.TSY[i], 20)) continue;
         ctx.moveTo(GS.TSX[i] + GS.NSX[i] * GS.off[i], GS.TSY[i] + GS.NSY[i] * GS.off[i]);

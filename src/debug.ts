@@ -52,8 +52,12 @@ import * as m48 from './ui/home';
 import * as m49 from './ui/notify';
 import * as m50 from './render3d/switch';
 import * as m51 from './ui/bench';
+import * as m52 from './sim/lines';
+import * as m53 from './sim/dynline';
 
 const MODS: any[] = [
+  m52,
+  m53,
   m47,
   m48,
   m49,

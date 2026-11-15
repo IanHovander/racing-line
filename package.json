@@ -14,6 +14,7 @@
     "fmt:check": "oxfmt --check",
     "serve": "node scripts/serve.mjs",
     "test": "playwright test",
+    "lines": "node tools/precompute.cjs",
     "check": "npm run fmt:check && npm run lint && npm run typecheck && npm run build && npm test",
     "prepare": "git config core.hooksPath .githooks || true"
   },

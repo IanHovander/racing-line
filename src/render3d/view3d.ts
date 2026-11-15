@@ -10,7 +10,8 @@ import { H, W, cv } from '../core/dom';
 import { attract, cars, opts } from '../game/race';
 import { cam } from '../render/camera';
 import { BODY, COVER, FPLATE, FWING, PODS, RPLATE, RWING, WHEELS, rect } from '../render/car';
-import { liveZone, profileFor } from '../sim/profile';
+import { DYN, dynOn, hardMask } from '../sim/lines';
+import { PROF, liveZone, profileFor } from '../sim/profile';
 import { shade } from '../teams/teams';
 
 let renderer: any = null,
@@ -19,7 +20,8 @@ let renderer: any = null,
   world: any = null,
   builtFor: any = null,
   lineGeo: any = null,
-  lineCol: Float32Array | null = null;
+  lineCol: Float32Array | null = null,
+  lineSrc: any = null; // the lateral offsets the racing-line ribbon is laid along
 const carObjs = new Map<any, any>();
 
 let glCanvas: HTMLCanvasElement | null = null;
@@ -300,6 +302,7 @@ function buildWorld() {
       const j = (i + 1) % N;
       idx.push(2 * i, 2 * j, 2 * j + 1, 2 * i, 2 * j + 1, 2 * i + 1);
     }
+    lineSrc = GS.off;
     lineGeo = new THREE.BufferGeometry();
     lineGeo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
     lineCol = new Float32Array(N * 2 * 4);
@@ -443,6 +446,18 @@ function makeCar(c) {
   return g;
 }
 
+/** move the racing-line ribbon onto another line (lateral offsets per sample) */
+function layLine(lat): void {
+  if (lineSrc === lat || !lineGeo) return;
+  lineSrc = lat;
+  const p = lineGeo.attributes.position;
+  for (let i = 0; i < GS.N; i++)
+    for (let k = 0; k < 2; k++) {
+      const v = lat[i] + (k ? -0.15 : 0.15);
+      p.setXYZ(i * 2 + k, GS.cx[i] + GS.nx[i] * v, GS.cy[i] + GS.ny[i] * v, GS.HT[i] + 0.05);
+    }
+  p.needsUpdate = true;
+}
 function updateLine() {
   if (!lineCol || !lineGeo) return;
   const visible = opts.line && !attract && cars[GS.ctrl];
@@ -451,19 +466,34 @@ function updateLine() {
     lineGeo.attributes.color.needsUpdate = true;
     return;
   }
-  if (GS.PZONE.team !== cars[GS.ctrl].team) {
-    GS.PZONE = new Uint8Array(GS.N);
-    GS.PZONE.team = cars[GS.ctrl].team;
-    profileFor(cars[GS.ctrl].st, GS.PZONE);
+  const pc = cars[GS.ctrl],
+    dyn = opts.steer === 0 && dynOn(pc) && !pc.finished && !pc.out;
+  // a car the planner is driving follows its own line (sim/lines.ts): lay the ribbon along that line. This renderer
+  // shows the line of the level for the whole lap, not the live plan from the car.
+  layLine(dyn ? DYN.line.lat : GS.off);
+  let ZN, mask;
+  if (dyn) {
+    ZN = DYN.line.zone;
+    mask = opts.line === 2 ? hardMask(DYN.line.v, ZN) : null;
+  } else {
+    if (GS.PZONE.team !== pc.team) {
+      GS.PZONE = new Uint8Array(GS.N);
+      GS.PZONE.team = pc.team;
+      profileFor(pc.st, GS.PZONE);
+    }
+    const ZB = GS.PZONE.length === GS.N ? GS.PZONE : GS.zone;
+    ZN = liveZone(pc, ZB);
+    mask = opts.line === 2 ? hardMask(PROF[pc.team] || GS.vf, ZB) : null;
   }
-  const ZN = liveZone(cars[GS.ctrl], GS.PZONE.length === GS.N ? GS.PZONE : GS.zone);
   const C = [
     [0.47, 1, 0.47, 0.55],
     [1, 0.27, 0.24, 0.75],
     [1, 0.84, 0.04, 0.65],
+    [1, 0.55, 0.12, 0.75],
   ];
+  const NONE = [0, 0, 0, 0];
   for (let i = 0; i < GS.N; i++) {
-    const q = C[ZN[i]] || C[0];
+    const q = mask && !mask[i] ? NONE : C[ZN[i]] || C[0];
     for (let k = 0; k < 2; k++) lineCol.set(q, (i * 2 + k) * 4);
   }
   lineGeo.attributes.color.needsUpdate = true;
