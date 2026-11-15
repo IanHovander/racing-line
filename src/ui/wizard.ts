@@ -192,7 +192,9 @@ export function init(): void {
   // text boxes with a clear button (.clrX): one tap empties the box and leaves the keyboard up for the new text
   document.querySelectorAll<HTMLButtonElement>('.clrX').forEach(b => {
     const box = $(b.dataset.for) as HTMLInputElement;
-    b.addEventListener('pointerdown', e => e.preventDefault()); // do not take the focus from the box
+    // Do not take the focus from the box (a mouse press on a button would). This must be mousedown: cancelling
+    // pointerdown makes Safari drop the click that follows a tap, and the button then did nothing on an iPhone.
+    b.addEventListener('mousedown', e => e.preventDefault());
     b.onclick = () => {
       box.value = '';
       box.focus();
