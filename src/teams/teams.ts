@@ -3,17 +3,19 @@ import { clamp } from '../core/dom';
 // ---------- team logos and driver flags (original artwork, inline SVG) ----------
 export const LOGOS = [
   '<path d="M20 2 L36 8 V20 C36 30 28 36 20 38 C12 36 4 30 4 20 V8 Z" fill="#d81f26" stroke="#ffd400" stroke-width="2"/><path d="M23 7 L13 22 H19 L16 33 L27 17 H21 Z" fill="#ffd400"/>',
-  '<path d="M20 2 L36 11 V29 L20 38 L4 29 V11 Z" fill="#c8cdd3" stroke="#00b3a4" stroke-width="2"/><path d="M8 24 L20 12 L32 24 H27 L20 17 L13 24 Z" fill="#00b3a4"/><path d="M12 30 L20 22 L28 30 H24 L20 26 L16 30 Z" fill="#4a515b"/>',
+  '', // Argent GP logo is the supplied transparent PNG asset.
   '', // Papaya logo is the supplied transparent PNG asset.
   '', // Verde logo is the supplied transparent PNG asset.
   '<path d="M20 1 L38 20 L20 39 L2 20 Z" fill="#2449c4" stroke="#ff3b6b" stroke-width="2"/><path d="M20 9 L23 17 H31 L25 22 L27 30 L20 25 L13 30 L15 22 L9 17 H17 Z" fill="#ff3b6b"/>',
 ];
 export const teamLogo = (t, s) =>
-  t === 2
-    ? `<img class="logo" width="${s}" height="${s}" src="./papaya-racing-logo.png" alt="" aria-hidden="true">`
-    : t === 3
-      ? `<img class="logo" width="${s}" height="${s}" src="./verde-team-logo.png" alt="" aria-hidden="true">`
-      : `<svg class="logo" width="${s}" height="${s}" viewBox="0 0 40 40" aria-hidden="true">${LOGOS[t] || ''}</svg>`;
+  t === 1
+    ? `<img class="logo" width="${s}" height="${s}" src="./argent-gp-logo.png" alt="" aria-hidden="true">`
+    : t === 2
+      ? `<img class="logo" width="${s}" height="${s}" src="./papaya-racing-logo.png" alt="" aria-hidden="true">`
+      : t === 3
+        ? `<img class="logo" width="${s}" height="${s}" src="./verde-team-logo.png" alt="" aria-hidden="true">`
+        : `<svg class="logo" width="${s}" height="${s}" viewBox="0 0 40 40" aria-hidden="true">${LOGOS[t] || ''}</svg>`;
 export const FLAGS = {
   MX: [
     'Mexico',
