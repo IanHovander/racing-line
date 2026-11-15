@@ -45,6 +45,12 @@ A bot only presses and releases the gas, like a player on Space. It waits for th
 - `rollout.cjs`: the full sweep. Every circuit x car x level, dry, and two cars in the wet, with `perfect` and
   `late0.2`; then races against each Opponents level. One process per circuit; 5 to 10 minutes. `--quick` (two
   cars, no races), `--races` (races only), `--show` (print the last results).
+- `classic-lap.cjs`: the Classic fixed line driven by the bot on several circuits (`--tracks 1,3,6,7`). `--set
+  'CLASSIC.level=0'` keeps the old elastic-band line for comparison.
+- `ai-offs.cjs`: run a race and log every time an AI car leaves the tarmac, with what it was doing (in a lane,
+  beside another car, just hit, over the line's speed, its braking error). Prints the share of race time off
+  the tarmac; `--list` prints each excursion. `--set 'AI_TIMING.early=[0,0,0];AI_LANE.slow=0'` turns the early
+  aim and the lane caution off for comparison.
 - `mp-test.cjs`: a two-player online race with no network, two copies of the game joined by a fake room. Checks
   both players' lines, the host's AI, what the guest sees, and that both sides agree on the result.
 

@@ -45,7 +45,7 @@ export function teamCardHtml(team: number) {
   return h + '</div>';
 }
 const DYN_LV_NOTE = [
-  'The original fixed line.',
+  'Classic: one fixed line, taken from the experts. The car is steered back to it and nothing is re-planned.',
   'Novice: a slower line with big reserves. Lifting holds your speed, so just lift before the bar; a late lift is forgiven.',
   'Intermediate: quicker, with a moderate reserve for late lifts and early gas.',
   'Cautious Expert: close to the limit. A small reserve only.',

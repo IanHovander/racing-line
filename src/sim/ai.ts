@@ -2,7 +2,7 @@ import { GS } from '../state';
 import { $, clamp } from '../core/dom';
 import { attract, cars, opts } from '../game/race';
 import { BPROF, VCAP } from './car-model';
-import { AIL, AIV, AIZ, DYN_AIB, aiSteer } from './lines';
+import { AIK, AIL, AIV, AIZ, DYN_AIB, aiSteer } from './lines';
 import { PROF, laneProfile } from './profile';
 import { inYellow } from './step';
 import { DRV } from '../teams/drivers';
@@ -187,6 +187,26 @@ export function defend(c, dt, ZN = GS.zone) {
   }
   return null;
 }
+/**
+ * How exactly an AI driver meets the braking points of its dynamic line, by Opponents level (Easy, Medium, Hard).
+ * sigma: the spread of the timing error in seconds (normally distributed; a consistent driver has up to a quarter
+ * less, an erratic one a little more). early: how many seconds before the braking point the driver aims, so that
+ * the late end of the spread still makes the corner. fix: a constant error for measurements (tools), null in play.
+ */
+export const AI_TIMING: { sigma: number[]; early: number[]; fix: number | null } = {
+  sigma: [0.2, 0.12, 0.08],
+  early: [0.1, 0.08, 0.08],
+  fix: null,
+};
+/**
+ * An AI car away from its dynamic line slows for corners: by `slow` (a share of its speed) when it is `full` metres or
+ * more off the line and the line corners at `g` m/s^2 or more, proportionally less when closer or on a gentler bend.
+ */
+export const AI_LANE = { full: 3, slow: 0.12, g: 18 };
+/** a standard normal random number (Box-Muller) */
+function gauss(): number {
+  return Math.sqrt(-2 * Math.log(1 - Math.random())) * Math.cos(2 * Math.PI * Math.random());
+}
 /** how an AI car follows a dynamic line: samples it looks ahead for its target speed, and how sharply it brakes when over it */
 export const AI_TUNE = { look: 2, bgain: 1.5 };
 // AI drivers. With the dynamic lines ready (sim/lines.ts) they drive the line of the Opponents level for their own car, at close
@@ -198,19 +218,22 @@ export function controlAI(c, dt, factor) {
     ZN = AIZ[c.team] || GS.zone;
   if (PV && !c.finished) factor += DYN_AIB[opts.diff];
   factor *= 1 + 0.05 * (ds.pace - 0.5) + (opts.rain ? 0.06 * (ds.wet - 0.5) : 0);
-  c.wobT = (c.wobT || 0) - dt;
-  if (c.wobT <= 0) {
-    c.wobT = 1.5 + Math.random() * 2;
-    c.wob = (Math.random() * 2 - 1) * (1 - ds.consist) * 0.02;
+  if (!PV) {
+    // on the classic line a driver's imperfection is a wandering pace and the odd late-braking moment
+    c.wobT = (c.wobT || 0) - dt;
+    if (c.wobT <= 0) {
+      c.wobT = 1.5 + Math.random() * 2;
+      c.wob = (Math.random() * 2 - 1) * (1 - ds.consist) * 0.02;
+    }
+    factor *= 1 + (c.wob || 0);
+    if (c.slipT > 0) c.slipT -= dt;
+    else if (
+      ZN[(c.idx + 8) % GS.N] === 1 &&
+      ZN[c.idx] !== 1 &&
+      Math.random() < dt * 0.6 * (1 - ds.consist) ** 2
+    )
+      c.slipT = 0.45; // a late-braking moment
   }
-  factor *= 1 + (c.wob || 0);
-  if (c.slipT > 0) c.slipT -= dt;
-  else if (
-    ZN[(c.idx + 8) % GS.N] === 1 &&
-    ZN[c.idx] !== 1 &&
-    Math.random() < dt * 0.6 * (1 - ds.consist) ** 2
-  )
-    c.slipT = 0.45; // a late-braking moment
   factor = Math.min(factor, 1.012); // never beyond what the grip allows
   let [des, cap, urg] = traffic(c, LN);
   if (c.defSeenT > 0) c.defSeenT -= dt;
@@ -229,7 +252,38 @@ export function controlAI(c, dt, factor) {
   }
   const r = dt * (3 + urg * 3);
   c.lane += clamp(des - c.lane, -r, r);
-  const vp = (PV || PROF[c.team] || GS.vf)[(c.idx + (PV ? AI_TUNE.look : 3)) % GS.N];
+  let vp = (PV || PROF[c.team] || GS.vf)[(c.idx + (PV ? AI_TUNE.look : 3)) % GS.N];
+  if (PV) {
+    // On a dynamic line a driver's imperfection is timing: every braking zone is met a little early or late, by a
+    // normally distributed error around a deliberately early aim (AI_TIMING). Early: the car slows to the speeds the
+    // line asks for a few metres further on. Late: it keeps the speeds of a few metres back.
+    const braking = ZN[c.idx] === 1 || ZN[c.idx] === 3;
+    if (c.brkErr === undefined || (c.wasBrk && !braking)) {
+      const lv = opts.diff;
+      c.brkErr =
+        AI_TIMING.fix !== null
+          ? AI_TIMING.fix
+          : gauss() * AI_TIMING.sigma[lv] * (1.25 - 0.5 * ds.consist) - AI_TIMING.early[lv];
+    }
+    c.wasBrk = braking;
+    const sh = Math.round((-c.brkErr * c.v) / GS.SEG), // samples: ahead when early, behind when late
+      vs = PV[(((c.idx + AI_TUNE.look + sh) % GS.N) + GS.N) % GS.N];
+    vp = sh >= 0 ? Math.min(vp, vs) : Math.max(vp, vs);
+    // Off its line (in a lane beside or round another car) the line's speeds no longer fit: the dynamic lines use the
+    // whole road, so a lane is often a tighter arc or the far edge. Take what is coming slower in proportion to how far
+    // off the line the car is and how hard the line corners over the next second and a half.
+    const dev = Math.min(1, Math.abs(c.lat - LN[c.idx]) / AI_LANE.full);
+    if (dev > 0.05) {
+      const KP = AIK[c.team];
+      let hard = 0;
+      for (let t = 0; t <= 1.5; t += 0.5) {
+        const i = (c.idx + Math.round((c.v * t) / GS.SEG)) % GS.N,
+          g = Math.abs(KP[i]) * PV[i] * PV[i];
+        if (g > hard) hard = g;
+      }
+      vp *= 1 - AI_LANE.slow * dev * Math.min(1, hard / AI_LANE.g);
+    }
+  }
   let vt = Math.min(
     (vp < VCAP * (c.st || NEUTRAL).top - 1 ? vp * Math.sqrt(c.gm) : vp * (1 - 0.1 * c.dmg)) *
       factor *

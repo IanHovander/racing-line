@@ -11,7 +11,8 @@ change. The command-line tools are described in [tools/README.md](../tools/READM
 ## What the player gets
 
 - **Four lines to follow** ("Line Difficulty" in Settings, the pause menu and the online lobby; `L` cycles
-  them in a race), plus the original fixed line as "Classic". The default is Cautious Expert.
+  them in a race), plus "Classic": one fixed line that the car is steered back to, with nothing re-planned.
+  The default is Cautious Expert.
 
   | Level           | Grip used | Brakes assumed | Distance kept from the road edge | Notes                                    |
   | --------------- | --------- | -------------- | -------------------------------- | ---------------------------------------- |
@@ -26,7 +27,7 @@ change. The command-line tools are described in [tools/README.md](../tools/READM
 
 - **The drawn line** ("Racing Line" setting, or `H`): Hidden, Difficult Turns (only each circuit's three
   to five heaviest braking points, from about two seconds before the braking point until the car is
-  through the corner) or Shown. It starts shown in practice and hidden in races; each remembers its own
+  through the corner) or Shown. It is shown by default; practice and races each remember their own
   choice. The car follows the line whether or not it is drawn.
 
 - **Opponents** drive the line of the Opponents setting for their own car: Easy = Novice,
@@ -135,8 +136,35 @@ Lap times on Lone Star with the Rosso car (one-button bot lifting exactly on tim
   steered round.
 - **AI cars** do not use `plan()`. They follow `planner.line` with the game's existing traffic and
   defending logic (lane offsets from the line), steering by the line's own curvature when they are on it
-  and by pure pursuit otherwise. Their pace on the line is `DYN_AIB` in `src/sim/lines.ts` (about 96.5% /
-  97.5% / 97.5% of the line's speeds for Easy / Medium / Hard), a little short of a well-timed player.
+  and by pure pursuit otherwise. Their pace on the line is `DYN_AIB` in `src/sim/lines.ts` (about 97.3% /
+  98.3% / 98.3% of the line's speeds for Easy / Medium / Hard).
+- **AI timing** (`AI_TIMING` in `src/sim/ai.ts`). A driver meets each braking zone a little early or late:
+  a normally distributed error with a spread of 0.20 s (Easy), 0.12 s (Medium) or 0.08 s (Hard), a quarter
+  less for the most consistent drivers. They aim 0.10 / 0.08 / 0.08 s early, so the late end of the spread
+  still makes the corner (solo, the Hard line takes 0.05 s late cleanly and slides at 0.10 s; Medium is
+  clean to 0.10 s; Easy to at least 0.20 s). Together with the pace above this leaves the AI a little short
+  of a well-timed player on the same line.
+- **AI in traffic** (`AI_LANE`). Most AI excursions came from cars off their own line beside or round
+  another car: the dynamic lines use the whole road, so a lane is often a tighter arc or the far edge.
+  A car away from its line now takes corners up to 12% slower, in proportion to how far off the line it is
+  (3 m or more for the full amount) and how hard the line corners over the next second and a half. With
+  the early aim this cut AI time off the tarmac in test races from 0.7-2.3% of race time to 0.1-0.5%.
+
+## Classic: a fixed line from the experts
+
+Classic used to follow an elastic band pulled tight through the corners. It now follows the consensus of the
+experts: the average of the five cars' Cautious Expert lines for the circuit and weather, scaled in to the
+classic 1.1 m edge margin (`adoptClassic` in `src/sim/lines.ts`). It is still one fixed line for everyone,
+followed by pure pursuit with the classic speed profile; nothing is re-planned from the car. The same line is
+what Lanes and Overtake steering follow, and what an AI car falls back to when its own line is not ready.
+
+The speed profile of that line is worked out from its curvature measured as the planner measures it, taken 10%
+sharper (`CLASSIC.care`): the wide circle fit that suited the elastic line saw the expert line's corners as
+rounder than they are and the car slid about 9 s a lap. With it Classic slides about as much as it used to
+(0 to 2 s a lap) and laps much faster: Lone Star 54.8 s (was 61.1 s), Monte Porto 42.7 s (45.0 s), Ardennes
+49.5 s (54.1 s), Marina Night 53.0 s (57.7 s). Check with `tools/classic-lap.cjs`.
+
+Until the ready-made lines have arrived (or if they are missing) the elastic line is used.
 
 ## Stored lines (`public/dynlines.json`)
 

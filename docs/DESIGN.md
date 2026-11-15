@@ -398,13 +398,22 @@ Full write-up: [dynamic-racing-line.md](dynamic-racing-line.md). Tools: [tools/R
   - Cautious Expert: 97%, 90%, 1.0 m.
   - Perfect Expert: 99.5%, 98.5%, 0.3 m, and it plans skids into its braking.
 - **The reserve is the player's:** with the gas held the car uses its real grip, so lifting later than the line says is faster until the road runs out. When too fast the driver turns in at the tyre limit and skids the speed off.
-- **Racing Line** setting (`opts.line`: 0 Hidden, 2 Difficult Turns, 1 Shown; `H` cycles): starts shown in practice and hidden in races, each remembered separately (`lineP` / `lineR`). Difficult Turns draws only each circuit's three to five heaviest braking points (lose 100 km/h or more, or drop to 55% of the speed or less), from about two seconds before the braking point.
+- **Racing Line** setting (`opts.line`: 0 Hidden, 2 Difficult Turns, 1 Shown; `H` cycles): shown by default (v17.14; races used to start hidden); practice and races each remember their own choice (`lineP` / `lineR`). Difficult Turns draws only each circuit's three to five heaviest braking points (lose 100 km/h or more, or drop to 55% of the speed or less), from about two seconds before the braking point.
 - **The live line** (`src/render/line.ts`): solid from the car = the path being steered, green gas / yellow hold / red brake / orange brake with a skid, a white bar where to lift; dashed = the rest of the lap.
 - **Opponents drive the lines too:** Easy = Novice, Medium = Intermediate (was "Normal"), Hard = Cautious Expert, each for its own car, at about 96.5% / 97.5% / 97.5% of the line's own speeds (`DYN_AIB`), with the existing traffic and defending logic. Lone Star solo AI laps: 57.0 / 54.0 / 52.8 s (were 66.5 / 62.7 / 60.0 s on the fixed line).
 - **Other cars:** the player's planned path ignores moving cars (a pass-planning version was removed: unpredictable); the contact assist brakes behind them; stopped cars are steered round.
 - **Lines are ready-made:** `public/dynlines.json` holds all 320 (8 circuits × 5 cars × 4 levels × dry/wet), built by `npm run lines`, fetched at start-up outside the bundle. A missing or out-of-date line is built in the browser in the background and cached in `localStorage`.
 - **Online:** every player's car is planned locally at their own Line Difficulty (a personal control in the lobby); the host drives the AI on the room's Opponents line. The network protocol is unchanged.
 - **Line builder:** periodic B-spline of lateral offsets (848 control points), lap model with the game's physics and curvature measured on the drawn path, searched by smooth multi-point bumps coarse to fine, then a wide-entry step per corner. Lone Star, Rosso, bot lifting on time: Novice 56.1 s, Intermediate 53.7 s, Cautious Expert 52.4 s, Perfect Expert 51.4 s (fixed line: 61.1 s).
+
+## v17.14 — Classic from the experts, AI timing
+
+- **Classic is a fixed line taken from the experts** (`adoptClassic`, `src/sim/lines.ts`): the average of the five cars' Cautious Expert lines for the circuit and weather, scaled in to the classic 1.1 m edge margin, replacing the elastic-band line once the ready-made lines have arrived. Still one fixed line for everyone, followed by pure pursuit; Lanes and Overtake steering use it too. Its speed profile uses the line's own curvature taken 10% sharper (`CLASSIC.care`). Lone Star in Classic: 54.8 s (was 61.1 s), with under a second of sliding a lap.
+- **AI timing** (`AI_TIMING`, `src/sim/ai.ts`): on a dynamic line each braking zone is met early or late by a normally distributed error, spread 0.20 s Easy / 0.12 s Medium / 0.08 s Hard (a quarter less for the most consistent drivers), around an aim 0.10 / 0.08 / 0.08 s early. This replaces the wandering pace and the random late-braking moment (both still used on the classic line).
+- **AI in traffic** (`AI_LANE`): a car away from its line takes corners up to 12% slower, in proportion to its distance from the line (full at 3 m) and how hard the line corners over the next 1.5 s.
+- **Pace** (`DYN_AIB`): 97.3% / 98.3% / 98.3% of the line's speeds, which with the early aim keeps AI lap times where they were (Lone Star solo 57.1 / 54.1 / 52.9 s).
+- **Racing Line is shown by default** in races as well as in practice (races used to start with it hidden). Practice and races still remember their own choice.
+- **Result:** AI time off the tarmac in test races fell from 0.7–2.3% of race time to 0.1–0.5%, and contacts fell with it (`node tools/ai-offs.cjs`).
 
 ## Model
 

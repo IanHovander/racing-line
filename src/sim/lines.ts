@@ -18,7 +18,7 @@ import { attract, cars, opts } from '../game/race';
 import { pursuit } from './ai';
 import { BPROF, BRK, GRIP, VCAP, VMAX } from './car-model';
 import { create } from './dynline';
-import { PROF } from './profile';
+import { PROF, buildProfile, setLineCurv } from './profile';
 import { TEAM_STATS } from '../teams/team-stats';
 import { WETB, WETG, WX } from '../track/track';
 import { showToast, updatePads } from '../ui/controls';
@@ -26,8 +26,8 @@ import { syncAllSegs } from '../ui/widgets';
 import { WZ } from '../ui/wizard';
 
 export const DYN_NAMES = ['Classic', 'Novice', 'Intermediate', 'Cautious Expert', 'Perfect Expert'];
-/** AI pace on its line, added to the classic skill (0.9 / 0.955 / 1.0): about 0.965 / 0.975 / 0.975 of the line's own speeds, a little short of a well-timed player on the same line */
-export const DYN_AIB = [0.065, 0.02, -0.025];
+/** AI pace on its line, added to the classic skill (0.9 / 0.955 / 1.0): about 0.973 / 0.983 / 0.983 of the line's own speeds. With the early braking aim in AI_TIMING (sim/ai.ts) that leaves the AI a little short of a well-timed player on the same line */
+export const DYN_AIB = [0.073, 0.028, -0.017];
 /** grip of each surface relative to tarmac in the wet (as in physics()) */
 export const DYN_WETS = [34, 31, 18, 10, 22, 19].map(
   (g, i) => (g * [0.72, 0.55, 0.7, 0.85, 0.7, 0.55][i]) / (34 * 0.72),
@@ -53,9 +53,13 @@ export let AIL: any[] = [],
 /** the ready-made lines, by "circuit:team:level:wet" (null until public/dynlines.json has arrived) */
 export let DYNLINES: any = null;
 let busy = false;
+/** circuit + weather whose expert lines the classic line was last taken from */
+let classicKey = '';
 
 /** forget every planner (the track is being rebuilt) */
 export function dynDrop(): void {
+  classicKey = '';
+  setLineCurv(null); // the track is being rebuilt: its line is the elastic one again
   DYN = null;
   DYNSTAT = null;
   DYNKEY = '';
@@ -169,6 +173,53 @@ export function dynAssign(): void {
     }
   }
 }
+// ---- Classic: one fixed line for everyone, taken from the experts ----
+// The classic line (GS.off: what Classic steering, Lanes, Overtake and the AI without a line of its own follow) used to
+// come from an elastic band pulled tight through the corners. Once the ready-made lines are here it is replaced by the
+// consensus of the experts: the average of the five cars' lines at one level, scaled in from that level's edge margin to
+// the classic one (1.1 m), so it is a real racing line found for lap time. It stays a fixed line: nothing is re-planned
+// from the car, which is what makes it Classic. Only ready-made lines are used; nothing is built for this.
+/** level: which experts' lines (0 keeps the elastic line). care: how much sharper the line's corners are taken to be when its speeds are worked out; 1.1 leaves pure pursuit about as much room as it had on the elastic line (0.1 to 2 s of sliding a lap) */
+export const CLASSIC = { level: 3, care: 1.1 };
+function adoptClassic(): void {
+  if (classicKey === DYNKEY || !CLASSIC.level) return;
+  const P = [];
+  for (let t = 0; t < TEAM_STATS.length; t++) {
+    const D = dynGet(t, CLASSIC.level);
+    if (!D.ready) return;
+    P.push(D);
+  }
+  const E = GS.HW - 1.1,
+    k = Math.min(1, E / (GS.HW - P[0].cfg.edge));
+  for (let i = 0; i < GS.N; i++) {
+    let a = 0;
+    for (const D of P) a += D.line.lat[i];
+    GS.off[i] = clamp((a / P.length) * k, -E, E);
+    GS.rx[i] = GS.cx[i] + GS.nx[i] * GS.off[i];
+    GS.ry[i] = GS.cy[i] + GS.ny[i] * GS.off[i];
+  }
+  // its curvature, measured as the planner measures a line (the circle through the points 4 m behind, here and 4 m
+  // ahead) and lightly smoothed: the wide fit in buildProfile() suits the gentle elastic line but sees the sharper
+  // corners of an expert line as rounder than they are, and the car then slides through them.
+  const N = GS.N,
+    raw = new Float64Array(N),
+    kap = new Float64Array(N);
+  for (let i = 0; i < N; i++) {
+    const a = (i - 2 + N) % N,
+      b = (i + 2) % N,
+      ux = GS.rx[i] - GS.rx[a],
+      uy = GS.ry[i] - GS.ry[a],
+      wx = GS.rx[b] - GS.rx[i],
+      wy = GS.ry[b] - GS.ry[i],
+      d = Math.hypot(ux, uy) * Math.hypot(wx, wy) * Math.hypot(GS.rx[b] - GS.rx[a], GS.ry[b] - GS.ry[a]);
+    raw[i] = Math.abs((2 * (ux * wy - uy * wx)) / Math.max(d, 1e-9));
+  }
+  for (let i = 0; i < N; i++)
+    kap[i] = Math.max(raw[(i - 1 + N) % N], raw[i], raw[(i + 1) % N]) * CLASSIC.care;
+  setLineCurv(kap);
+  buildProfile(); // the speed profiles and zones of the fixed line
+  classicKey = DYNKEY;
+}
 /** build the queued lines a few milliseconds at a time */
 function dynPump(): void {
   if (busy) return;
@@ -205,6 +256,7 @@ export function dynPrepare(sync?: boolean): void {
     DYNKEY = key;
     DYNP = {};
   }
+  adoptClassic();
   DYNTM = dynTeam();
   const need = [];
   if (opts.dynlv) need.push(dynGet(DYNTM, opts.dynlv));
@@ -314,7 +366,7 @@ export function refLine(c, isPlayer: boolean) {
 }
 
 // ---- drawing the line: when, and for which corners ----
-// Whether the racing line is drawn. It starts shown in practice and hidden in races (single player and online);
+// Whether the racing line is drawn. It starts shown, in practice and in races (single player and online);
 // each of the two remembers its own choice, made in Settings, in the pause menu or with H. opts.line is the
 // choice for the session being set up or driven: 0 = hidden, 1 = shown, 2 = difficult turns only (hardMask).
 export function linePractice(): boolean {
@@ -323,7 +375,7 @@ export function linePractice(): boolean {
 }
 export function lineLoad(): void {
   const p = linePractice(),
-    v = store.get(p ? 'lineP' : 'lineR', p ? 1 : 0);
+    v = store.get(p ? 'lineP' : 'lineR', 1);
   opts.line = v === true ? 1 : v === 1 || v === 2 ? v : 0;
   syncAllSegs();
 }
