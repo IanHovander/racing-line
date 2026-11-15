@@ -764,6 +764,9 @@ body #pThr.big {
   min-width: 0;
   height: 32px;
   margin: 0;
+  padding: 0;
+  border: 0; /* (not the text-box frame that .card input gives) */
+  border-radius: 0;
   background: transparent;
   -webkit-appearance: none;
   appearance: none;

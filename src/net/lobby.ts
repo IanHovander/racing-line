@@ -168,6 +168,7 @@ export function lbRulesInit() {
     tow: opts.tow,
     drsOn: opts.drs ? 1 : 0,
     drsPow: opts.drsPow,
+    cgrip: opts.cgrip,
     limits: opts.limits,
     yellow: opts.yellow,
   };
@@ -228,6 +229,7 @@ export function renderLobbySettings(cfg) {
   for (const [k, label, min] of [
     ['tow', 'Slipstream', 0],
     ['drsPow', 'DRS Strength', 1],
+    ['cgrip', 'Catch-up Grip', 0],
   ] as [string, string, number][]) {
     const d = document.createElement('div'),
       sp = document.createElement('span'),

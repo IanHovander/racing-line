@@ -112,6 +112,11 @@ export function spawn(x, y, z, col, life, sp) {
     r: 0.3 + Math.random() * 0.5,
   });
 }
+/**
+ * Catch-up grip (Rules: Catch-up Grip, opts.cgrip 0 off, 1 normal, up to 5): a car behind the leader gets up to
+ * `grip` more grip at Normal, rising evenly with the distance behind until `full` metres (about 13–15 s).
+ */
+export const CATCHUP = { grip: 0.05, full: 1000 };
 export function step(dt) {
   if (GS.state === 'countdown') {
     GS.cdT += dt;
@@ -133,6 +138,10 @@ export function step(dt) {
     const tt = opts.tow ? towTarget(c) : 0;
     c.tow += (tt - c.tow) * Math.min(1, dt * (tt > c.tow ? 3 : 6));
   }
+  // catch-up grip: how far the leader is round the race, to give the cars behind more grip
+  let lead = 0;
+  const cg = GS.state === 'race' && !GS.PRACTICE ? opts.cgrip || 0 : 0;
+  if (cg) for (const c of cars) if (!c.out && !c.gone) lead = Math.max(lead, progress(c));
   cars.forEach((c, i) => {
     let u;
     if (c.gone) return;
@@ -144,7 +153,10 @@ export function step(dt) {
       }
       return;
     }
-    c.gm = 1 - 0.15 * c.dmg;
+    // grip: less with damage, more the further behind the leader (everything that judges speed reads c.gm)
+    c.gm =
+      (1 - 0.15 * c.dmg) *
+      (1 + (cg ? cg * CATCHUP.grip * Math.min(1, Math.max(0, lead - progress(c)) / CATCHUP.full) : 0));
     if (c.out) {
       u = [
         0,

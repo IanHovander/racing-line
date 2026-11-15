@@ -204,6 +204,7 @@ export function init(): void {
   for (const p of ['s', 'p']) {
     sliderInit(p + 'Tow', 'tow', 0, 5, 0.25);
     sliderInit(p + 'DRSp', 'drsPow', 1, 5, 0.25);
+    sliderInit(p + 'CGrip', 'cgrip', 0, 5, 0.25);
   }
   segInit('sTurns', 'turns', Number);
   $('sDRS').addEventListener('click', () => setTimeout(updatePads, 0));
