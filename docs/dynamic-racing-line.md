@@ -28,7 +28,10 @@ change. The command-line tools are described in [tools/README.md](../tools/READM
 - **The drawn line** ("Racing Line" setting, or `H`): Hidden, Difficult Turns (only each circuit's three
   to five heaviest braking points, from about two seconds before the braking point until the car is
   through the corner) or Shown. It is shown by default; practice and races each remember their own
-  choice. The car follows the line whether or not it is drawn.
+  choice. The car follows the line whether or not it is drawn. What is drawn is the level's own line,
+  fixed on the road: green on the gas, yellow holding speed, red braking, a white bar where each braking
+  starts. The path the planner steers when the car is off that line, or too fast for it, is worked out
+  and driven but not drawn (it was drawn from the car until v17.17).
 
 - **Opponents** drive the line of the Opponents setting for their own car: Easy = Novice,
   Medium = Intermediate, Hard = Cautious Expert. Perfect Expert is the player's alone.
@@ -44,7 +47,7 @@ change. The command-line tools are described in [tools/README.md](../tools/READM
 | ---------------------- | -------------------------------------------------------------------------------------------------------------------- |
 | `src/sim/dynline.ts`   | The planner: line builder, live planner, steering/braking control. No DOM and no game state.                         |
 | `src/sim/lines.ts`     | The game's side: which planner drives which car, loading and saving lines, AI steering on a line, the line settings. |
-| `src/render/line.ts`   | Drawing the live line on the canvas.                                                                                 |
+| `src/render/line.ts`   | Drawing the level's line on the canvas.                                                                              |
 | `public/dynlines.json` | The 320 ready-made lines (8 circuits x 5 cars x 4 levels x dry/wet), written by a tool, fetched at start-up.         |
 | `tools/`               | Headless harness, bots, tests and the line precompute. See [tools/README.md](../tools/README.md).                    |
 

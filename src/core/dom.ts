@@ -37,9 +37,18 @@ export const store = {
     }
   },
   set(k, v) {
+    const s = JSON.stringify(v);
     try {
-      localStorage.setItem('hcgp_' + k, JSON.stringify(v));
-    } catch (e) {}
+      localStorage.setItem('hcgp_' + k, s);
+    } catch (e) {
+      // Storage is full. The racing lines cached by sim/lines.ts are the only large entries and can be worked out
+      // again, so they make room for the setting (a full store used to drop every later save without a word).
+      try {
+        for (const key of Object.keys(localStorage))
+          if (key.startsWith('hcgp_dynl_')) localStorage.removeItem(key);
+        localStorage.setItem('hcgp_' + k, s);
+      } catch (_) {}
+    }
   },
 };
 /**

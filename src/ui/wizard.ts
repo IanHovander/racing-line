@@ -13,8 +13,7 @@ import {
   mpPresence,
   mpWarm,
   normCode,
-  cleanName,
-  saveName,
+  commitName,
 } from '../net/multiplayer';
 import { hostStart } from '../net/netcode';
 import {
@@ -176,15 +175,17 @@ export function init(): void {
     }
   };
   const nick = $('nick') as HTMLInputElement;
-  nick.addEventListener('input', () => {
-    const name = cleanName(nick.value).trim();
-    if (!name) return; // an empty box keeps the name until a new one is typed
-    saveName(name);
-    mpPresence();
-  });
+  // The name is taken from the box on every kind of edit, not only on "input": autofill and some phone keyboards
+  // fill a box without that event, and the name was then shown but never saved.
+  const commit = () => {
+    if (commitName()) mpPresence();
+  };
+  for (const ev of ['input', 'change', 'keyup', 'compositionend']) nick.addEventListener(ev, commit);
   nick.addEventListener('blur', () => {
-    nick.value = GS.NICK;
+    commit();
+    nick.value = GS.NICK; // (an empty box keeps the name until a new one is typed)
   });
+  addEventListener('pagehide', commit);
   nick.addEventListener('keydown', e => {
     if (e.key === 'Enter') nick.blur();
   });
