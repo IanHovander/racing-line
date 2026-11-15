@@ -915,6 +915,10 @@ export function buildTrack(T) {
           t.pine = 1;
           t.h = 11 + rnd() * 9;
           t.r = 2.6 + rnd() * 1.6;
+        } else if (T.forest) {
+          t.birch = true;
+          t.h = 9 + rnd() * 7;
+          t.r = 3.5 + rnd() * 2.5;
         }
         if (T.sakura && rnd() < 0.62) {
           t.sak = 1;
@@ -923,6 +927,30 @@ export function buildTrack(T) {
         GS.trees.push(t);
       }
     }
+  }
+  GS.undergrowth = [];
+  GS.boulders = [];
+  if (T.forest) {
+    const scatter = (target, count, edgeMin, edgeMax, margin) => {
+      let tries = 0;
+      while (target.length < count && tries < count * 24) {
+        tries++;
+        const i = Math.floor(rnd() * GS.N);
+        const side = rnd() < 0.5 ? -1 : 1;
+        const offset = GS.BAR[i] + edgeMin + rnd() * (edgeMax - edgeMin);
+        const x = GS.cx[i] + GS.nx[i] * side * offset;
+        const y = GS.cy[i] + GS.ny[i] * side * offset;
+        if (!clear(x, y, margin) || inWater(x, y)) continue;
+        if (GS.STAD && Math.hypot(x - GS.STAD.x, y - GS.STAD.y) < GS.STAD.r2 + margin) continue;
+        if (GS.WHEEL && Math.hypot(x - GS.WHEEL.x, y - GS.WHEEL.y) < 20 + margin) continue;
+        if (GS.SPHERE && Math.hypot(x - GS.SPHERE.x, y - GS.SPHERE.y) < GS.SPHERE.r + margin) continue;
+        if (GS.boxes.some(b => (x - b.cx) ** 2 + (y - b.cy) ** 2 < (26 + margin) ** 2)) continue;
+        if (GS.trees.some(t => (x - t.x) ** 2 + (y - t.y) ** 2 < (t.r + margin * 0.45) ** 2)) continue;
+        target.push({ x, y, hz: hAt(x, y), c: rnd(), w: 5 + rnd() * 4, variant: rnd() < 0.5 ? 0 : 1 });
+      }
+    };
+    scatter(GS.undergrowth, 190, 8, 70, 5);
+    scatter(GS.boulders, 54, 12, 90, 9);
   }
   GS.LIGHTS = [];
   if (T.night) {

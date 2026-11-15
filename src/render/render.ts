@@ -8,7 +8,7 @@ import { P, cam, depth } from './camera';
 import { drawCar } from './car';
 import { FW, GLOW_FLUSH, drawFireworks, drawPetals, drawRain, queueFlagMarshal } from './effects';
 import { BAND_RULE, band, onScr } from './primitives';
-import { GLOWS, drawFlagpole, drawPole, drawTree } from './scenery';
+import { GLOWS, drawBoulder, drawFlagpole, drawPole, drawTree, drawUndergrowth } from './scenery';
 import {
   ADQ,
   drawBridge,
@@ -26,6 +26,56 @@ import { clearTime } from '../sim/step';
 import { TEAMS } from '../teams/teams';
 import { parts, skids } from '../track/active';
 import { NEONQ } from '../track/track';
+const meadowTexture = new Image();
+meadowTexture.src = new URL('../../meadow-groundcover.png', import.meta.url).href;
+const mowedGrassTexture = new Image();
+mowedGrassTexture.src = new URL('../../mowed-grass.png', import.meta.url).href;
+const gravelTexture = new Image();
+gravelTexture.src = new URL('../../gravel-surface.png', import.meta.url).href;
+const asphaltTexture = new Image();
+asphaltTexture.src = new URL('../../asphalt-surface.png', import.meta.url).href;
+let meadowPattern: CanvasPattern | null = null;
+let mowedGrassPattern: CanvasPattern | null = null;
+let gravelPattern: CanvasPattern | null = null;
+let asphaltPattern: CanvasPattern | null = null;
+
+function worldTextureTransform(pattern: CanvasPattern, texture: HTMLImageElement, tileWorldWidth: number) {
+  const scale = tileWorldWidth / texture.naturalWidth;
+  const a = -cam.zoom * GS.cS * scale;
+  const b = -cam.zoom * cam.tilt * GS.cC * scale;
+  const c = cam.zoom * GS.cC * scale;
+  const d = -cam.zoom * cam.tilt * GS.cS * scale;
+  const e = GS.OX + cam.zoom * (cam.x * GS.cS - cam.y * GS.cC);
+  const f = GS.OY + cam.zoom * (cam.tilt * (cam.x * GS.cC + cam.y * GS.cS) + cam.z * cam.hz);
+  pattern.setTransform(new DOMMatrix([a, b, c, d, e, f]));
+}
+
+function fillGroundBackground() {
+  ctx.fillStyle = GS.TR.bg;
+  ctx.fillRect(0, 0, W, H);
+  if (!GS.TR.forest || !meadowTexture.complete || !meadowTexture.naturalWidth) return;
+  meadowPattern ??= ctx.createPattern(meadowTexture, 'repeat');
+  if (!meadowPattern) return;
+  worldTextureTransform(meadowPattern, meadowTexture, 56);
+  ctx.fillStyle = meadowPattern;
+  ctx.fillRect(0, 0, W, H);
+}
+
+function fillBarrierGrass() {
+  if (!GS.TR.forest || !mowedGrassTexture.complete || !mowedGrassTexture.naturalWidth) return;
+  mowedGrassPattern ??= ctx.createPattern(mowedGrassTexture, 'repeat');
+  if (!mowedGrassPattern) return;
+  worldTextureTransform(mowedGrassPattern, mowedGrassTexture, 168);
+  band(GS.SIDES, mowedGrassPattern);
+}
+
+function texturePattern(texture: HTMLImageElement, current: CanvasPattern | null, tileWidth: number) {
+  if (!texture.complete || !texture.naturalWidth) return current;
+  const pattern = current || ctx.createPattern(texture, 'repeat');
+  if (pattern) worldTextureTransform(pattern, texture, tileWidth);
+  return pattern;
+}
+
 export function render() {
   NEONQ.length = 0;
   GS.cS = Math.sin(cam.a);
@@ -46,8 +96,7 @@ export function render() {
     if (GS.state !== 'menu') minimap();
     return;
   }
-  ctx.fillStyle = GS.TR.bg;
-  ctx.fillRect(0, 0, W, H);
+  fillGroundBackground();
   const z = cam.zoom,
     t = cam.tilt;
   for (let i = 0; i < GS.N; i++) {
@@ -84,10 +133,11 @@ export function render() {
     ctx.restore();
   }
   band(GS.SIDES, GS.TR.run);
+  fillBarrierGrass();
   // mowing stripes inside runoff
   if (!GS.TR.street) {
     ctx.save();
-    band(GS.SIDES, GS.TR.run);
+    band(GS.SIDES, GS.TR.run, 0, false);
     ctx.clip(BAND_RULE as CanvasFillRule);
     ctx.strokeStyle = 'rgba(255,255,255,0.035)';
     ctx.lineWidth = 5 * z;
@@ -119,7 +169,8 @@ export function render() {
       gp.lineTo(GS.TSX[i] + GS.NSX[i] * b1, GS.TSY[i] + GS.NSY[i] * b1);
       gp.closePath();
     }
-    ctx.fillStyle = '#cbb68a';
+    gravelPattern = texturePattern(gravelTexture, gravelPattern, 96);
+    ctx.fillStyle = gravelPattern || '#cbb68a';
     ctx.fill(gp);
     ctx.fillStyle = 'rgba(110,95,70,0.55)';
     for (const p of GS.STONES) {
@@ -159,7 +210,8 @@ export function render() {
     });
   }
   band(GS.HW + 0.45, '#ececec');
-  band(GS.HW, opts.rain ? '#35373c' : '#46484e');
+  asphaltPattern = texturePattern(asphaltTexture, asphaltPattern, 120);
+  band(GS.HW, asphaltPattern || (opts.rain ? '#35373c' : '#46484e'));
   if (GS.BRIDGE) {
     const B = GS.BRIDGE;
     ctx.fillStyle = 'rgba(0,0,0,0.28)';
@@ -595,6 +647,8 @@ export function render() {
   }
   const objs = [];
   for (const tr of GS.trees) objs.push([depth(tr.x, tr.y), 0, tr]);
+  for (const shrub of GS.undergrowth) objs.push([depth(shrub.x, shrub.y), 8, shrub]);
+  for (const rock of GS.boulders) objs.push([depth(rock.x, rock.y), 9, rock]);
   for (const b of GS.boxes) objs.push([depth(b.cx, b.cy) + 6, 1, b]);
   cars.forEach((c, i) => {
     if (!c.gone) objs.push([depth(c.x, c.y), 2, c, i]);
@@ -632,6 +686,8 @@ export function render() {
     }
     if (o[1] === 0) drawTree(o[2]);
     else if (o[1] === 1) drawBox(o[2]);
+    else if (o[1] === 8) drawUndergrowth(o[2]);
+    else if (o[1] === 9) drawBoulder(o[2]);
     else {
       const c = o[2];
       const g = P(c.x, c.y, 0);

@@ -5,7 +5,7 @@ import { P, cam } from './camera';
 export const OV = (o, i) => (typeof o === 'number' ? o : o.R ? o.R[i] : o[i]),
   OVL = (o, i) => (typeof o === 'number' ? o : o.L ? o.L[i] : o[i]);
 export let BAND_RULE = 'evenodd';
-export function band(o, col, z?) {
+export function band(o, col, z?, fill = true) {
   const zy = -(z || 0) * cam.zoom * cam.hz;
   ctx.beginPath();
   if (!GS.BRIDGE) {
@@ -24,8 +24,10 @@ export function band(o, col, z?) {
         : ctx.moveTo(GS.TSX[i] - GS.NSX[i] * v, GS.TSY[i] - GS.NSY[i] * v + zy);
     }
     ctx.closePath();
-    ctx.fillStyle = col;
-    ctx.fill('evenodd');
+    if (fill) {
+      ctx.fillStyle = col;
+      ctx.fill('evenodd');
+    }
     return;
   }
   BAND_RULE = 'nonzero';
@@ -43,8 +45,10 @@ export function band(o, col, z?) {
     ctx.lineTo(GS.TSX[i] - GS.NSX[i] * li, GS.TSY[i] - GS.NSY[i] * li + zy);
     ctx.closePath();
   }
-  ctx.fillStyle = col;
-  ctx.fill('nonzero');
+  if (fill) {
+    ctx.fillStyle = col;
+    ctx.fill('nonzero');
+  }
 }
 export function edge(o, z, sg) {
   const zy = -z * cam.zoom * cam.hz;

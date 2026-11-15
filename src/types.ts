@@ -84,6 +84,7 @@ export interface Tree {
   c: number;
   palm?: boolean;
   pine?: number;
+  birch?: boolean;
   sak?: number;
 }
 

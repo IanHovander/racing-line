@@ -3,6 +3,59 @@ import { ctx } from '../core/dom';
 import { P, cam } from './camera';
 import { onScr } from './primitives';
 import { FLAGS } from '../teams/teams';
+const pineSprite = new Image();
+pineSprite.src = new URL('../../pine-realistic.png', import.meta.url).href;
+const birchSprite = new Image();
+birchSprite.src = new URL('../../birch-realistic.png', import.meta.url).href;
+const undergrowthSprites = [new Image(), new Image()];
+undergrowthSprites[0].src = new URL('../../undergrowth-cluster.png', import.meta.url).href;
+undergrowthSprites[1].src = new URL('../../shrub-cluster.png', import.meta.url).href;
+const boulderSprite = new Image();
+boulderSprite.src = new URL('../../moss-boulder.png', import.meta.url).href;
+
+function drawGroundSprite(sprite: HTMLImageElement, item, width: number, heightRatio: number) {
+  if (!sprite.complete || !sprite.naturalWidth) return;
+  const g = P(item.x, item.y, 0);
+  const w = width * cam.zoom;
+  const h = w * (sprite.naturalHeight / sprite.naturalWidth) * heightRatio;
+  if (!onScr(g[0], g[1], w)) return;
+  if (item.c < 0.5) {
+    ctx.drawImage(sprite, g[0] - w / 2, g[1] - h, w, h);
+  } else {
+    ctx.save();
+    ctx.translate(g[0], 0);
+    ctx.scale(-1, 1);
+    ctx.drawImage(sprite, -w / 2, g[1] - h, w, h);
+    ctx.restore();
+  }
+}
+
+export function drawUndergrowth(item) {
+  const sprite = undergrowthSprites[item.variant || 0];
+  drawGroundSprite(sprite, item, item.w, 0.72);
+}
+
+export function drawBoulder(item) {
+  drawGroundSprite(boulderSprite, item, item.w, 0.72);
+}
+
+function drawSpeciesSprite(sprite: HTMLImageElement, t, g, zTop = 0.88) {
+  if (!sprite.complete || !sprite.naturalWidth) return;
+  const top = P(t.x, t.y, t.h * zTop);
+  const h = g[1] - top[1];
+  const shape = t.r / Math.max(1, t.h * 0.22);
+  const w = h * (sprite.naturalWidth / sprite.naturalHeight) * Math.max(0.8, Math.min(1.3, shape));
+  if (t.c < 0.5) {
+    ctx.drawImage(sprite, g[0] - w / 2, top[1], w, h);
+  } else {
+    ctx.save();
+    ctx.translate(g[0], 0);
+    ctx.scale(-1, 1);
+    ctx.drawImage(sprite, -w / 2, top[1], w, h);
+    ctx.restore();
+  }
+}
+
 export function drawTree(t) {
   GS.PZ = t.hz || 0;
   try {
@@ -20,26 +73,15 @@ export function drawTree0(t) {
     ctx.beginPath();
     ctx.ellipse(g[0] + R * 0.5, g[1] + R * 0.15, R * 1.1, R * cam.tilt, 0, 0, 7);
     ctx.fill();
-    const tr = P(t.x, t.y, t.h * 0.2);
-    ctx.strokeStyle = '#4a3420';
-    ctx.lineWidth = Math.max(1, 0.35 * cam.zoom);
+    drawSpeciesSprite(pineSprite, t, g);
+    return;
+  }
+  if (t.birch) {
+    ctx.fillStyle = 'rgba(0,0,0,0.23)';
     ctx.beginPath();
-    ctx.moveTo(g[0], g[1]);
-    ctx.lineTo(tr[0], tr[1]);
-    ctx.stroke();
-    const cols = t.c < 0.5 ? ['#173d24', '#1f4d2c', '#2a5e36'] : ['#1b4429', '#245533', '#30673d'];
-    for (let k = 0; k < 3; k++) {
-      const b = P(t.x, t.y, t.h * (0.18 + k * 0.24)),
-        tp = P(t.x, t.y, t.h * (0.55 + k * 0.22)),
-        w = R * (1.15 - k * 0.28);
-      ctx.fillStyle = cols[k];
-      ctx.beginPath();
-      ctx.moveTo(b[0] - w, b[1]);
-      ctx.lineTo(b[0] + w, b[1]);
-      ctx.lineTo(tp[0], tp[1]);
-      ctx.closePath();
-      ctx.fill();
-    }
+    ctx.ellipse(g[0] + R * 0.35, g[1] + R * 0.15, R * 1.35, R * cam.tilt, 0, 0, 7);
+    ctx.fill();
+    drawSpeciesSprite(birchSprite, t, g);
     return;
   }
   if (t.palm) {

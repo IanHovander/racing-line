@@ -9,7 +9,7 @@ import { GS } from '../state';
 import { H, W, cv } from '../core/dom';
 import { attract, cars, opts } from '../game/race';
 import { cam } from '../render/camera';
-import { BODY, COVER, FPLATE, FWING, PODS, RPLATE, RWING, WHEELS, rect } from '../render/car';
+import { BODY, COVER, FPLATE, FWING, PODS, RPLATE, RWING, WHEELS, helmetColor, rect } from '../render/car';
 import { liveZone, profileFor } from '../sim/profile';
 import { shade } from '../teams/teams';
 
@@ -18,9 +18,17 @@ let renderer: any = null,
   camera: any = null,
   world: any = null,
   builtFor: any = null,
+  sizeW = -1,
+  sizeH = -1,
   lineGeo: any = null,
   lineCol: Float32Array | null = null;
 const carObjs = new Map<any, any>();
+const liveCars = new Set<any>();
+const lineColors = [
+  [0.47, 1, 0.47, 0.55],
+  [1, 0.27, 0.24, 0.75],
+  [1, 0.84, 0.04, 0.65],
+];
 
 let glCanvas: HTMLCanvasElement | null = null;
 /** create the WebGL canvas (under the game canvas, which stays on top for the overlays) and the scene */
@@ -32,7 +40,9 @@ export function start(): void {
   cv.parentNode.insertBefore(gl, cv);
   glCanvas = gl;
   renderer = new THREE.WebGLRenderer({ canvas: gl, antialias: true });
-  renderer.setPixelRatio(Math.min(2, devicePixelRatio || 1));
+  // A full-screen WebGL scene at 2x DPR shades four times as many pixels. Keep the
+  // 3D layer lighter on high-density displays; the crisp 2D HUD still uses full DPR.
+  renderer.setPixelRatio(Math.min(1.25, devicePixelRatio || 1));
   scene = new THREE.Scene();
   // The canvas projection is a left-handed map from the world to the screen. Mirroring the scene in z (and
   // the camera matrix's z column back) makes it right-handed for three.js, so front faces, normals and
@@ -94,6 +104,27 @@ const mat = (col, extra?) =>
 /** unlit material for the flat ground layers, so they match the canvas colours exactly */
 const flat = (col, extra?) =>
   new THREE.MeshBasicMaterial({ color: new THREE.Color(col), side: THREE.DoubleSide, ...extra });
+const mowedGrassTexture = new THREE.TextureLoader().load(
+  new URL('../../mowed-grass.png', import.meta.url).href,
+);
+mowedGrassTexture.wrapS = THREE.RepeatWrapping;
+mowedGrassTexture.wrapT = THREE.RepeatWrapping;
+mowedGrassTexture.colorSpace = THREE.SRGBColorSpace;
+mowedGrassTexture.repeat.set(0.25, 0.25);
+const mowedGrassMaterial = new THREE.MeshBasicMaterial({
+  map: mowedGrassTexture,
+  side: THREE.DoubleSide,
+});
+function loadTrackTexture(file: string, tileWorldWidth: number) {
+  const texture = new THREE.TextureLoader().load(new URL(`../../${file}`, import.meta.url).href);
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.RepeatWrapping;
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.repeat.set(42 / tileWorldWidth, 42 / tileWorldWidth);
+  return new THREE.MeshBasicMaterial({ map: texture, side: THREE.DoubleSide });
+}
+const gravelMaterial = loadTrackTexture('gravel-surface.png', 96);
+const asphaltMaterial = loadTrackTexture('asphalt-surface.png', 120);
 
 /** a band along the track between signed offsets a(i) .. b(i) (positive = right), lifted dz */
 /** Ground layers (grass, run-off, gravel, paint, lines, asphalt, kerbs) are drawn in order, like the
@@ -114,14 +145,20 @@ function band(
   keep?: (i: number, j: number) => boolean,
 ) {
   const pos: number[] = [],
+    uv: number[] = [],
     idx: number[] = [];
   const N = GS.N;
   for (let i = 0; i < N; i++) {
     const A = a(i),
       B = b(i),
       z = GS.HT[i] + dz;
-    pos.push(GS.cx[i] + GS.nx[i] * A, GS.cy[i] + GS.ny[i] * A, z);
-    pos.push(GS.cx[i] + GS.nx[i] * B, GS.cy[i] + GS.ny[i] * B, z);
+    const ax = GS.cx[i] + GS.nx[i] * A;
+    const ay = GS.cy[i] + GS.ny[i] * A;
+    const bx = GS.cx[i] + GS.nx[i] * B;
+    const by = GS.cy[i] + GS.ny[i] * B;
+    pos.push(ax, ay, z);
+    pos.push(bx, by, z);
+    uv.push(ax / 42, ay / 28, bx / 42, by / 28);
   }
   for (let i = 0; i < N; i++) {
     const j = (i + 1) % N;
@@ -130,6 +167,7 @@ function band(
   }
   const g = new THREE.BufferGeometry();
   g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
   g.setIndex(idx);
   g.computeVertexNormals();
   return ground(new THREE.Mesh(g, typeof col === 'string' ? flat(col) : col));
@@ -195,7 +233,7 @@ function buildWorld() {
       i => OVR(GS.SIDES, i),
       i => -OVL(GS.SIDES, i),
       0,
-      TR.run,
+      TR.forest ? mowedGrassMaterial : TR.run,
     ),
   );
   for (const sg of [1, -1]) {
@@ -204,7 +242,7 @@ function buildWorld() {
         i => sg * (GS.GINA[i] || 0),
         i => sg * (GS.gout[i] || 0),
         0.01,
-        '#cbb68a',
+        gravelMaterial,
         (i, j) => GS.gside[i] === sg && GS.gside[j] === sg,
       ),
     );
@@ -242,7 +280,7 @@ function buildWorld() {
       () => HW,
       () => -HW,
       0.03,
-      opts.rain ? '#35373c' : '#46484e',
+      asphaltMaterial,
     ),
   );
   world.add(
@@ -431,7 +469,7 @@ function makeCar(c) {
     cyl.position.set(w[0], w[1] + Math.sign(w[1]) * hw, r);
     g.add(cyl);
   });
-  const helmet = new THREE.Mesh(new THREE.SphereGeometry(0.27, 12, 8), mat(c.acc));
+  const helmet = new THREE.Mesh(new THREE.SphereGeometry(0.27, 12, 8), mat(helmetColor(c)));
   helmet.position.set(-0.05, 0, 0.85);
   g.add(helmet);
   const shadow = new THREE.Mesh(
@@ -457,13 +495,8 @@ function updateLine() {
     profileFor(cars[GS.ctrl].st, GS.PZONE);
   }
   const ZN = liveZone(cars[GS.ctrl], GS.PZONE.length === GS.N ? GS.PZONE : GS.zone);
-  const C = [
-    [0.47, 1, 0.47, 0.55],
-    [1, 0.27, 0.24, 0.75],
-    [1, 0.84, 0.04, 0.65],
-  ];
   for (let i = 0; i < GS.N; i++) {
-    const q = C[ZN[i]] || C[0];
+    const q = lineColors[ZN[i]] || lineColors[0];
     for (let k = 0; k < 2; k++) lineCol.set(q, (i * 2 + k) * 4);
   }
   lineGeo.attributes.color.needsUpdate = true;
@@ -477,13 +510,16 @@ export function render3d(): boolean {
     builtFor = key;
     buildWorld();
   }
-  const sz = renderer.getSize(new THREE.Vector2());
-  if (sz.x !== W || sz.y !== H) renderer.setSize(W, H, false);
+  if (sizeW !== W || sizeH !== H) {
+    renderer.setSize(W, H, false);
+    sizeW = W;
+    sizeH = H;
+  }
   // cars
-  const live = new Set();
+  liveCars.clear();
   for (const c of cars) {
     if (c.gone) continue;
-    live.add(c);
+    liveCars.add(c);
     let o = carObjs.get(c);
     if (!o) {
       o = makeCar(c);
@@ -494,7 +530,7 @@ export function render3d(): boolean {
     o.rotation.z = c.h;
   }
   for (const [c, o] of carObjs)
-    if (!live.has(c)) {
+    if (!liveCars.has(c)) {
       scene.remove(o);
       carObjs.delete(c);
     }

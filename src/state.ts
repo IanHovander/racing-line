@@ -43,6 +43,8 @@ export interface State {
   zone: any;
   boxes: any;
   trees: any;
+  undergrowth: any;
+  boulders: any;
   STONES: any;
   MM: any;
   TSX: any;

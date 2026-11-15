@@ -45,6 +45,182 @@ export const COVER = mirror([
   [-1.6, -0.2],
   [-2.05, -0.1],
 ]);
+
+const carSpriteSheets = [new Image(), new Image()];
+carSpriteSheets[0].src = new URL('../../formula-car-spritesheet.png', import.meta.url).href;
+carSpriteSheets[1].src = new URL('../../formula-car-spritesheet-2.png', import.meta.url).href;
+let baseCarFrames: HTMLCanvasElement[] | null = null;
+let baseCarSheetCount = 0;
+const tintedCarFrames = new Map<string, HTMLCanvasElement>();
+const CAR_FRAME_HEADINGS = [
+  230, 223, 212, 188, 182, 214, 233, 244, 261, 273, 315, 0, 0, 45, 45, 45, 226, 220, 209, 189, 180, 214, 234,
+  243, 260, 274, 315, 0, 0, 45, 45, 45,
+];
+const DRIVER_HELMETS = [
+  '#f44336',
+  '#00c853',
+  '#2979ff',
+  '#ffd600',
+  '#e040fb',
+  '#00b8d4',
+  '#ff6d00',
+  '#7c4dff',
+  '#c6ff00',
+  '#ff4081',
+];
+export function helmetColor(c) {
+  return DRIVER_HELMETS[((c.team || 0) * 2 + (c.drv || 0)) % DRIVER_HELMETS.length];
+}
+
+function colorRgb(color: string): [number, number, number] {
+  const hex = /^#([0-9a-f]{6})$/i.exec(color || '');
+  if (!hex) return [230, 230, 230];
+  const n = parseInt(hex[1], 16);
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+}
+
+function getBaseCarFrames() {
+  const sheets = carSpriteSheets.filter(sheet => sheet.complete && sheet.naturalWidth);
+  if (!sheets.length) return null;
+  if (baseCarFrames && baseCarSheetCount === sheets.length) return baseCarFrames;
+  baseCarFrames = [];
+  for (const sheet of sheets) {
+    const sw = sheet.naturalWidth / 4;
+    const sh = sheet.naturalHeight / 4;
+    for (let i = 0; i < 16; i++) {
+      const cell = document.createElement('canvas');
+      cell.width = Math.ceil(sw);
+      cell.height = Math.ceil(sh);
+      const cellCtx = cell.getContext('2d');
+      if (!cellCtx) return null;
+      cellCtx.drawImage(sheet, (i % 4) * sw, Math.floor(i / 4) * sh, sw, sh, 0, 0, sw, sh);
+      const data = cellCtx.getImageData(0, 0, cell.width, cell.height);
+      let x0 = cell.width,
+        y0 = cell.height,
+        x1 = 0,
+        y1 = 0;
+      for (let y = 0; y < cell.height; y++)
+        for (let x = 0; x < cell.width; x++)
+          if (data.data[(y * cell.width + x) * 4 + 3] > 24) {
+            x0 = Math.min(x0, x);
+            y0 = Math.min(y0, y);
+            x1 = Math.max(x1, x + 1);
+            y1 = Math.max(y1, y + 1);
+          }
+      const frame = document.createElement('canvas');
+      frame.width = Math.max(1, x1 - x0);
+      frame.height = Math.max(1, y1 - y0);
+      frame
+        .getContext('2d')
+        ?.drawImage(cell, x0, y0, frame.width, frame.height, 0, 0, frame.width, frame.height);
+      baseCarFrames.push(frame);
+    }
+  }
+  baseCarSheetCount = sheets.length;
+  return baseCarFrames;
+}
+
+function tintedCarFrame(index: number, primary: string, accent: string) {
+  const key = `${index}:${primary}:${accent}`;
+  const cached = tintedCarFrames.get(key);
+  if (cached) return cached;
+  const source = getBaseCarFrames()?.[index];
+  if (!source) return null;
+  const canvas = document.createElement('canvas');
+  canvas.width = source.width;
+  canvas.height = source.height;
+  const frameCtx = canvas.getContext('2d');
+  if (!frameCtx) return null;
+  frameCtx.drawImage(source, 0, 0);
+  const frame = frameCtx.getImageData(0, 0, canvas.width, canvas.height);
+  const p = colorRgb(primary);
+  const a = colorRgb(accent);
+  for (let i = 0; i < frame.data.length; i += 4) {
+    const r = frame.data[i],
+      g = frame.data[i + 1],
+      b = frame.data[i + 2],
+      hi = Math.max(r, g, b),
+      lo = Math.min(r, g, b),
+      lum = (r * 0.2126 + g * 0.7152 + b * 0.0722) / 255;
+    let tone: [number, number, number] | null = null;
+    if (lo > 142 && hi - lo < 72) tone = p;
+    else if (b > r * 1.25 && g > r * 1.15 && b > 88) tone = a;
+    if (tone) {
+      const lightFactor = 0.38 + lum * 0.66;
+      frame.data[i] = Math.min(255, tone[0] * lightFactor);
+      frame.data[i + 1] = Math.min(255, tone[1] * lightFactor);
+      frame.data[i + 2] = Math.min(255, tone[2] * lightFactor);
+    }
+  }
+  frameCtx.putImageData(frame, 0, 0);
+  tintedCarFrames.set(key, canvas);
+  return canvas;
+}
+
+function drawFormulaSprite(c) {
+  const delta = Math.atan2(Math.sin(c.h - cam.a), Math.cos(c.h - cam.a));
+  const targetHeading =
+    ((Math.atan2(Math.sin(delta), cam.tilt * Math.cos(delta)) * 180) / Math.PI + 360) % 360;
+  // The generated sheet isn't perfectly ordered, so choose by each frame's measured nose direction.
+  let index = 0,
+    flipped = false,
+    sourceHeading = 0,
+    bestDistance = Infinity;
+  for (let i = 0; i < CAR_FRAME_HEADINGS.length; i++) {
+    for (let isMirrored = 0; isMirrored < 2; isMirrored++) {
+      const heading = isMirrored ? (360 - CAR_FRAME_HEADINGS[i]) % 360 : CAR_FRAME_HEADINGS[i];
+      const distance = Math.abs(((((targetHeading - heading + 540) % 360) + 360) % 360) - 180);
+      if (distance < bestDistance) {
+        index = i;
+        flipped = !!isMirrored;
+        sourceHeading = heading;
+        bestDistance = distance;
+      }
+    }
+  }
+  const frame = tintedCarFrame(index, c.col, c.acc);
+  if (!frame) return false;
+  const scale = cam.zoom * 0.01875;
+  const w = frame.width * scale;
+  const h = frame.height * scale;
+  const p = P(c.x, c.y, 0.48);
+  const correction = ((((targetHeading - sourceHeading + 540) % 360) + 360) % 360) - 180;
+  ctx.save();
+  ctx.translate(p[0], p[1]);
+  ctx.rotate((correction * Math.PI) / 180);
+  if (flipped) ctx.scale(-1, 1);
+  ctx.drawImage(frame, -w / 2, -h / 2, w, h);
+  ctx.restore();
+  const ch = Math.cos(c.h),
+    sh = Math.sin(c.h);
+  const helmet = P(c.x - ch * 0.08, c.y - sh * 0.08, 0.96);
+  ctx.fillStyle = helmetColor(c);
+  ctx.beginPath();
+  ctx.ellipse(
+    helmet[0],
+    helmet[1],
+    Math.max(1.8, cam.zoom * 0.19),
+    Math.max(1.3, cam.zoom * 0.12),
+    0,
+    0,
+    Math.PI * 2,
+  );
+  ctx.fill();
+  ctx.fillStyle = '#161a1f';
+  ctx.beginPath();
+  ctx.ellipse(
+    helmet[0] + ch * cam.zoom * 0.06,
+    helmet[1] + sh * cam.zoom * 0.06,
+    Math.max(1, cam.zoom * 0.1),
+    Math.max(0.8, cam.zoom * 0.065),
+    0,
+    0,
+    Math.PI * 2,
+  );
+  ctx.fill();
+  return true;
+}
+
 // a tyre as a short cylinder: tread drawn where it faces the camera, then the outer sidewall with a rim
 export const WHL_N = 14,
   WHL_C = Array.from({ length: WHL_N }, (_, k) => {
@@ -98,7 +274,7 @@ export function drawWheel3(c, w, front) {
     ctx.closePath();
     ctx.fill();
     const hb = toW(w[0], near, r);
-    ctx.fillStyle = c.acc;
+    ctx.fillStyle = helmetColor(c);
     ctx.beginPath();
     ctx.arc(hb[0], hb[1], Math.max(1, r * 0.22 * cam.zoom), 0, 7);
     ctx.fill();
@@ -154,52 +330,54 @@ export function drawCar0(c, isMe, isMate) {
   });
   ctx.closePath();
   ctx.fill();
-  // wheels on the far side first, the body, then the near-side wheels in front of it
-  const latC = -sh * GS.cC + ch * GS.cS;
-  const nearW = w => Math.sign(w[1]) * latC < 0;
-  WHEELS.forEach((w, k) => {
-    if (!nearW(w)) drawWheel3(c, w, k < 2);
-  });
-  const bc = c.out ? shade(c.col, 0.45) : c.col;
-  prism(
-    local(c, [
-      [1.2, -0.12],
-      [1.2, 0.12],
-      [-1.95, 0.12],
-      [-1.95, -0.12],
-    ]),
-    0.18,
-    0.3,
-    '#222',
-    '#111',
-  ); // suspension/floor line
-  prism(local(c, PODS), 0.1, 0.38, shade(c.col, 0.92), shade(c.col, c.out ? 0.28 : 0.52));
-  prism(local(c, BODY), 0.12, 0.46, bc, shade(c.col, c.out ? 0.3 : 0.6));
-  prism(local(c, COVER), 0.46, 0.78, shade(c.col, 1.12), shade(c.col, 0.7));
-  if (c.dmg < 0.35) {
-    prism(local(c, FWING), 0.05, 0.18, shade(c.col, 0.85), shade(c.col, 0.5));
-    for (const fp of FPLATE) prism(local(c, fp), 0.05, 0.3, shade(c.acc, 0.9), shade(c.acc, 0.55));
+  if (!drawFormulaSprite(c)) {
+    // wheels on the far side first, the body, then the near-side wheels in front of it
+    const latC = -sh * GS.cC + ch * GS.cS;
+    const nearW = w => Math.sign(w[1]) * latC < 0;
+    WHEELS.forEach((w, k) => {
+      if (!nearW(w)) drawWheel3(c, w, k < 2);
+    });
+    const bc = c.out ? shade(c.col, 0.45) : c.col;
+    prism(
+      local(c, [
+        [1.2, -0.12],
+        [1.2, 0.12],
+        [-1.95, 0.12],
+        [-1.95, -0.12],
+      ]),
+      0.18,
+      0.3,
+      '#222',
+      '#111',
+    ); // suspension/floor line
+    prism(local(c, PODS), 0.1, 0.38, shade(c.col, 0.92), shade(c.col, c.out ? 0.28 : 0.52));
+    prism(local(c, BODY), 0.12, 0.46, bc, shade(c.col, c.out ? 0.3 : 0.6));
+    prism(local(c, COVER), 0.46, 0.78, shade(c.col, 1.12), shade(c.col, 0.7));
+    if (c.dmg < 0.35) {
+      prism(local(c, FWING), 0.05, 0.18, shade(c.col, 0.85), shade(c.col, 0.5));
+      for (const fp of FPLATE) prism(local(c, fp), 0.05, 0.3, shade(c.acc, 0.9), shade(c.acc, 0.55));
+    }
+    WHEELS.forEach((w, k) => {
+      if (nearW(w)) drawWheel3(c, w, k < 2);
+    });
+    prism(local(c, rect(-2.5, -2.3, -0.06, 0.06)), 0.4, 0.95, '#222', '#111');
+    if (c.drs) {
+      prism(local(c, RWING), 0.9, 0.97, c.acc, shade(c.acc, 0.6));
+      prism(local(c, RWING), 1.13, 1.18, '#2e7dff', '#1d4fb0');
+    } else prism(local(c, RWING), 0.9, 1.08, c.acc, shade(c.acc, 0.6));
+    for (const rp of RPLATE) prism(local(c, rp), 0.55, 1.12, shade(c.col, 0.8), shade(c.col, 0.5));
+    // helmet + halo
+    const hp = P(c.x + ch * -0.05, c.y + sh * -0.05, 0.85);
+    ctx.fillStyle = c.acc;
+    ctx.beginPath();
+    ctx.arc(hp[0], hp[1], Math.max(2, 0.27 * cam.zoom), 0, 7);
+    ctx.fill();
+    ctx.fillStyle = '#111';
+    const vp = P(c.x + ch * 0.12, c.y + sh * 0.12, 0.88);
+    ctx.beginPath();
+    ctx.arc(vp[0], vp[1], Math.max(1, 0.12 * cam.zoom), 0, 7);
+    ctx.fill();
   }
-  WHEELS.forEach((w, k) => {
-    if (nearW(w)) drawWheel3(c, w, k < 2);
-  });
-  prism(local(c, rect(-2.5, -2.3, -0.06, 0.06)), 0.4, 0.95, '#222', '#111');
-  if (c.drs) {
-    prism(local(c, RWING), 0.9, 0.97, c.acc, shade(c.acc, 0.6));
-    prism(local(c, RWING), 1.13, 1.18, '#2e7dff', '#1d4fb0');
-  } else prism(local(c, RWING), 0.9, 1.08, c.acc, shade(c.acc, 0.6));
-  for (const rp of RPLATE) prism(local(c, rp), 0.55, 1.12, shade(c.col, 0.8), shade(c.col, 0.5));
-  // helmet + halo
-  const hp = P(c.x + ch * -0.05, c.y + sh * -0.05, 0.85);
-  ctx.fillStyle = c.acc;
-  ctx.beginPath();
-  ctx.arc(hp[0], hp[1], Math.max(2, 0.27 * cam.zoom), 0, 7);
-  ctx.fill();
-  ctx.fillStyle = '#111';
-  const vp = P(c.x + ch * 0.12, c.y + sh * 0.12, 0.88);
-  ctx.beginPath();
-  ctx.arc(vp[0], vp[1], Math.max(1, 0.12 * cam.zoom), 0, 7);
-  ctx.fill();
   if (c.tow > 0.2) {
     const tw = c.tow,
       tm = performance.now() / 1000;
