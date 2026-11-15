@@ -172,5 +172,4 @@ races with no retirements or stuck cars.
 - The expert lines use the whole road. Lifting 0.2 s late costs up to about 1 s off the road a lap on
   Cautious Expert and more on Perfect Expert; Novice and Intermediate forgive it.
 - Online was tested with two players (simulated, and two tabs over a real connection), not more.
-- The three.js renderer (beta) shows the line of your level for the whole lap, not the live plan.
 - `public/dynlines.json` is about 750 kB.

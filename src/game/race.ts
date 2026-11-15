@@ -190,8 +190,6 @@ export function init(): void {
     damage: store.get('damage', 0),
     yellow: store.get('yellow', 10),
     limits: store.get('limits', 0),
-    /** draw with three.js instead of the canvas renderer (Settings → Display → Renderer) */
-    r3d: store.get('r3d', false),
     drs: store.get('defv4', 0) ? store.get('drs', 2) : (store.set('drs', 2), 2),
     tow: store.get('tow', 1),
     turns: store.get('turns', 1),

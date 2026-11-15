@@ -50,8 +50,6 @@ import * as m46 from './game/loop';
 import * as m47 from './sim/start';
 import * as m48 from './ui/home';
 import * as m49 from './ui/notify';
-import * as m50 from './render3d/switch';
-import * as m51 from './ui/bench';
 import * as m52 from './sim/lines';
 import * as m53 from './sim/dynline';
 
@@ -61,8 +59,6 @@ const MODS: any[] = [
   m47,
   m48,
   m49,
-  m50,
-  m51,
   m0,
   m1,
   m2,

@@ -20,7 +20,6 @@ const options = {
   entryPoints: { main: path.join(root, 'src/main.ts') },
   bundle: true,
   format: 'esm',
-  // three.js is loaded on demand (render3d/view3d.ts) into its own chunk
   splitting: true,
   chunkNames: 'chunks/[name]-[hash]',
   target: 'es2020',
