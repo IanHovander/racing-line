@@ -3,3 +3,7 @@ dist/
 test-results/
 playwright-report/
 .DS_Store
+# racing-line tools: generated parts, sweep results and the line cache
+tools/.lines/
+tools/.rollout/
+tools/.cache.json

@@ -23,7 +23,7 @@ export const LB_RULES: [string, string, [number, string][]][] = [
     'Opponents',
     [
       [0, 'Easy'],
-      [1, 'Normal'],
+      [1, 'Medium'],
       [2, 'Hard'],
     ],
   ],
@@ -115,6 +115,17 @@ export const LB_CTRL: [string, string, [number, string][]][] = [
       [1, 'Lanes'],
       [2, 'Manual'],
       [3, 'Overtake'],
+    ],
+  ],
+  [
+    'dynlv',
+    'Line Difficulty',
+    [
+      [1, 'Novice'],
+      [2, 'Intermediate'],
+      [3, 'Cautious Expert'],
+      [4, 'Perfect Expert'],
+      [0, 'Classic'],
     ],
   ],
   [

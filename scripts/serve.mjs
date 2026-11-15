@@ -2,8 +2,9 @@
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..', 'dist');
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', 'dist');
 const port = Number(process.env.PORT || 4173);
 const types = {
   '.html': 'text/html',

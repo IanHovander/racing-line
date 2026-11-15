@@ -5,5 +5,15 @@
   "trailingComma": "all",
   "arrowParens": "avoid",
   "sortPackageJson": false,
-  "ignorePatterns": ["dist/**", "public/vendor/**", "src/vendor/**", "src/ui/posters.ts", "package-lock.json"]
+  "ignorePatterns": [
+    "dist/**",
+    "public/vendor/**",
+    "public/dynlines.json",
+    "src/vendor/**",
+    "src/ui/posters.ts",
+    "package-lock.json",
+    "tools/.lines/**",
+    "tools/.rollout/**",
+    "tools/.cache.json"
+  ]
 }

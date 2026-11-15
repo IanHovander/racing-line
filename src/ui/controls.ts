@@ -7,6 +7,7 @@ import { mpOn } from '../net/multiplayer';
 import { cam } from '../render/camera';
 import { renderLaneInd } from '../sim/ai';
 import { GEARTOP, autoGear, isManual } from '../sim/car-model';
+import { DYN, dynEligible, lineSave } from '../sim/lines';
 import { syncAllSegs } from './widgets';
 export const PEDALS = ['Throttle Only', 'Brake Only', 'Throttle + Brake', 'Auto Pedals'],
   STEERS = ['Auto Steering', 'Lane Steering', 'Manual Steering', 'Overtake Steering'];
@@ -51,6 +52,7 @@ export function swapCar() {
   GS.mateIdx = t;
   const c = cars[GS.ctrl];
   c.lane = 0;
+  if (DYN) DYN.reset();
   showToast('Now driving: ' + c.name);
   updatePads();
 }
@@ -106,17 +108,29 @@ export function syncCtrlMenu() {
     b.classList.toggle('sel', +b.dataset.v === opts.steer),
   );
   $('pedNote').textContent = PED_NOTE[opts.pedals];
-  $('steerNote').textContent = STEER_NOTE[opts.steer];
+  $('steerNote').textContent =
+    opts.steer === 0 && opts.dynlv && dynEligible()
+      ? 'The car follows the racing line of your Line Difficulty. It slows behind moving cars and steers round stopped ones.'
+      : STEER_NOTE[opts.steer];
 }
 export function toggleCam() {
   opts.cam = 1 - opts.cam;
   store.set('cam', opts.cam);
   showToast(opts.cam ? 'Isometric camera' : 'Chase camera');
 }
+/** H or the Line button: hidden -> difficult turns -> shown. Hiding the line changes nothing about how the car drives. */
 export function toggleLine() {
-  opts.line = !opts.line;
-  store.set('line', opts.line);
-  showToast(opts.line ? 'Racing line on' : 'Racing line off');
+  opts.line = [2, 0, 1][opts.line | 0];
+  lineSave();
+  showToast(
+    [
+      'Racing line hidden (the car still follows it)',
+      'Racing line shown',
+      'Racing line shown for difficult turns only',
+    ][opts.line],
+  );
+  updatePads();
+  syncAllSegs();
 }
 export function resetCar() {
   if (attract) return;
@@ -128,6 +142,7 @@ export function resetCar() {
   c.h = Math.atan2(GS.ty[i], GS.tx[i]);
   c.v = 0;
   c.lane = 0;
+  if (DYN) DYN.reset();
   if (GS.state === 'paused') togglePause();
 }
 export function togglePause() {

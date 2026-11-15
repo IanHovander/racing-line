@@ -2,6 +2,7 @@ import { GS } from '../state';
 import { $, clamp } from '../core/dom';
 import { attract, cars, opts } from '../game/race';
 import { BPROF, VCAP } from './car-model';
+import { AIL, AIV, AIZ, DYN_AIB, aiSteer } from './lines';
 import { PROF, laneProfile } from './profile';
 import { inYellow } from './step';
 import { DRV } from '../teams/drivers';
@@ -11,8 +12,9 @@ import { showToast } from '../ui/controls';
 // ================= Simulation =================
 export const STEP = 1 / 120;
 GS.HITS = 0;
-// look ahead in proportion to closing speed; steer around slow/stopped cars, brake if there is no gap
-export function traffic(c) {
+// look ahead in proportion to closing speed; steer around slow/stopped cars, brake if there is no gap.
+// LN is the line the car is driving (lane offsets are measured from it): the classic line unless given.
+export function traffic(c, LN = GS.off) {
   let desired = 0,
     cap = 1e9,
     urg = 0,
@@ -30,10 +32,10 @@ export function traffic(c) {
     if (d <= 0 || d > look || close < -1) continue;
     if (Math.abs(o.lat) > GS.HW + 2.5) continue; // well off the track, not in the way
     const wid = o.v < 15 ? 3.9 : 2.8 + 0.5 * (0.5 - ag); // stopped cars may sit sideways; aggressive drivers take tighter gaps
-    const myLat = GS.off[o.idx] + c.lane;
+    const myLat = LN[o.idx] + c.lane;
     if (
       Math.abs(o.lat - myLat) >= wid &&
-      Math.abs(o.lat - GS.off[o.idx]) >= wid &&
+      Math.abs(o.lat - LN[o.idx]) >= wid &&
       Math.abs(c.lat - o.lat) >= wid
     )
       continue;
@@ -48,7 +50,7 @@ export function traffic(c) {
     let side = c.lat < o.lat - 0.3 ? -1 : c.lat > o.lat + 0.3 ? 1 : roomR > roomL ? 1 : -1;
     if ((side < 0 ? roomL : roomR) < 0) side = -side;
     const room = side < 0 ? roomL : roomR;
-    desired = clamp(o.lat + side * wid, -EDGE, EDGE) - GS.off[o.idx];
+    desired = clamp(o.lat + side * wid, -EDGE, EDGE) - LN[o.idx];
     urg = clamp((close / Math.max(d, 1)) * 1.5, 0, 6);
     const need = Math.max(0, 2.4 - Math.abs(c.lat - o.lat)),
       tClear = need / (3 + urg * 3),
@@ -73,11 +75,11 @@ export function traffic(c) {
     else lo = Math.max(lo, o.lat + 3.3);
   }
   if (lo > -EDGE || hi < EDGE) {
-    let tgt = GS.off[c.idx] + (bestD < 1e9 ? desired : c.lane);
+    let tgt = LN[c.idx] + (bestD < 1e9 ? desired : c.lane);
     if (lo <= hi) tgt = clamp(tgt, lo, hi);
     else tgt = c.lat;
     const jL = (c.idx + Math.round((7 + c.v * 0.32) / GS.SEG)) % GS.N;
-    desired = tgt - GS.off[jL];
+    desired = tgt - LN[jL];
     urg = Math.max(urg, 3);
   } // hold that line where the steering is aiming, so cars side by side don't converge as the racing line swings across
   return [desired, cap, urg];
@@ -92,10 +94,11 @@ export function pursuitLat(c, tl) {
     sh = Math.sin(c.h);
   return (2 * (-dx * sh + dy * ch)) / Math.max(dx * dx + dy * dy, 1);
 }
-export function pursuit(c) {
+export function pursuit(c, LN = GS.off) {
   const Ld = 7 + c.v * 0.32;
   const j = (c.idx + Math.round(Ld / GS.SEG)) % GS.N;
-  const o = clamp(GS.off[j] + c.lane, -(GS.HW - 1.1), GS.HW - 1.1);
+  const E = LN === GS.off ? GS.HW - 1.1 : GS.HW - 0.9; // the dynamic lines run closer to the edge than the classic one
+  const o = clamp(LN[j] + c.lane, -E, E);
   const dx = GS.cx[j] + GS.nx[j] * o - c.x,
     dy = GS.cy[j] + GS.ny[j] * o - c.y;
   const ch = Math.cos(c.h),
@@ -127,7 +130,7 @@ export function sideRoom(c, lat) {
   }
   return lo <= hi ? clamp(lat, lo, hi) : c.lat;
 }
-export function defend(c, dt) {
+export function defend(c, dt, ZN = GS.zone) {
   if (attract && !c.defAll) return null;
   const dv = opts.diff;
   if (c.def) {
@@ -141,7 +144,7 @@ export function defend(c, dt) {
       c.defCool = 2.5;
       return null;
     }
-    if (g > -9 || GS.zone[(c.idx + 12) % GS.N] === 1) c.def.frozen = true; // attacker alongside: hold the line you chose
+    if (g > -9 || ZN[(c.idx + 12) % GS.N] === 1) c.def.frozen = true; // attacker alongside: hold the line you chose
     return c.def;
   }
   if ((c.defCool || 0) > 0) {
@@ -151,7 +154,7 @@ export function defend(c, dt) {
   if (c.out || inYellow(c) || GS.raceTime < 10) return null;
   for (let k = 0; k < 45; k += 3) {
     const i = (c.idx + k) % GS.N;
-    if (GS.zone[i] === 1 || Math.abs(GS.ccurv[i]) > 1 / 260) return null;
+    if (ZN[i] === 1 || Math.abs(GS.ccurv[i]) > 1 / 260) return null;
   } // only on a straight, never under braking
   for (const o of cars) {
     if (o === c || o.gone || o.out || o.ghost > 0) continue;
@@ -184,8 +187,16 @@ export function defend(c, dt) {
   }
   return null;
 }
+/** how an AI car follows a dynamic line: samples it looks ahead for its target speed, and how sharply it brakes when over it */
+export const AI_TUNE = { look: 2, bgain: 1.5 };
+// AI drivers. With the dynamic lines ready (sim/lines.ts) they drive the line of the Opponents level for their own car, at close
+// to that line's own speeds: the line carries the difficulty. Without them (a line still being worked out) the classic line and profile.
 export function controlAI(c, dt, factor) {
   const ds = DRV(c);
+  const LN = AIL[c.team] || GS.off,
+    PV = AIV[c.team],
+    ZN = AIZ[c.team] || GS.zone;
+  if (PV && !c.finished) factor += DYN_AIB[opts.diff];
   factor *= 1 + 0.05 * (ds.pace - 0.5) + (opts.rain ? 0.06 * (ds.wet - 0.5) : 0);
   c.wobT = (c.wobT || 0) - dt;
   if (c.wobT <= 0) {
@@ -195,30 +206,30 @@ export function controlAI(c, dt, factor) {
   factor *= 1 + (c.wob || 0);
   if (c.slipT > 0) c.slipT -= dt;
   else if (
-    GS.zone[(c.idx + 8) % GS.N] === 1 &&
-    GS.zone[c.idx] !== 1 &&
+    ZN[(c.idx + 8) % GS.N] === 1 &&
+    ZN[c.idx] !== 1 &&
     Math.random() < dt * 0.6 * (1 - ds.consist) ** 2
   )
     c.slipT = 0.45; // a late-braking moment
   factor = Math.min(factor, 1.012); // never beyond what the grip allows
-  let [des, cap, urg] = traffic(c);
+  let [des, cap, urg] = traffic(c, LN);
   if (c.defSeenT > 0) c.defSeenT -= dt;
-  const D = defend(c, dt);
+  const D = defend(c, dt, ZN);
   let defV = 1e9;
   if (D) {
     if (!D.frozen) {
       const tgt = sideRoom(c, D.lat);
       const r = dt * DEF_RATE[opts.diff] * (0.7 + 0.6 * DRV(c).defend);
-      c.lane += clamp(tgt - GS.off[c.idx] - c.lane, -r, r);
+      c.lane += clamp(tgt - LN[c.idx] - c.lane, -r, r);
     }
     des = c.lane;
     urg = 0;
-    const sv = clamp((GS.off[c.idx] + c.lane) / (GS.HW - 1.7), -1, 1);
-    defV = laneSafe(c, sv, 3);
+    const sv = clamp((LN[c.idx] + c.lane) / (GS.HW - 1.7), -1, 1);
+    defV = laneSafe(c, sv, 3, PV);
   }
   const r = dt * (3 + urg * 3);
   c.lane += clamp(des - c.lane, -r, r);
-  const vp = (PROF[c.team] || GS.vf)[(c.idx + 3) % GS.N];
+  const vp = (PV || PROF[c.team] || GS.vf)[(c.idx + (PV ? AI_TUNE.look : 3)) % GS.N];
   let vt = Math.min(
     (vp < VCAP * (c.st || NEUTRAL).top - 1 ? vp * Math.sqrt(c.gm) : vp * (1 - 0.1 * c.dmg)) *
       factor *
@@ -231,10 +242,15 @@ export function controlAI(c, dt, factor) {
   if (c.slipT > 0) vt += 3.5;
   let thr = 0,
     brk = 0;
-  if (c.v < vt - 0.4) thr = 1;
+  if (PV) {
+    // the braking of a dynamic line is planned: follow its speeds closely
+    if (c.v < vt - 0.3) thr = 1;
+    else if (c.v > vt + 0.3) brk = clamp((c.v - vt) / AI_TUNE.bgain, 0.15, 1);
+    else thr = 0.3;
+  } else if (c.v < vt - 0.4) thr = 1;
   else if (c.v > vt + 0.8) brk = clamp((c.v - vt) / 5, 0.2, 1);
   else thr = 0.35;
-  return [thr, brk, pursuit(c)];
+  return [thr, brk, aiSteer(c, LN)];
 }
 // fastest speed that still stops short of the nearest car directly in your path
 export function aheadCap(c) {
@@ -325,9 +341,9 @@ export function pursuitLane(c, s) {
     sh = Math.sin(c.h);
   return (2 * (-dx * sh + dy * ch)) / Math.max(dx * dx + dy * dy, 1);
 }
-export function laneSafe(c, s, ahead) {
+export function laneSafe(c, s, ahead, PV?) {
   const i = (c.idx + ahead) % GS.N;
-  let v = (PROF[c.team] || GS.vf)[i];
+  let v = (PV || PROF[c.team] || GS.vf)[i];
   if (Math.abs(s) > 0.05) {
     const lp = laneProfile(s > 0 ? 1 : -1, c.team);
     v = v * (1 - Math.abs(s)) + Math.min(v, lp[i]) * Math.abs(s);

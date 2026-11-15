@@ -6,6 +6,7 @@ import { cars, opts, setupRace } from '../game/race';
 import { MP, leaveRoom, mpOn, mpPresence, showLobby } from '../net/multiplayer';
 import { renderLobby } from '../net/lobby';
 import { renderLaneInd } from '../sim/ai';
+import { dynPrepare, lineSave, setDynLevel } from '../sim/lines';
 import { buildProfile } from '../sim/profile';
 import { DRIVER_STATS } from '../teams/drivers';
 import { TEAM_STATS } from '../teams/team-stats';
@@ -43,6 +44,13 @@ export function teamCardHtml(team: number) {
     h += `<div class="drv">${flag(t.nat[d], 13)}<b>${t.drivers[d]}</b><span>${DRIVER_STATS[team][d].tag}</span></div>`;
   return h + '</div>';
 }
+const DYN_LV_NOTE = [
+  'The original fixed line.',
+  'Novice: a slower line with big reserves. Lifting holds your speed, so just lift before the bar; a late lift is forgiven.',
+  'Intermediate: quicker, with a moderate reserve for late lifts and early gas.',
+  'Cautious Expert: close to the limit. A small reserve only.',
+  'Perfect Expert: the fastest possible line, skids included. No reserve at all: it needs exact timing.',
+];
 export function showTeamStats() {
   $('teamStats').innerHTML = teamCardHtml(opts.team);
 }
@@ -200,7 +208,8 @@ export function init(): void {
   segInit('sTow', 'tow', Number);
   segInit('sTurns', 'turns', Number);
   $('sDRS').addEventListener('click', () => setTimeout(updatePads, 0));
-  segInit('sLine', 'line', v => v === '1');
+  segInit('sLine', 'line', Number);
+  segInit('sDyn', 'dynlv', Number);
   segInit('sGears', 'gears', Number);
   $('sGears').addEventListener('click', () => setTimeout(updatePads, 0));
   for (const [id, key, cast] of [
@@ -211,7 +220,8 @@ export function init(): void {
     ['pPedals', 'pedals', Number],
     ['pSteer', 'steer', Number],
     ['pCam', 'cam', Number],
-    ['pLine', 'line', v => v === '1'],
+    ['pLine', 'line', Number],
+    ['pDyn', 'dynlv', Number],
     ['pSnd', 'sound', v => v === '1'],
     ['pMus', 'music', v => v === '1'],
   ])
@@ -228,6 +238,28 @@ export function init(): void {
       syncAllSegs();
     }, 0);
   });
+  // the Racing Line switch sets the choice for practice or for races, whichever is on
+  for (const id of ['sLine', 'pLine'])
+    $(id).addEventListener('click', e => {
+      if ((e.target as HTMLElement).closest('button')) setTimeout(lineSave, 0);
+    });
+  // picking the line you follow (the buttons themselves are ordinary segmented controls on opts.dynlv)
+  const dynLvSync = () => {
+    $('dynLvNote').textContent = DYN_LV_NOTE[opts.dynlv];
+  };
+  for (const id of ['pDyn', 'sDyn'])
+    $(id).addEventListener('click', e => {
+      if (!(e.target as HTMLElement).closest('button')) return;
+      setTimeout(() => {
+        setDynLevel(opts.dynlv);
+        dynLvSync();
+        syncCtrlMenu();
+      }, 0);
+    });
+  dynLvSync();
+  // the lines depend on the car, the weather and the Opponents level
+  for (const id of ['sTeam', 'sRain', 'sDiff'])
+    $(id).addEventListener('click', () => setTimeout(dynPrepare, 0));
   segInit('sSnd', 'sound', v => v === '1');
   segInit('sMus', 'music', v => v === '1');
   $('sSnd').addEventListener('click', () =>

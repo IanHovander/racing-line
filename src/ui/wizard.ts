@@ -1,4 +1,5 @@
 import { GS } from '../state';
+import { lineLoad } from '../sim/lines';
 import { setMusic, setSfx, unlockAudio } from '../audio/audio';
 import { $, clamp, store } from '../core/dom';
 import { opts } from '../game/race';
@@ -109,6 +110,7 @@ export const wzMode = m => {
   WZ.mode = m;
   WZ.picked = true;
   store.set('wzmode', m);
+  lineLoad(); // the Racing Line setting shows the choice for practice or for races
   wzGo(1);
 };
 export const wzHost = () => {

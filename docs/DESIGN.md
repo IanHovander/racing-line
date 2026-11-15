@@ -387,6 +387,25 @@ Playable build: https://matthewtorgerson.github.io/racing-line/ (GitHub Pages, b
 
 - Online races start from a random grid with the human players at the back: the AI cars shuffled at the front, the players shuffled behind them (`hostStart` in `net/netcode.ts`). The host picks the grid and sends it, so every player sees the same one.
 
+## v17.13 — dynamic racing line (`src/sim/dynline.ts`, `src/sim/lines.ts`)
+
+Full write-up: [dynamic-racing-line.md](dynamic-racing-line.md). Tools: [tools/README.md](../tools/README.md).
+
+- **Why:** in one-button driving the car chased one fixed line; arriving too fast or off it meant a skid back towards it. Now a planner re-plans from the car's real position, heading and speed and steers along that plan. Controls are unchanged (hold or lift the gas).
+- **Line Difficulty** (Settings · Driving, pause menu, lobby; `L` cycles in a race; `opts.dynlv`, default 3): Novice / Intermediate / Cautious Expert / Perfect Expert, or Classic (the old fixed line). Each level is the fastest line within its reserves:
+  - Novice: 86% of the grip, 62% of the brakes, 2.2 m from the road edge; lifting holds your speed.
+  - Intermediate: 93%, 78%, 1.5 m.
+  - Cautious Expert: 97%, 90%, 1.0 m.
+  - Perfect Expert: 99.5%, 98.5%, 0.3 m, and it plans skids into its braking.
+- **The reserve is the player's:** with the gas held the car uses its real grip, so lifting later than the line says is faster until the road runs out. When too fast the driver turns in at the tyre limit and skids the speed off.
+- **Racing Line** setting (`opts.line`: 0 Hidden, 2 Difficult Turns, 1 Shown; `H` cycles): starts shown in practice and hidden in races, each remembered separately (`lineP` / `lineR`). Difficult Turns draws only each circuit's three to five heaviest braking points (lose 100 km/h or more, or drop to 55% of the speed or less), from about two seconds before the braking point.
+- **The live line** (`src/render/line.ts`): solid from the car = the path being steered, green gas / yellow hold / red brake / orange brake with a skid, a white bar where to lift; dashed = the rest of the lap.
+- **Opponents drive the lines too:** Easy = Novice, Medium = Intermediate (was "Normal"), Hard = Cautious Expert, each for its own car, at about 96.5% / 97.5% / 97.5% of the line's own speeds (`DYN_AIB`), with the existing traffic and defending logic. Lone Star solo AI laps: 57.0 / 54.0 / 52.8 s (were 66.5 / 62.7 / 60.0 s on the fixed line).
+- **Other cars:** the player's planned path ignores moving cars (a pass-planning version was removed: unpredictable); the contact assist brakes behind them; stopped cars are steered round.
+- **Lines are ready-made:** `public/dynlines.json` holds all 320 (8 circuits × 5 cars × 4 levels × dry/wet), built by `npm run lines`, fetched at start-up outside the bundle. A missing or out-of-date line is built in the browser in the background and cached in `localStorage`.
+- **Online:** every player's car is planned locally at their own Line Difficulty (a personal control in the lobby); the host drives the AI on the room's Opponents line. The network protocol is unchanged.
+- **Line builder:** periodic B-spline of lateral offsets (848 control points), lap model with the game's physics and curvature measured on the drawn path, searched by smooth multi-point bumps coarse to fine, then a wide-entry step per corner. Lone Star, Rosso, bot lifting on time: Novice 56.1 s, Intermediate 53.7 s, Cautious Expert 52.4 s, Perfect Expert 51.4 s (fixed line: 61.1 s).
+
 ## Model
 
 - Tracks: control points → Catmull-Rom → smoothed and resampled every 2 m (`buildTrack()`). Long straights need intermediate control points: without them the spline overshoots at the next tight corner and makes a near-cusp (a 4–7 m radius). That happened on the first Mexico and Vegas drafts.
@@ -421,7 +440,7 @@ Playable build: https://matthewtorgerson.github.io/racing-line/ (GitHub Pages, b
   - `band()`/`edge()` take `SIDES={R,L}`.
   - Side effect: running wide on the inside now meets a wall sooner. COTA flat-out vs ideal went from ~−0.6 s to +3.9 s.
 - **Elevation**: `HT[i]`, `SL[i]`; gravity along the slope; slope shading; gradient readout. Cars are placed at the right height when the grid is set up (`locate()` in `setupRace`). This fixed cars floating or sinking before lights out on raised grids such as Interlagos and COTA (hot-fixed live first).
-- The racing line comes from elastic-band curvature minimisation. Speed profiles come from `profileFor(stats)` (grip, braking and acceleration passes, rain, slope, team).
+- The classic racing line comes from elastic-band curvature minimisation (the dynamic lines of v17.13 are searched for lap time instead). Speed profiles come from `profileFor(stats)` (grip, braking and acceleration passes, rain, slope, team).
 - Surfaces (grip; extra drag):
   - 0 asphalt: 34.
   - 1 kerb: 31.
