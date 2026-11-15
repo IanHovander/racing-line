@@ -354,10 +354,10 @@ export function render() {
     ctx.lineTo(b[0], b[1]);
   }
   ctx.stroke();
-  // racing line overlay. A car the planner is driving draws its own live line (render/line.ts) instead of the classic one
+  // racing line overlay. A car the planner is driving shows the line of its Line Difficulty (render/line.ts) instead of the classic one
   const pc = cars[GS.ctrl],
     dynLine = opts.line && !attract && !!pc && !pc.finished && !pc.out && opts.steer === 0 && dynOn(pc);
-  if (dynLine) drawDynLine(pc, z);
+  if (dynLine) drawDynLine(z);
   if (opts.line && !attract && !dynLine && cars[GS.ctrl] && GS.PZONE.team !== cars[GS.ctrl].team) {
     GS.PZONE = new Uint8Array(GS.N);
     GS.PZONE.team = cars[GS.ctrl].team;

@@ -390,6 +390,16 @@ export function saveName(name: string): void {
   store.set('nick', name);
   cookie.set('nick', name);
 }
+/**
+ * Take the name from the lobby's name box if it holds a new one; true when the name changed. Called on every edit
+ * of the box and before the name is sent to the room, so what the box shows is what is saved.
+ */
+export function commitName(): boolean {
+  const name = cleanName(($('nick') as HTMLInputElement).value).trim();
+  if (!name || name === GS.NICK) return false; // an empty box keeps the name until a new one is typed
+  saveName(name);
+  return true;
+}
 /** why a join failed, in the player's words */
 function joinError(e, code: string, asHost: boolean): string {
   const t = e && e.type;
@@ -563,6 +573,7 @@ export function mpCfg() {
 }
 export function mpPresence(full?) {
   if (!MP.room) return;
+  if (MP.phase === 'lobby' && !$('lobby').classList.contains('hide')) commitName();
   const p: any = {
     v: 1,
     nick: GS.NICK.slice(0, 16),
