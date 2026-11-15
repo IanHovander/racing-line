@@ -194,7 +194,6 @@ export function init(): void {
   syncCtrlMenu();
   segInit('sLaps', 'laps', Number);
   segInit('sDiff', 'diff', Number);
-  segInit('sCam', 'cam', Number);
   segInit('sRain', 'rain', Number);
   $('sRain').addEventListener('click', () => {
     WX.rain = opts.rain;
@@ -219,7 +218,6 @@ export function init(): void {
     ['pGears', 'gears', Number],
     ['pPedals', 'pedals', Number],
     ['pSteer', 'steer', Number],
-    ['pCam', 'cam', Number],
     ['pLine', 'line', Number],
     ['pDyn', 'dynlv', Number],
     ['pSnd', 'sound', v => v === '1'],

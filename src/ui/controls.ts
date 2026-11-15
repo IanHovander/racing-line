@@ -113,11 +113,6 @@ export function syncCtrlMenu() {
       ? 'The car follows the racing line of your Line Difficulty. It slows behind moving cars and steers round stopped ones.'
       : STEER_NOTE[opts.steer];
 }
-export function toggleCam() {
-  opts.cam = 1 - opts.cam;
-  store.set('cam', opts.cam);
-  showToast(opts.cam ? 'Isometric camera' : 'Chase camera');
-}
 /** H or the Line button: hidden -> difficult turns -> shown. Hiding the line changes nothing about how the car drives. */
 export function toggleLine() {
   opts.line = [2, 0, 1][opts.line | 0];

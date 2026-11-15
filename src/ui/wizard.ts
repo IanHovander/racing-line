@@ -22,7 +22,6 @@ import {
   resetCar,
   showToast,
   swapCar,
-  toggleCam,
   toggleLine,
   togglePause,
 } from './controls';
@@ -214,7 +213,6 @@ export function init(): void {
   });
   $('bMode').onclick = cycleMode;
   $('bSteer').onclick = cycleSteer;
-  $('bCam').onclick = toggleCam;
   $('bLine').onclick = toggleLine;
   $('bSnd').onclick = () => {
     unlockAudio();

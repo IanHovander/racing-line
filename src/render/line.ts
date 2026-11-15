@@ -1,8 +1,8 @@
 // The racing line on the canvas when the planner is driving the player's car (sim/lines.ts).
 //
 // What is drawn is the level's own line: the fastest line for the chosen Line Difficulty, the same every lap, as if
-// painted on the road. Green = on the gas, yellow = holding speed, red = braking, orange = braking with a skid; a
-// white bar marks where each braking starts (lift there). With "Difficult Turns" only the stretches around the
+// painted on the road. Green = on the gas, yellow = holding speed, red = braking, orange = braking with a skid (until v17.18 a
+// white bar also marked where each braking starts). With "Difficult Turns" only the stretches around the
 // circuit's heaviest braking points are drawn.
 //
 // The path the planner is steering the car down right now is not drawn. On the line and at its speeds the two are
@@ -23,7 +23,6 @@ const COLS = [
   'rgba(255,140,30,0.9)',
 ];
 /** half the width of the lift bar, metres */
-const BAR = 1.5;
 
 /** z is the camera zoom (pixels per metre) */
 export function drawDynLine(z: number): void {
@@ -56,17 +55,6 @@ export function drawDynLine(z: number): void {
     ctx.strokeStyle = COLS[zc];
     ctx.stroke();
   }
-  // the lift markers: a bar across the line where each braking begins
-  const brake = (i: number) => zn[i] === 1 || zn[i] === 3;
-  ctx.strokeStyle = 'rgba(255,255,255,0.95)';
-  ctx.lineWidth = Math.max(2, 0.5 * z);
-  ctx.beginPath();
-  for (let i = 0; i < N; i++) {
-    if (!brake(i) || brake((i + N - 1) % N) || !drawn(i)) continue;
-    ctx.moveTo(X(i, la[i] - BAR), Y(i, la[i] - BAR));
-    ctx.lineTo(X(i, la[i] + BAR), Y(i, la[i] + BAR));
-  }
-  ctx.stroke();
   ctx.lineCap = 'butt';
   ctx.lineJoin = 'miter';
 }

@@ -32,7 +32,7 @@ export function render() {
   GS.cC = Math.cos(cam.a);
   GS.OX = W / 2;
   // where the followed car sits on screen; higher on the main screen so it clears the big buttons
-  GS.OY = H * (attract && GS.state === 'menu' ? 0.48 : opts.cam === 0 ? 0.64 : 0.56);
+  GS.OY = H * (attract && GS.state === 'menu' ? 0.48 : 0.56);
   ctx.fillStyle = GS.TR.bg;
   ctx.fillRect(0, 0, W, H);
   const z = cam.zoom,

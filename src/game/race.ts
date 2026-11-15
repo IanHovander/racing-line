@@ -3,7 +3,7 @@ import type { Car } from '../types';
 import { GS } from '../state';
 import { H, W, clamp, store } from '../core/dom';
 import { MP } from '../net/multiplayer';
-import { cam } from '../render/camera';
+import { ISO_A, cam } from '../render/camera';
 import { FW } from '../render/effects';
 import { flagFrames, flagImg } from '../render/scenery';
 import { renderLaneInd } from '../sim/ai';
@@ -170,7 +170,7 @@ export function setupRace(isAttract, mpGrid?) {
   const cc = cars[Math.max(0, GS.ctrl)];
   cam.x = cc.x;
   cam.y = cc.y;
-  cam.a = opts.cam === 0 ? cc.h : -Math.PI / 4;
+  cam.a = ISO_A;
 }
 export function init(): void {
   opts = {
@@ -179,7 +179,6 @@ export function init(): void {
     team: store.get('team', 0),
     laps: store.get('laps', 5),
     diff: store.get('diff', 1),
-    cam: store.get('camv2', 0) ? store.get('cam', 1) : (store.set('camv2', 1), store.set('cam', 1), 1),
     /** the racing line on screen: 0 hidden, 1 shown, 2 difficult turns only. Set by lineLoad() for practice or races */
     line: 0,
     /** the line you follow: 0 classic, 1..4 Novice / Intermediate / Cautious Expert / Perfect Expert (sim/lines.ts) */

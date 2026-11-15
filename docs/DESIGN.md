@@ -558,3 +558,10 @@ Reported from two phones: opening the connection "is very inconsistent and often
 - Online: chat/reactions, spectating, flag picker for humans.
 - Crowd audio only with a real recorded sample.
 - Performance: if phones struggle on Sakura Ring or Neon Strip, cut petal count, batch neon strokes, or cache the crossover quads.
+
+## v17.18 — Isometric camera only, no lift bars
+
+- The chase camera is gone: the camera always looks along the fixed isometric bearing `ISO_A` (−45°, tilt 0.5,
+  height scale 0.8). Removed with it: the Camera setting (Settings, pause menu, lobby view options), the hidden
+  Cam button and `toggleCam`. A stored `hcgp_cam` is now ignored.
+- The racing line no longer draws the white bar where each braking zone starts; the red section shows it.

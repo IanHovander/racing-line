@@ -151,14 +151,6 @@ export const LB_CTRL: [string, string, [number, string][]][] = [
 // (Sound Effects and Music are on/off switches: 1 and 0 here, booleans in opts.)
 export const LB_VIEW: [string, string, [number, string][]][] = [
   [
-    'cam',
-    'Camera',
-    [
-      [1, 'Isometric'],
-      [0, 'Chase'],
-    ],
-  ],
-  [
     'line',
     'Racing Line',
     [
