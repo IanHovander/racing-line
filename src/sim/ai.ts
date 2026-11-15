@@ -287,10 +287,11 @@ export function controlAI(c, dt, factor) {
   let vt = Math.min(
     (vp < VCAP * (c.st || NEUTRAL).top - 1 ? vp * Math.sqrt(c.gm) : vp * (1 - 0.1 * c.dmg)) *
       factor *
-      (1 + 0.06 * c.tow),
+      (1 + 0.06 * c.tow * (opts.tow || 0)),
     cap,
   );
-  if (c.drs && vp >= VCAP * (c.st || NEUTRAL).top - 1) vt = Math.min(cap, vt * 1.06);
+  if (c.drs && vp >= VCAP * (c.st || NEUTRAL).top - 1)
+    vt = Math.min(cap, vt * (1 + 0.06 * (opts.drsPow || 1)));
   if (inYellow(c)) vt = Math.min(vt, vp * 0.72);
   vt = Math.min(vt, defV * factor);
   if (c.slipT > 0) vt += 3.5;

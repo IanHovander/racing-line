@@ -8,7 +8,7 @@ import { TRACKS } from '../track/circuits';
 import { setMusic, setSfx, unlockAudio } from '../audio/audio';
 import { lineLoad, lineSave } from '../sim/lines';
 import { showToast } from '../ui/controls';
-import { syncAllSegs } from '../ui/widgets';
+import { makeSlider, syncAllSegs } from '../ui/widgets';
 import { placeCircuitPicker, showCircuit, teamCardHtml } from '../ui/menu';
 // ---- lobby: circuit (host), race settings (host), controls (each player)
 export const LB_RULES: [string, string, [number, string][]][] = [
@@ -49,14 +49,6 @@ export const LB_RULES: [string, string, [number, string][]][] = [
   [
     'damage',
     'Damage & Knockouts',
-    [
-      [0, 'Off'],
-      [1, 'On'],
-    ],
-  ],
-  [
-    'tow',
-    'Slipstream',
     [
       [0, 'Off'],
       [1, 'On'],
@@ -175,6 +167,7 @@ export function lbRulesInit() {
     damage: opts.damage,
     tow: opts.tow,
     drsOn: opts.drs ? 1 : 0,
+    drsPow: opts.drsPow,
     limits: opts.limits,
     yellow: opts.yellow,
   };
@@ -231,6 +224,32 @@ export function renderLobbySettings(cfg) {
         renderLobby();
       }),
     );
+  // catch-up strength: sliders, sent to everyone once the host lets go
+  for (const [k, label, min] of [
+    ['tow', 'Slipstream', 0],
+    ['drsPow', 'DRS Strength', 1],
+  ] as [string, string, number][]) {
+    const d = document.createElement('div'),
+      sp = document.createElement('span'),
+      box = document.createElement('div');
+    sp.textContent = label;
+    d.append(sp, box);
+    r.appendChild(d);
+    makeSlider(
+      box,
+      min,
+      5,
+      0.25,
+      src[k] === undefined ? 1 : +src[k],
+      !MP.host,
+      () => {},
+      v => {
+        MP.rules[k] = v;
+        mpPresence();
+        renderLobby();
+      },
+    );
+  }
   $('lbRulesNote').textContent = MP.host
     ? 'You set these for everyone.'
     : cfg

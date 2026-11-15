@@ -101,7 +101,7 @@ export function controlPlayer(c, dt) {
     k = c.steer * kmax;
     safe = (PROF[c.team] || GS.vf)[(c.idx + 4) % GS.N] * Math.sqrt(c.gm);
   }
-  if (c.drs && !dyn) safe *= 1.06; // the planner works from the real speed of the car, so it needs no DRS allowance
+  if (c.drs && !dyn) safe *= 1 + 0.06 * (opts.drsPow || 1); // the planner works from the real speed of the car, so it needs no DRS allowance
   c.safeV = safe;
   // throttle: you hold the gas; lift off and the car brakes itself to the safe speed
   thr = input.thr ? 1 : 0;
