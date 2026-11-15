@@ -424,11 +424,11 @@ Players saw each other's cars about 15–18 m behind where they really were (mor
 
 Measured with two games side by side in one page (fake PeerJS, 2 players, 20 s of racing at 40–90 m/s), error of each player's view of the other car along its heading:
 
-| One-way latency | Before | After |
-|---|---|---|
-| 30 ± 10 ms | — | +0.2 m median, 95% within 2 m |
-| 120 ± 30 ms | −17.5 m median, 5–8% within 2 m | 0.0 m median, 89–95% within 2 m |
-| 150 ± 60 ms, 2% stalls of 300 ms | — | −0.1 m median, 84–89% within 2 m |
+| One-way latency                  | Before                          | After                            |
+| -------------------------------- | ------------------------------- | -------------------------------- |
+| 30 ± 10 ms                       | —                               | +0.2 m median, 95% within 2 m    |
+| 120 ± 30 ms                      | −17.5 m median, 5–8% within 2 m | 0.0 m median, 89–95% within 2 m  |
+| 150 ± 60 ms, 2% stalls of 300 ms | —                               | −0.1 m median, 84–89% within 2 m |
 
 What remains is what any extrapolation has: when a driver brakes or turns in, the other screen finds out one latency later (≈ v × latency of error until the next state, a car length or two at 150 ms). Contacts with remote cars still only move the local car.
 
