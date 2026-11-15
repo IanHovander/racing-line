@@ -8,7 +8,7 @@ import { TRACKS } from '../track/circuits';
 import { setMusic, setSfx, unlockAudio } from '../audio/audio';
 import { lineLoad, lineSave } from '../sim/lines';
 import { showToast } from '../ui/controls';
-import { makeSlider, syncAllSegs } from '../ui/widgets';
+import { STRENGTH, STRENGTH_OFF, makeSlider, syncAllSegs } from '../ui/widgets';
 import { placeCircuitPicker, showCircuit, teamCardHtml } from '../ui/menu';
 // ---- lobby: circuit (host), race settings (host), controls (each player)
 export const LB_RULES: [string, string, [number, string][]][] = [
@@ -226,11 +226,11 @@ export function renderLobbySettings(cfg) {
       }),
     );
   // catch-up strength: sliders, sent to everyone once the host lets go
-  for (const [k, label, min] of [
-    ['tow', 'Slipstream', 0],
-    ['drsPow', 'DRS Strength', 1],
-    ['cgrip', 'Catch-up Grip', 0],
-  ] as [string, string, number][]) {
+  for (const [k, label, stops] of [
+    ['tow', 'Slipstream', STRENGTH_OFF],
+    ['drsPow', 'DRS Strength', STRENGTH],
+    ['cgrip', 'Catch-up Grip', STRENGTH_OFF],
+  ] as [string, string, number[]][]) {
     const d = document.createElement('div'),
       sp = document.createElement('span'),
       box = document.createElement('div');
@@ -239,9 +239,7 @@ export function renderLobbySettings(cfg) {
     r.appendChild(d);
     makeSlider(
       box,
-      min,
-      5,
-      0.25,
+      stops,
       src[k] === undefined ? 1 : +src[k],
       !MP.host,
       () => {},
