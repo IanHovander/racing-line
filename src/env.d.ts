@@ -6,6 +6,8 @@ interface Window {
   claude?: any;
   /** PeerJS, loaded on demand from vendor/peerjs.min.js */
   Peer?: any;
+  /** PeerJS's other global: { Peer, util } (util.defaultConfig holds its default STUN/TURN servers) */
+  peerjs?: any;
   webkitAudioContext?: typeof AudioContext;
   __RL_DEBUG?: boolean;
 }

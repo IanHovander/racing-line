@@ -3,7 +3,16 @@ import { setMusic, setSfx, unlockAudio } from '../audio/audio';
 import { $, clamp, store } from '../core/dom';
 import { opts } from '../game/race';
 import { placeCircuitPicker } from './menu';
-import { ARTIFACT_URL, MP, enterRoom, leaveRoom, mpCode, mpPresence, normCode } from '../net/multiplayer';
+import {
+  ARTIFACT_URL,
+  MP,
+  enterRoom,
+  leaveRoom,
+  mpCode,
+  mpPresence,
+  normCode,
+  saveNick,
+} from '../net/multiplayer';
 import { hostStart } from '../net/netcode';
 import {
   cycleMode,
@@ -161,10 +170,14 @@ export function init(): void {
       showToast('Copy failed — select the link below');
     }
   };
-  $('nick').addEventListener('input', e => {
-    GS.NICK = (e.target as HTMLInputElement).value.replace(/[^\p{L}\p{N} ._-]/gu, '').slice(0, 16) || GS.NICK;
-    store.set('nick', GS.NICK);
-    mpPresence();
+  // your name: saved with every keystroke, and tidied (what was actually saved) when you leave the box
+  const nick = $('nick');
+  nick.addEventListener('input', () => {
+    if (saveNick(nick.value)) mpPresence();
+  });
+  nick.addEventListener('change', () => {
+    if (saveNick(nick.value)) mpPresence();
+    nick.value = GS.NICK;
   });
   $('bResume').onclick = togglePause;
   $('bReset').onclick = resetCar;
