@@ -432,6 +432,30 @@ Measured with two games side by side in one page (fake PeerJS, 2 players, 20 s o
 
 What remains is what any extrapolation has: when a driver brakes or turns in, the other screen finds out one latency later (≈ v × latency of error until the next state, a car length or two at 150 ms). Contacts with remote cars still only move the local car.
 
+## v17.16 — joining a room, and the lobby's settings
+
+Joining showed nothing until the lobby appeared (3.3 s from an invite link), and a mistyped code "joined" an empty room with no host. `net/multiplayer.ts` (`enterRoom`, `makeP2PApi`) and the new `net/joining.ts`:
+
+- **Waiting screen** (`#mpWait`): up at once when a room is opened or joined, with a loading bar and the step in progress ("Reaching the matchmaking server…", "Connecting to the host…", "Opening your room…"), a Cancel button, and after 4 s a line saying it can take up to ten seconds. Each step moves the bar on and it creeps in between, so it never stands still.
+- **An invite link shows the screen with the first paint**, before the game's code has loaded: a two-line script in `index.html` sets the class `joining` on `<html>` when the address has a room code, and the stylesheet shows `#mpWait` ("Joining Race · Loading the game…") in place of the main screen. `net/joining.ts` takes over when it runs.
+- **Your name is remembered** in `localStorage` (`hcgp_nick`, as before) and now also in a year-long cookie of the same name (`cookie` in `core/dom.ts`); whichever survives restores the other at start-up. Clearing the box keeps the old name until a new one is typed.
+- **Clear buttons:** the name box and both room-code boxes have an × in a circle at their right end (`.clr` / `.clrX`), 46 px wide, always shown; the text never runs under it. One tap empties the box and keeps the keyboard up.
+- **A guest's Room page** starts with their name and the players; the invite code and QR, which they have just used, come below (`#lobby.guest`). The host's still starts with the code and QR.
+- **Failures are explained**, with Try Again and Back (Back returns to the join box with the code still in it): no race with that code, the host can't be reached, the matchmaking server can't be reached.
+- **Faster:**
+  - Outside claude.ai the game no longer waits 1.6 s for claude.ai's room service before loading PeerJS.
+  - A guest connects straight to the host. It used to ask for the room's own id first, a wasted round trip to the matchmaking server, and the reason a wrong code opened an empty room.
+  - The connection to the matchmaking server is opened ahead of time when the Multiplayer panel or the join box is opened (`mpWarm`), and dropped after 90 s if unused.
+  - Measured on one machine (two tabs): invite link to lobby 3.3 s → 1.2 s, with the waiting screen up from 0.45 s; join by code 1.6 s → 1.2 s, or 0.4 s with the connection already open; online play ready after page load 2.0 s → 0.5 s.
+- **A new room's code that is already taken** is replaced by another (up to three tries) instead of failing.
+- **More than one tab:**
+  - The invite link opened in a second tab of the host's browser joins as a second player.
+  - A host that reloads its page takes its room back (the tab remembers the code in `sessionStorage`).
+  - A host that closed its tab and opens the link again reopens the room as host (the browser remembers the last room it hosted for 12 hours, `hcgp_mphost`); if another tab still hosts it, the link joins that one.
+  - A host tab in the background keeps its room going. Browsers slow a hidden tab's timers to once a second and later once a minute, and the hub sent the player list on a timer; it now also sends it when a guest connects and when a guest's update or heartbeat arrives late for the timer, and a guest answers the hub's list with a heartbeat when its own timer is late.
+  - Not changed: a hidden tab does not draw or simulate (the browser stops its frames), so in a race only the tab in front drives.
+- **Lobby settings:** the Settings step now has everything the pause menu has. "Display & Sound" (`LB_VIEW` in `net/lobby.ts`): Camera, Racing Line, Turn Numbers, Sound Effects, Music, each player's own and saved as in the menu. The Racing Line row shows the practice or race choice to match the host's Session (`linePractice()` reads the room's session while in the lobby).
+
 ## Model
 
 - Tracks: control points → Catmull-Rom → smoothed and resampled every 2 m (`buildTrack()`). Long straights need intermediate control points: without them the spline overshoots at the next tight corner and makes a near-cusp (a 4–7 m radius). That happened on the first Mexico and Vegas drafts.

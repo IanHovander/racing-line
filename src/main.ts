@@ -6,6 +6,7 @@ import { init as init3 } from './game/race';
 import { init as init4 } from './input/input';
 import { init as init5 } from './audio/audio';
 import { init as init6 } from './audio/music';
+import { init as initJoining } from './net/joining';
 import { init as init7 } from './net/multiplayer';
 import { init as init8 } from './net/lobby';
 import { init as init9 } from './ui/widgets';
@@ -25,6 +26,7 @@ init3(); // game/race
 init4(); // input/input
 init5(); // audio/audio
 init6(); // audio/music
+initJoining(); // net/joining: the waiting screen for opening or joining a room
 init7(); // net/multiplayer
 init8(); // net/lobby
 init9(); // ui/widgets

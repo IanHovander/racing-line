@@ -19,6 +19,7 @@ import { pursuit } from './ai';
 import { BPROF, BRK, GRIP, VCAP, VMAX } from './car-model';
 import { create } from './dynline';
 import { PROF, buildProfile, setLineCurv } from './profile';
+import { MP, hostPeer } from '../net/multiplayer';
 import { TEAM_STATS } from '../teams/team-stats';
 import { WETB, WETG, WX } from '../track/track';
 import { showToast, updatePads } from '../ui/controls';
@@ -371,6 +372,12 @@ export function refLine(c, isPlayer: boolean) {
 // choice for the session being set up or driven: 0 = hidden, 1 = shown, 2 = difficult turns only (hardMask).
 export function linePractice(): boolean {
   if (!attract) return !!GS.PRACTICE;
+  if (MP.room) {
+    // in an online lobby: the session the host has picked
+    const hp = MP.host ? null : hostPeer(),
+      cfg = MP.host ? MP.rules : hp && hp.presence.cfg;
+    return !!(cfg && cfg.practice);
+  }
   return !!WZ && WZ.mode === 'practice';
 }
 export function lineLoad(): void {
