@@ -751,6 +751,61 @@ body #pThr.big {
   background: #ff3b30;
   border-color: #ff6a60;
 }
+/* strength sliders (Rules): a big thumb for fingers, the filled part white up to the thumb */
+.sld {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+.sld input[type='range'] {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 32px;
+  margin: 0;
+  background: transparent;
+  -webkit-appearance: none;
+  appearance: none;
+  touch-action: pan-y;
+}
+.sld input[type='range']::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 3px;
+  background: linear-gradient(90deg, #f2f4f7 var(--p, 0%), rgba(255, 255, 255, 0.18) var(--p, 0%));
+}
+.sld input[type='range']::-moz-range-track {
+  height: 6px;
+  border-radius: 3px;
+  background: linear-gradient(90deg, #f2f4f7 var(--p, 0%), rgba(255, 255, 255, 0.18) var(--p, 0%));
+}
+.sld input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 26px;
+  height: 26px;
+  margin-top: -10px;
+  border-radius: 50%;
+  background: #fff;
+  border: 0;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+}
+.sld input[type='range']::-moz-range-thumb {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #fff;
+  border: 0;
+}
+.sld input[type='range']:disabled {
+  opacity: 0.5;
+}
+.sld b {
+  flex: 0 0 64px;
+  text-align: right;
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 600;
+}
 
 svg.flag {
   border-radius: 2px;

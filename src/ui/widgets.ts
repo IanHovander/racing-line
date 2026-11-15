@@ -19,6 +19,62 @@ export function segInit(id, key, cast) {
   });
   sync();
 }
+/** how a strength slider reads: Off, Normal, 2.5× … */
+export const sliderText = (v: number) => (v <= 0 ? 'Off' : v === 1 ? 'Normal' : `${v}×`);
+/**
+ * Fill el (an empty .sld box) with a slider from min to max and its readout. onMove runs while dragging,
+ * onSet once it is let go. Returns a function that moves the slider to a value without either.
+ */
+export function makeSlider(
+  el: HTMLElement,
+  min: number,
+  max: number,
+  step: number,
+  cur: number,
+  dis: boolean,
+  onMove: (v: number) => void,
+  onSet: (v: number) => void,
+): (v: number) => void {
+  el.classList.add('sld');
+  el.textContent = '';
+  const r = document.createElement('input'),
+    out = document.createElement('b');
+  r.type = 'range';
+  r.min = String(min);
+  r.max = String(max);
+  r.step = String(step);
+  r.disabled = dis;
+  el.append(r, out);
+  const show = (v: number) => {
+    r.value = String(v);
+    out.textContent = sliderText(v);
+    r.style.setProperty('--p', `${((v - min) / (max - min)) * 100}%`);
+  };
+  r.addEventListener('input', () => {
+    show(+r.value);
+    onMove(+r.value);
+  });
+  r.addEventListener('change', () => onSet(+r.value));
+  show(cur);
+  return show;
+}
+/** a slider in a menu row for opts[key], saved when it is let go */
+export function sliderInit(id: string, key: string, min: number, max: number, step: number) {
+  const set = makeSlider(
+    $(id),
+    min,
+    max,
+    step,
+    opts[key],
+    false,
+    v => (opts[key] = v),
+    v => {
+      store.set(key, v);
+      syncAllSegs(); // the same slider in the other menu
+    },
+  );
+  SEG_SYNC.push(() => set(opts[key]));
+}
 export function init(): void {
   // ================= Menu wiring =================
   {

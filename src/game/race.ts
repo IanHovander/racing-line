@@ -186,7 +186,10 @@ export function init(): void {
     yellow: store.get('yellow', 10),
     limits: store.get('limits', 0),
     drs: store.get('defv4', 0) ? store.get('drs', 2) : (store.set('drs', 2), 2),
-    tow: store.get('tow', 1),
+    /** slipstream strength: 0 off, 1 normal, up to 5 (5× as strong) */
+    tow: clamp(+store.get('tow', 1) || 0, 0, 5),
+    /** how much DRS adds: 1 normal, up to 5 (turning DRS off is opts.drs) */
+    drsPow: clamp(+store.get('drsPow', 1) || 1, 1, 5),
     turns: store.get('turns', 1),
     gears: store.get('defv4', 0) ? store.get('gears', 0) : (store.set('gears', 0), store.set('defv4', 1), 0),
     sound: store.get('sound', true),

@@ -45,7 +45,9 @@ export function physics(c, dt, thr, brk, kd) {
     c.gm *
     (opts.rain ? [0.72, 0.55, 0.7, 0.85, 0.7, 0.55][surf] : 1);
   const v = c.v;
-  const dr = c.drs ? 1 : 0;
+  // DRS and slipstream strength (Rules settings): 1 is the normal effect, 0.5 half, 2 double…
+  const dr = c.drs ? opts.drsPow || 1 : 0,
+    tw = c.tow * (opts.tow || 0);
   if (c.boostT > 0) c.boostT -= dt; // launch boost after a quick start
   let a =
     thr *
@@ -55,8 +57,8 @@ export function physics(c, dt, thr, brk, kd) {
       (1 + 0.06 * dr) *
       gE *
       (1 - 0.25 * c.dmg) *
-      Math.max(0, 1 - (v / (VMAX * st.top * (1 + 0.075 * c.tow + 0.055 * dr) * (1 - 0.12 * c.dmg))) ** 2) +
-      0.9 * c.tow * (gE > 0 ? 1 : 0));
+      Math.max(0, 1 - (v / (VMAX * st.top * (1 + 0.075 * tw + 0.055 * dr) * (1 - 0.12 * c.dmg))) ** 2) +
+      0.9 * tw * (gE > 0 ? 1 : 0));
   if (thr < 0.05) a -= 2.5 + v * 0.02 + (man ? 2.2 * Math.min(1, v / GEARTOP[c.gear]) : 0); // engine braking is stronger in a lower gear
   a -= brk * [BRK, 38, 18, 10, 30, 22][surf] * st.brk * (0.6 + 0.4 * c.gm) * WETB();
   a -= 9.81 * (GS.SL[c.idx] || 0);

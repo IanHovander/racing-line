@@ -19,7 +19,7 @@ import { CIRCUIT_PLACE, bindTrackMap, drawTrackMap, elevProfile, setMapData } fr
 import { CIRCUIT_COLS, CIRCUIT_FLAG } from './circuits';
 import { showToast, syncCtrlMenu, updatePads } from './controls';
 import { fmt, updateLights } from './hud';
-import { segInit, syncAllSegs } from './widgets';
+import { segInit, sliderInit, syncAllSegs } from './widgets';
 import { WZ, wzHost, wzJoin } from './wizard';
 /** summary card for one team: tagline, car bars in two columns, one line per driver (team step and lobby) */
 export function teamCardHtml(team: number) {
@@ -200,7 +200,11 @@ export function init(): void {
   segInit('sYellow', 'yellow', Number);
   segInit('sLimits', 'limits', Number);
   segInit('sDRS', 'drs', Number);
-  segInit('sTow', 'tow', Number);
+  // catch-up strength: slipstream Off (0) or Normal (1) up to 5×, DRS Normal up to 5×
+  for (const p of ['s', 'p']) {
+    sliderInit(p + 'Tow', 'tow', 0, 5, 0.25);
+    sliderInit(p + 'DRSp', 'drsPow', 1, 5, 0.25);
+  }
   segInit('sTurns', 'turns', Number);
   $('sDRS').addEventListener('click', () => setTimeout(updatePads, 0));
   segInit('sLine', 'line', Number);
@@ -209,7 +213,6 @@ export function init(): void {
   $('sGears').addEventListener('click', () => setTimeout(updatePads, 0));
   for (const [id, key, cast] of [
     ['pTurns', 'turns', Number],
-    ['pTow', 'tow', Number],
     ['pDRSs', 'drs', Number],
     ['pGears', 'gears', Number],
     ['pSteer', 'steer', Number],
