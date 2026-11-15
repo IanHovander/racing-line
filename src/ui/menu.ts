@@ -12,7 +12,6 @@ import { TEAM_STATS } from '../teams/team-stats';
 import { TEAMS, flag, teamLogo } from '../teams/teams';
 import { buildTrack } from '../track/build';
 import { buildSelectedTrack, raceTrackStarted } from '../track/active';
-import { setRenderer3d } from '../render3d/switch';
 import { TRACKS } from '../track/circuits';
 import { WX } from '../track/track';
 import { CIRCUIT_PLACE, bindTrackMap, drawTrackMap, elevProfile, setMapData } from './circuit-map';
@@ -202,8 +201,6 @@ export function init(): void {
   segInit('sTurns', 'turns', Number);
   $('sDRS').addEventListener('click', () => setTimeout(updatePads, 0));
   segInit('sLine', 'line', v => v === '1');
-  segInit('sR3d', 'r3d', v => v === '1');
-  $('sR3d').addEventListener('click', () => setTimeout(() => setRenderer3d(opts.r3d), 0));
   segInit('sGears', 'gears', Number);
   $('sGears').addEventListener('click', () => setTimeout(updatePads, 0));
   for (const [id, key, cast] of [

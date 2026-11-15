@@ -349,15 +349,9 @@ Playable build: https://matthewtorgerson.github.io/racing-line/ (GitHub Pages, b
 - Build: `dist/index.html` loads `main.js` / `main.css` with a `?v=<content hash>` so a fresh page never runs a stale cached bundle (GitHub Pages caches for ~10 min).
 - Coach: a personal-best sector shows "Best sector 2 · 22.56" with the gain on your previous best (purple dot when it is also the fastest of anyone).
 
-## v17.7 — three.js renderer (beta), one music theme
+## v17.7 — renderer cleanup, one music theme
 
-- **Renderer switch** (Settings → Display → Renderer: Canvas / 3D three.js beta; or `?three` / `?canvas` in the URL; stored as `r3d`). `render3d/switch.ts` loads `render3d/view3d.ts` (and three.js, ~530 KB) on demand into its own chunk (esbuild `splitting`), so canvas players don't download it.
-  - Same framing as the canvas: the canvas projection `P()` is written as one affine camera matrix, so HUD, minimap and touch layout are unchanged. Depth runs along the view direction.
-  - Draws: ground, water, run-off (with skirts down to the ground), gravel, painted run-off, white lines, asphalt, rubbered line, kerbs, start chequers, racing line (vertex colours updated per frame, dashed), barriers (face, top, back), buildings (extruded footprints), trees (instanced: three-cone pines, round trees with trunks), cars (extruded body/pods/cover/wings, cylinder tyres, helmet, shadow). The canvas, kept on top, draws the car markers, name tags and minimap.
-  - The scene is mirrored in z (with the camera matrix's z column flipped back) so the projection is right-handed for three.js; otherwise faces and normals come out backwards and lit surfaces go dark. Flat ground layers use unlit materials so they match the canvas colours exactly; walls, buildings, trees and cars are lit (hemisphere 2.2 + sun 1.6). Kerbs and the racing line are continuous.
-  - Ground layers are drawn in order without writing depth (`ground()` in view3d.ts, renderOrder from −10000): on tight corners the inner run-off folds back over the track and on hills sat above it, which gave z-fighting bands (Lone Star T1). A track with a bridge keeps depth writes for the crossing. Painted run-off uses the per-sample stripe widths and cycles the colours like the canvas.
-  - Not yet in 3D: flags and flag poles, sponsor boards and catch fences, sector boards and turn numbers, pit lane markings and garages' colour stripes, tunnel, bridge, Ferris wheel, sphere, skids, particles, rain, night lighting, shadows.
-- **Benchmark**: Settings → Display → Run Benchmark (or `bench()` in the console) runs the race behind the menu for 6 s with each renderer and reports fps, render() time (CPU) mean / p95 and frame-time p95 (`ui/bench.ts`, `PERF` in `game/loop.ts`).
+- **Canvas-only renderer**: the experimental live Three.js renderer, car sprite atlas, Settings switch and renderer benchmark were removed. Cars are drawn directly by the Canvas renderer.
 - **Audio off while hidden**: on `visibilitychange` (and `pagehide`) the audio context is suspended and the silent keep-alive element paused; both resume when the page is visible again.
 - **Music**: one theme for the whole game, the Ardennes Forest new beat. The other circuit themes, the drive layer and their instruments are removed.
 

@@ -1,6 +1,4 @@
 import { GS } from '../state';
-import { render3dFrame } from '../render3d/switch';
-import { drawCarMarks } from './car';
 import { $, H, W, clamp, ctx } from '../core/dom';
 import { attract, cars, opts } from '../game/race';
 import { drawBox } from './buildings';
@@ -33,19 +31,6 @@ export function render() {
   GS.OX = W / 2;
   // where the followed car sits on screen; higher on the main screen so it clears the big buttons
   GS.OY = H * (attract && GS.state === 'menu' ? 0.48 : opts.cam === 0 ? 0.64 : 0.56);
-  // three.js layer (branch three-js, ?three): it draws the world; the canvas stays clear on top
-  if (render3dFrame()) {
-    ctx.clearRect(0, 0, W, H);
-    // overlays the 3D scene doesn't draw: car markers and players' name tags
-    cars.forEach((c, i) => {
-      if (c.gone) return;
-      GS.PZ = c.hz || 0;
-      drawCarMarks(c, !attract && i === GS.ctrl, !attract && i === GS.mateIdx);
-    });
-    GS.PZ = 0;
-    if (GS.state !== 'menu') minimap();
-    return;
-  }
   ctx.fillStyle = GS.TR.bg;
   ctx.fillRect(0, 0, W, H);
   const z = cam.zoom,

@@ -13,8 +13,6 @@ export let last = performance.now(),
   acc = 0,
   frameN = 0;
 export let FDT = 1 / 60;
-/** frame timing for the renderer benchmark (ui/bench.ts): time spent in render() and time between frames, ms */
-export const PERF = { on: false, prev: 0, render: [] as number[], frame: [] as number[] };
 export function frame(now) {
   const dt = Math.min(0.05, (now - last) / 1000);
   last = now;
@@ -38,13 +36,7 @@ export function frame(now) {
   }
   mpSend(dt);
   updateCamera(GS.state === 'paused' ? 0 : dt);
-  if (PERF.on) {
-    const t0 = performance.now();
-    render();
-    PERF.render.push(performance.now() - t0);
-    PERF.frame.push(now - PERF.prev);
-    PERF.prev = now;
-  } else render();
+  render();
   hud(dt);
   audio(dt);
   if ((frameN = (frameN + 1) % 60) === 0) audioStatus();

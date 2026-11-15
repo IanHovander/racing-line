@@ -14,8 +14,6 @@ import { init as init11 } from './ui/wizard';
 import { init as init12 } from './game/loop';
 import { init as initHome } from './ui/home';
 import { init as initControls } from './ui/controls';
-import { init as init3d } from './render3d/switch';
-import { init as initBench } from './ui/bench';
 import { installDebug } from './debug';
 
 // Run every module's start-up code in the original order.
@@ -33,8 +31,6 @@ init10(); // ui/menu
 init11(); // ui/wizard
 initHome(); // ui/home
 initControls(); // ui/controls
-init3d(); // render3d/switch: three.js renderer if chosen
-initBench(); // ui/bench
 init12(); // game/loop
 
 if (
