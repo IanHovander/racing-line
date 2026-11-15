@@ -1,11 +1,12 @@
 // ================= Setup =================
 export const cv = document.getElementById('c') as HTMLCanvasElement,
   ctx = cv.getContext('2d');
+export const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 export let W = 0,
   H = 0,
   DPR = 1;
 export function resize() {
-  DPR = Math.min(2, window.devicePixelRatio || 1);
+  DPR = Math.min(isTouch ? 1.5 : 2, window.devicePixelRatio || 1);
   W = innerWidth;
   H = innerHeight;
   cv.width = Math.round(W * DPR);
@@ -26,7 +27,6 @@ export const wrapA = a => {
   if (a < 0) a += 2 * Math.PI;
   return a - Math.PI;
 };
-export const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 export const store = {
   get(k, d) {
     try {
