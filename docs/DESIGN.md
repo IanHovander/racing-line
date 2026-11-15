@@ -389,6 +389,10 @@ Playable build: https://matthewtorgerson.github.io/racing-line/ (GitHub Pages, b
 - Pause button in the bottom left corner (44 px). With steering or gear-down pads (and the speed panel above them) in that corner it sits above them (`layoutPads`).
 - Minimap has no dark panel behind it; the track line is white with a faded black edge (6 px at 45%) for contrast. It moves up to the top right corner, since only the desktop Swap button is left in `#btns`.
 
+## v17.12 — multiplayer grid
+
+- Online races start from a random grid with the human players at the back: the AI cars shuffled at the front, the players shuffled behind them (`hostStart` in `net/netcode.ts`). The host picks the grid and sends it, so every player sees the same one.
+
 ## Model
 
 - Tracks: control points → Catmull-Rom → smoothed and resampled every 2 m (`buildTrack()`). Long straights need intermediate control points: without them the spline overshoots at the next tight corner and makes a near-cusp (a 4–7 m radius). That happened on the first Mexico and Vegas drafts.

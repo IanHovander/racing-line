@@ -78,9 +78,15 @@ export function hostStart() {
   const slots = [];
   const nAI = MP.rules && MP.rules.practice ? 0 : 10 - grid.length;
   for (let i = 0; i < nAI; i++) slots.push(ai[i]);
-  // humans start mid-grid, AI around them
-  const mid = Math.max(0, Math.floor((10 - grid.length) / 2));
-  const order = slots.slice(0, mid).concat(grid, slots.slice(mid));
+  // random grid: the AI cars in a random order at the front, the human players in a random order behind them
+  const shuffle = <T>(a: T[]): T[] => {
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  };
+  const order = shuffle(slots).concat(shuffle(grid));
   const start = Date.now().toString(36);
   MP.lastStart = start;
   MP.room
