@@ -1,6 +1,6 @@
 # Dynamic racing line
 
-A replacement for the fixed racing line in one-button driving (Pedals: Throttle Only, Steering: Auto).
+A replacement for the fixed racing line in one-button driving (Steering: Auto).
 The car no longer chases one fixed line and skids when it misses it. A planner works out the fastest
 line for the car, re-plans from wherever the car really is, and steers along that plan. The player
 still only holds or lifts the gas.

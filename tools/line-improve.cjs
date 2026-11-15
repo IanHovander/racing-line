@@ -24,7 +24,7 @@ console.log(
       t.set(q);for(let d=-w;d<=w;d++){const i=((c+d)%N+N)%N;let v=q[i]+amp*0.5*(1+Math.cos(Math.PI*d/w));t[i]=v>lim?lim:v<-lim?-lim:v;}
       const L=lap(t);if(L<best-1e-6){gained+=best-L;best=L;q.set(t);}}
     log.push('pass '+(p+1)+': '+best.toFixed(3)+' s (gained '+gained.toFixed(3)+')');if(gained<0.002)break;}
-  const drive=()=>{opts.pedals=0;opts.steer=0;opts.damage=0;PRACTICE=true;setupRace(false);const c=cars[ctrl];let off=0,sl=0,laps=[],g=0;
+  const drive=()=>{opts.steer=0;opts.damage=0;PRACTICE=true;setupRace(false);const c=cars[ctrl];let off=0,sl=0,laps=[],g=0;
     while(laps.length<3&&g++<120*400){if(state==='race'&&START.done)input.thr=c.v<c.safeV-0.2;const b=c.cross;step(STEP);if(c.cross>=2&&state==='race'){if(Math.abs(c.lat)>HW+0.45)off+=STEP;if(c.slide>0.05)sl+=STEP;}if(c.cross>b&&c.cross>=2)laps.push(c.last);}
     return 'driven '+Math.min(...laps.slice(1)).toFixed(2)+' s (beyond the edge '+(off/2).toFixed(2)+' s/lap, sliding '+(sl/2).toFixed(1)+' s/lap)';};
   const shape=a=>{const ak=i=>Math.abs(DYN.line.kap[(i%N+N)%N]);let r=[];for(let i=0;i<N;i++){if(ak(i)<1/60)continue;let pk=true;for(let d=-25;d<=25;d++)if(ak(i+d)>ak(i))pk=false;if(!pk)continue;const o=-Math.sign(DYN.line.kap[i]);let w=1e9;for(let d=-120;d<0;d++)w=Math.min(w,lim-o*a[((i+d)%N+N)%N]);r.push((cornerAt(i)||'-')+' '+w.toFixed(1));}return r.join('  ');};

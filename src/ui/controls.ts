@@ -9,14 +9,7 @@ import { renderLaneInd } from '../sim/ai';
 import { GEARTOP, autoGear, isManual } from '../sim/car-model';
 import { DYN, dynEligible, lineSave } from '../sim/lines';
 import { syncAllSegs } from './widgets';
-export const PEDALS = ['Throttle Only', 'Brake Only', 'Throttle + Brake', 'Auto Pedals'],
-  STEERS = ['Auto Steering', 'Lane Steering', 'Manual Steering', 'Overtake Steering'];
-export const PED_NOTE = [
-  'Hold the gas; lift off and the car brakes to the safe speed for the next corner.',
-  'The car accelerates by itself; you choose when and how long to brake.',
-  'You control both the gas and the brake.',
-  'The car handles the gas and the brake for you, driving to the limit of the racing line.',
-];
+export const STEERS = ['Auto Steering', 'Lane Steering', 'Manual Steering', 'Overtake Steering'];
 export const STEER_NOTE = [
   'The car follows the racing line and steers around traffic.',
   'Tap left/right to choose the left side, the racing line or the right side.',
@@ -86,13 +79,6 @@ export function shift(d) {
   c.shiftT = 0.12;
   if (typeof sfxShift === 'function') sfxShift(d);
 }
-export function cycleMode() {
-  opts.pedals = (opts.pedals + 1) % 4;
-  store.set('pedals', opts.pedals);
-  showToast(PEDALS[opts.pedals]);
-  updatePads();
-  syncCtrlMenu();
-}
 export function cycleSteer() {
   opts.steer = (opts.steer + 1) % 4;
   store.set('steer', opts.steer);
@@ -101,13 +87,9 @@ export function cycleSteer() {
   syncCtrlMenu();
 }
 export function syncCtrlMenu() {
-  ([...$('sPedals').children] as HTMLElement[]).forEach(b =>
-    b.classList.toggle('sel', +b.dataset.v === opts.pedals),
-  );
   ([...$('sSteer').children] as HTMLElement[]).forEach(b =>
     b.classList.toggle('sel', +b.dataset.v === opts.steer),
   );
-  $('pedNote').textContent = PED_NOTE[opts.pedals];
   $('steerNote').textContent =
     opts.steer === 0 && opts.dynlv && dynEligible()
       ? 'The car follows the racing line of your Line Difficulty. It slows behind moving cars and steers round stopped ones.'
@@ -162,23 +144,19 @@ export function updatePads() {
   const show = !attract && isTouch && GS.state !== 'menu';
   $('bSwap').classList.toggle('hide', mpOn() || GS.PRACTICE || show);
   $('pSwap').classList.toggle('hide', !show || mpOn() || GS.PRACTICE);
-  $('pThr').classList.toggle('hide', !show || opts.pedals === 1 || opts.pedals === 3);
-  $('pBrk').classList.toggle('hide', !show || opts.pedals === 0 || opts.pedals === 3);
-  $('pBrk').classList.toggle('solo', opts.pedals === 1);
-  $('pThr').classList.toggle('big', opts.pedals === 0);
+  $('pThr').classList.toggle('hide', !show);
   $('pL').classList.toggle('hide', !show || opts.steer === 0);
   $('pUp').classList.toggle('hide', !show || opts.gears !== 1);
   $('pDRS').classList.toggle('hide', !show || opts.drs !== 1 || (mpOn() && false));
   $('pDn').classList.toggle('hide', !show || opts.gears !== 1);
   $('pR').classList.toggle('hide', !show || opts.steer === 0);
-  $('bMode').textContent = ['Pedals: Gas', 'Pedals: Brake', 'Pedals: Both', 'Pedals: Auto'][opts.pedals];
   $('bSteer').textContent = ['Steer: Auto', 'Steer: Lanes', 'Steer: Manual', 'Steer: Overtake'][opts.steer];
   $('laneInd').classList.toggle('hide', (opts.steer !== 1 && opts.steer !== 3) || attract);
   renderLaneInd();
   layoutPads();
 }
 const vis = (id: string) => !$(id).classList.contains('hide');
-/** touch layout: the speed panel sits left of the pedal pads (bottom-aligned) and Swap sits above the main pedal */
+/** touch layout: the speed panel sits left of the GAS pad (bottom-aligned) and Swap sits above it */
 export function layoutPads() {
   const spd = $('spd'),
     sw = $('pSwap');
@@ -189,9 +167,9 @@ export function layoutPads() {
   const pz = $('bPause');
   pz.style.bottom = '';
   if (!isTouch || GS.state === 'menu') return;
-  // throttle only, no steering pads: everything on the right thumb. GAS bottom right, Swap to its left at the
+  // no steering pads: everything on the right thumb. GAS bottom right, Swap to its left at the
   // same height, the speed panel above them centred on the screen, notifications above that.
-  if (vis('pThr') && !['pBrk', 'pL', 'pR', 'pUp', 'pDn', 'pDRS'].some(vis)) {
+  if (vis('pThr') && !['pL', 'pR', 'pUp', 'pDn', 'pDRS'].some(vis)) {
     const g = $('pThr').getBoundingClientRect(),
       W = innerWidth,
       H = innerHeight;
@@ -223,7 +201,7 @@ export function layoutPads() {
     document.body.style.setProperty('--notesB', Math.round(top + 12) + 'px');
     return;
   }
-  const right = ['pThr', 'pBrk'].filter(vis).map(id => $(id).getBoundingClientRect());
+  const right = ['pThr'].filter(vis).map(id => $(id).getBoundingClientRect());
   const W = innerWidth,
     H = innerHeight;
   if (right.length) {
@@ -236,7 +214,7 @@ export function layoutPads() {
     const main = right.reduce((a, r) => (r.right > a.right ? r : a));
     const bottom = H - Math.max(...right.map(r => r.bottom));
     if (H > W) {
-      // portrait: fill the space between any left pads and the pedals
+      // portrait: fill the space between any left pads and GAS
       let w = padL - 10 - leftEdge,
         b = bottom,
         l = leftEdge;
@@ -259,7 +237,7 @@ export function layoutPads() {
       spd.style.transform = 'none';
       spd.style.bottom = bottom + 'px';
     }
-    // Swap: centred above the main pedal, and above the gear-up / DRS pads if they are there
+    // Swap: centred above GAS, and above the gear-up / DRS pads if they are there
     if (vis('pSwap')) {
       const sr = sw.getBoundingClientRect();
       let top = padTop;

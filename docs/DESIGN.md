@@ -7,8 +7,8 @@ Playable build: https://matthewtorgerson.github.io/racing-line/ (GitHub Pages, b
 ## What's in the game
 
 - **View**: helicopter chase cam (rotates with the car, looks ahead with speed, and follows the car's height) or fixed isometric; 2.5D projection with extruded cars, trees, grandstands, garages and buildings.
-- **Controls**: two independent settings, in the menu and as in-race buttons (keys M and N).
-  - **Pedals** (`opts.pedals`): Throttle only (lift and the car auto-brakes to the safe speed), Brake only (the car accelerates by itself; only the brake keys brake), Throttle + Brake, and Auto (v14.7, `opts.pedals=3`: the car works both pedals itself to the safe speed for the steering mode, like the AI; on touch the GAS and BRAKE buttons are hidden). All 16 pedal/steering combinations are tested.
+- **Controls**: you work the throttle only, plus a Steering setting in the menu.
+  - **Throttle**: hold the gas (Up / W / Space, or the GAS pad on touch); lift and the car brakes itself to the safe speed for the next corner. There is no brake input. (Until Nov 2026 a Pedals setting also offered Brake only, Throttle + Brake and Auto.)
   - **Steering** (`opts.steer`):
     - 0 Auto: follows the racing line and steers around traffic (passes on its own).
     - 1 Lanes: tap left/right to pick left side / racing line / right side (`pursuitLane()`, `laneProfile()`); HUD LEFT / LINE / RIGHT and a yellow dashed target line.
@@ -99,7 +99,7 @@ Playable build: https://matthewtorgerson.github.io/racing-line/ (GitHub Pages, b
 - **HUD** (v14 cleanup): one panel top left.
   - Contents: LAP n/N with the race time (monospace), then last and best lap, the damage bar when on, then the standings (position, team logo, first three letters of the surname, monospace gap). Your car's row is yellow and your teammate's light blue. There's no separate position display or flags.
   - In-race buttons: only Swap car and pause.
-  - Pedals, steering, camera, racing line, sound effects and music are set in the main menu or in the pause menu (v14.1; both stay in sync via `SEG_SYNC`). The M/N/V/L keys are gone.
+  - Steering, camera, racing line, sound effects and music are set in the main menu or in the pause menu (v14.1; both stay in sync via `SEG_SYNC`). The M/N/V/L keys are gone.
   - Narrower panel (v14.5, ~116 px on a phone): the race time sits under LAP n/N, Last and Best are on two short monospace lines, and the columns are tighter.
 - **Buildings in the way sink** (v14.1, reworked v14.6): a tall building sinks if its whole footprint is nearer the camera than any piece of road on screen it covers. The road's centre line and both barriers count, sampled every 4 m around the whole lap wherever it's in view, so you can always see all the road in shot. Buildings beyond the road stay full height. It sinks smoothly to ~7% of its height (`b.sink`, about 0.2 s), replacing the old 16% fade; the chase cam no longer shrinks all buildings, and window rows are batched into one fill per building.
 - Night performance (v14.1): the light pools use two pre-rendered sprites (`POOLS`) instead of a new radial gradient per pool per frame, and the dark layer renders at half resolution.
@@ -143,7 +143,7 @@ Playable build: https://matthewtorgerson.github.io/racing-line/ (GitHub Pages, b
 - **Camera**: isometric is the default, and every existing player is switched to it once (`camv2`). The labels are now "Isometric" / "Chase", and the menu subtitle reads "Formula racing from above".
 - **HUD**:
   - Driver codes in the standings are monospace.
-  - The speed panel has a red brake bar on the left and a green throttle bar on the right, filled by the current pedal values (`c.thr`, `c.brk`).
+  - The speed panel has a red brake bar on the left and a green throttle bar on the right, filled by the current pedal values (`c.thr`, `c.brk`; the brake is the car's own auto-braking).
 - **Finish**:
   - Fireworks: rockets and bursts with pops on a top layer (`#fwc`) from the moment your car finishes, for ~14 s, above the results card.
   - Flag marshal: an orange-suited figure on the pit wall at the line waves a chequered flag once the leader starts the last lap.
@@ -190,7 +190,7 @@ Playable build: https://matthewtorgerson.github.io/racing-line/ (GitHub Pages, b
   - Zones: the 2–3 longest straights (curvature < 1/500 over ±8 samples, at least 280 m). Each zone starts 30 m into its straight and ends 50 m before the braking point, with a detection point 120 m before the straight starts.
   - Zone lengths: Azteca 798/520 m, Lone Star 622/250, Paulista 396/384/200, Monte Porto 218, Desert Lights 470/236, Sakura 572/408/206, Ardennes 470/246, Marina 374/220.
   - Rule: crossing the detection point less than 1.0 s behind the car ahead (gap ÷ your speed) enables DRS for that zone. It's not allowed on the first lap, under yellow or in the rain. Braking or leaving the zone closes it.
-  - Effect: +5.5% top speed and +6% pull while open. The AI and the throttle/auto-pedal assists may go above the usual speed cap on the straight.
+  - Effect: +5.5% top speed and +6% pull while open. The AI and the throttle assist may go above the usual speed cap on the straight.
   - Button mode is for your car (F or Enter; a DRS pad on touch above GAS, glowing green when ready). Automatic opens it for you when you're on the throttle. The AI always uses Automatic.
   - Display: a "DRS enabled" toast, and a DRS pill in the speed panel (outline, green flashing when ready, solid blue when open). The rear wing opens visibly (a raised blue flap). Each zone start has a blue "DRS" board and the detection point a blue dashed line.
   - Test: speeds up to ~325 km/h with DRS open, and contacts about the same as with DRS off.
@@ -220,15 +220,14 @@ Playable build: https://matthewtorgerson.github.io/racing-line/ (GitHub Pages, b
 
 - **Circuit step:** posters only (no name label, no button frame; selected poster lifts with a white outline, others dimmed). Below: circuit name + place (`CIRCUIT_PLACE`), description, then stats line (km · corners · DRS zones · elevation · night/street · your best), then the angled map + profile. Poster track maps are bigger (scale .92, dark under-stroke).
 - **No layout shift:** team buttons fixed 84 px with 2-line clamp; team tagline and driver taglines have fixed min-heights; settings notes have min-heights. Driver-traits explainer removed.
-- **Settings regrouped** into sections (main menu): Race (Opponents, Laps, Weather) · Driving (Pedals, Steering, Gearbox) · Rules (Damage, Slipstream, DRS, Track limits, Yellow flags) · Display & sound (Camera, Racing line, Turn numbers, Sound, Music). Pause menu uses the same grouping.
+- **Settings regrouped** into sections (main menu): Race (Opponents, Laps, Weather) · Driving (Steering, Gearbox) · Rules (Damage, Slipstream, DRS, Track limits, Yellow flags) · Display & sound (Camera, Racing line, Turn numbers, Sound, Music). Pause menu uses the same grouping.
 - **Turn numbers toggle** (`opts.turns`, default shown): hides the on-track corner boards.
 - **Menu music:** audio is started on page load where the browser allows; otherwise a small "Tap anywhere to start the music" hint shows and the first touch/click/key anywhere starts it (browsers block sound before the first interaction).
 - **Standings colours:** your row white with black text; teammate light grey (#c4c9d1).
 - **Race-control banner** moved low: just above the speed strip (desktop bottom 128 px; touch above the strip between the swap and DRS pads; landscape just above the strip).
 - **Swap:** big round SWAP pad on touch (left, above the gear/steer pads in portrait; bottom centre-right in landscape), top Swap button enlarged on desktop and hidden on touch.
 - **Crowds:** stands now draw rows of seats facing the track with people seated in rows (muted colours), replacing random coloured confetti on the roof.
-- **Lock-ups:** only when you control the brake (Brake-only or Throttle+Brake pedals). Braking hard while still turning (brake demand + cornering load > 1.32 × grip) locks the fronts: braking falls to 78% of grip and steering to 42% (runs wide), white tyre smoke from the fronts, skid marks, a tyre squeal and a "LOCK-UP" tag above the speed strip.
-- **Defaults:** Pedals = Throttle only (you hold the throttle, the car brakes itself), Steering = Auto, Gearbox = Automatic, DRS = Automatic. Applied once to existing players too (`defv4`); later choices are kept.
+- **Defaults:** Steering = Auto, Gearbox = Automatic, DRS = Automatic. Applied once to existing players too (`defv4`); later choices are kept.
 - **M. Vance is Canadian** (was Irish); new `CA` flag (red-white-red with a drawn maple leaf), used in the menu, standings and pit-lane flag row.
 - **Papaya Racing logo** is now the two-tone chevron P (orange bowl, blue leg, dark counter; option g of https://claude.ai/artifact/4WGiKPFuqfU33EwQ7UMF7b). Other teams unchanged.
 - Option pages for pending choices: team logos https://claude.ai/artifact/2voBPsJDVV3VAkeSQxRNm9 ; car markers + defend notifications https://claude.ai/artifact/5T4gSnxxS7UPRTN4oLxcR3
@@ -245,7 +244,7 @@ Playable build: https://matthewtorgerson.github.io/racing-line/ (GitHub Pages, b
 
 - Host goes straight into a lobby; Join opens the code box. Everything is chosen inside the lobby, in order: players (name), team, circuit (poster grid), race settings, then each player's own controls.
 - Up to two humans per team (teammates by join order, driver 1 then 2); a third player is moved to a team with a free seat. Empty seats are AI.
-- Host sets the circuit and race settings (Opponents, Laps, Weather, Damage, Slipstream, DRS on/off, Track limits, Yellow flags); guests see them read-only. Pedals, Steering, Gearbox and DRS Button/Automatic are per player.
+- Host sets the circuit and race settings (Opponents, Laps, Weather, Damage, Slipstream, DRS on/off, Track limits, Yellow flags); guests see them read-only. Steering, Gearbox and DRS Button/Automatic are per player.
 - Smoother remote cars: 20 Hz updates with sender timestamps, arc prediction from turn rate, out-of-order packets dropped, blend instead of jumps.
 - Contacts with a remote car only push the local car, more softly, and cause no damage — the remote position is a little old, so it shouldn't act like a wall.
 - Shared race clock: the host sends its clock; guests slew theirs to match, so countdown, lap and finish times agree on every screen.
@@ -285,7 +284,7 @@ Playable build: https://matthewtorgerson.github.io/racing-line/ (GitHub Pages, b
 ## v17.2 — timing-based starts (`src/sim/start.ts`)
 
 - Cars stay on the grid after lights out until their driver reacts.
-- **Your launch:** press the throttle after the lights go out. In pedal modes without a GAS pad (Brake only, Auto), any tap or key launches the car. The text under the lights says which ("Hit the GAS / Tap when the lights go out").
+- **Your launch:** press the throttle after the lights go out ("Hit the GAS when the lights go out" under the lights).
 - **Reaction time sets the launch**, shown as a coaching message:
   - under 0.2 s: "Perfect start", +15% drive for 2 s
   - under 0.35 s: "Good start", +7% for 2 s
@@ -333,12 +332,12 @@ Playable build: https://matthewtorgerson.github.io/racing-line/ (GitHub Pages, b
 
 ## v17.6 — one notification style
 
-- Every in-race message uses the coaching pill (dark, rounded, coloured dot, optional second line) in one place: top centre on desktop, above the pedals on touch screens (centred right of the Swap button), top centre in the menus. `notify(text, col, {sub, ttl, key, strong})` in `ui/notify.ts`; `showToast` and `rcBanner` are thin wrappers. Up to 3 stack, newest nearest the anchor; a note with the same `key` replaces the older one (`rc`, `lap`, `coach`).
+- Every in-race message uses the coaching pill (dark, rounded, coloured dot, optional second line) in one place: top centre on desktop, above the GAS pad on touch screens (centred right of the Swap button), top centre in the menus. `notify(text, col, {sub, ttl, key, strong})` in `ui/notify.ts`; `showToast` and `rcBanner` are thin wrappers. Up to 3 stack, newest nearest the anchor; a note with the same `key` replaces the older one (`rc`, `lap`, `coach`).
 - Dot colours (`NCOL`): purple best/fastest, green good, yellow slow, red off track / out, orange lost place, white race-control warning, orange (with outline) penalty, grey info.
 - Lap complete is now one line: laps done and the gap to the leader ("Lap 2 of 5 · 3.4 s behind Vance", or "Leading by 1.8 s"); the dot colour still grades the lap. The big lap card, the old centre toast and the race-control banner are gone.
 - Timing panel: no Last / Best lines. Time penalties are a yellow "+5" / "+10" badge floating just right of the panel on that driver's row. Your teammate's row is outlined instead of filled grey.
 - Race-control notes: a black-and-white track-limits flag icon for track-limits warnings, a warning-triangle icon (and orange outline) for time penalties.
-- Touch layout (`layoutPads()` in `ui/controls.ts`, run by `updatePads` and on resize): the speed panel sits left of the pedal pads, bottom-aligned (compact: no pedal bars, when narrower than 250 px; above the steering pads when those take the left side); Swap sits centred above the main pedal (above the gear-up / DRS pads if present). The big throttle-only GAS pad is `min(40vw, 190px)` wide.
+- Touch layout (`layoutPads()` in `ui/controls.ts`, run by `updatePads` and on resize): the speed panel sits left of the GAS pad, bottom-aligned (compact: no pedal bars, when narrower than 250 px; above the steering pads when those take the left side); Swap sits centred above GAS (above the gear-up / DRS pads if present). The big GAS pad is `min(40vw, 190px)` wide.
 - Timing panel: no race clock (only "Get ready…" before the start).
 - Timing panel gaps are relative to your car: −x.x for cars ahead, +x.x behind, ±nL when lapped; your own row has no gap.
 - Fonts: **Geist** (sans, SIL OFL, `public/fonts/Geist-Variable.woff2`, CSS `--sans`) for all text, Geist Mono (`--mono`) for numbers; canvas labels use Geist too.
@@ -535,6 +534,7 @@ Reported from two phones: opening the connection "is very inconsistent and often
 
 ## Change log
 
+- Throttle only (Nov 2026): the Pedals setting is gone (main menu, pause menu, online lobby and the in-race button), and with it Brake only, Throttle + Brake and Auto pedals, the BRAKE pad, the brake keys (Down / S) and the "tap to launch" start. Lock-ups went too: they only happened when you worked the brake yourself.
 - Tyre wear removed (Nov 2026): no Tyre Wear rule (single player or online), no tyre bar in the HUD, no Tyre Life bar on the team cards and no tyre-care driver trait. Grip now changes only with damage, dirt and weather.
 - v2–v12: see earlier entries: runoff/AI fixes, gravel, audio, slipstream, COTA/Interlagos, Monaco, tyres/damage/yellows, multiplayer, rain, Bahrain night, western theme, contact reduction, team stats/logos/flags, Lane steering, elevation, painted run-off, pits and flags, Pedals/Steering split, big painted fields, Overtake steering.
 - v12.1 (hotfix): grid cars are drawn at the right height before lights out on elevated grids.

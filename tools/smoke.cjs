@@ -5,7 +5,7 @@ const { load } = require('./headless.cjs');
 const H = load({ seed: 3 });
 const step = (n, thr) => H.run(`for(let i=0;i<${n};i++){input.thr=${thr};step(STEP);}`);
 H.run(
-  'opts.pedals=0;opts.steer=0;opts.team=0;opts.dynlv=2;opts.line=1;opts.rain=0;WX.rain=0;trackIdx=1;buildTrack(TRACKS[1]);dynPrepare(true);PRACTICE=false;setupRace(false);',
+  'opts.steer=0;opts.team=0;opts.dynlv=2;opts.line=1;opts.rain=0;WX.rain=0;trackIdx=1;buildTrack(TRACKS[1]);dynPrepare(true);PRACTICE=false;setupRace(false);',
 );
 console.log(
   'eligible',

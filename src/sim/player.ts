@@ -103,34 +103,19 @@ export function controlPlayer(c, dt) {
   }
   if (c.drs && !dyn) safe *= 1.06; // the planner works from the real speed of the car, so it needs no DRS allowance
   c.safeV = safe;
-  // pedals
-  if (opts.pedals === 0) {
-    thr = input.thr ? 1 : 0;
-    if (!thr && c.v > safe + 0.3) brk = 1;
-    else if (!thr && dyn && DYN.hold && c.v > 8 && c.v < safe - 0.6) {
-      // Novice line: lifting holds the present speed instead of coasting down, so the only timing that matters is lifting before the braking point
-      const st = c.st || NEUTRAL;
-      thr = clamp(
-        0.06 +
-          (9.81 * Math.max(0, GS.SL[c.idx] || 0)) /
-            Math.max(1, 13 * st.acc * (1 - (c.v / (VMAX * st.top)) ** 2)),
-        0.06,
-        0.7,
-      );
-    }
-  } else if (opts.pedals === 1) {
-    brk = input.brk ? 1 : 0;
-    thr = brk ? 0 : 1;
-  } else if (opts.pedals === 3) {
-    const vt = safe;
-    if (c.v < vt - 0.4) thr = 1;
-    else if (c.v > vt + 0.8) brk = clamp((c.v - vt) / 5, 0.2, 1);
-    else thr = 0.35;
-  } // auto pedals: drive to the safe speed
-  else {
-    thr = input.thr ? 1 : 0;
-    brk = input.brk ? 1 : 0;
-    if (brk) thr = 0;
+  // throttle: you hold the gas; lift off and the car brakes itself to the safe speed
+  thr = input.thr ? 1 : 0;
+  if (!thr && c.v > safe + 0.3) brk = 1;
+  else if (!thr && dyn && DYN.hold && c.v > 8 && c.v < safe - 0.6) {
+    // Novice line: lifting holds the present speed instead of coasting down, so the only timing that matters is lifting before the braking point
+    const st = c.st || NEUTRAL;
+    thr = clamp(
+      0.06 +
+        (9.81 * Math.max(0, GS.SL[c.idx] || 0)) /
+          Math.max(1, 13 * st.acc * (1 - (c.v / (VMAX * st.top)) ** 2)),
+      0.06,
+      0.7,
+    );
   }
   // contact assist while the car is steering for you
   if (opts.steer !== 2) {

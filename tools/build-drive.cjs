@@ -13,7 +13,7 @@ H.ctx.CF = JSON.parse(arg('cfg', '{}'));
 H.ctx.ST = process.argv.includes('--stored');
 const t0 = Date.now();
 console.log(
-  H.run(`(()=>{const [T,tm,lv,rn]=A;opts.team=tm;opts.dynlv=lv;opts.rain=rn;WX.rain=rn;opts.pedals=0;opts.steer=0;opts.damage=0;trackIdx=T;buildTrack(TRACKS[T]);dynPrepare(true);
+  H.run(`(()=>{const [T,tm,lv,rn]=A;opts.team=tm;opts.dynlv=lv;opts.rain=rn;WX.rain=rn;opts.steer=0;opts.damage=0;trackIdx=T;buildTrack(TRACKS[T]);dynPrepare(true);
   let model=DYN.line.lapTime;
   if(!ST){globalThis.DYNCFG=CF;const D=dynMake(tm,lv);globalThis.DYNCFG=undefined;D.build(Infinity);model=D.line.lapTime;DYN.setLine(Float64Array.from(D.line.lat));}
   PRACTICE=true;setupRace(false);const c=cars[ctrl];let off=0,sl=0,laps=[],g=0;

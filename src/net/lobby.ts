@@ -92,16 +92,6 @@ export const LB_RULES: [string, string, [number, string][]][] = [
 ];
 export const LB_CTRL: [string, string, [number, string][]][] = [
   [
-    'pedals',
-    'Pedals',
-    [
-      [0, 'Throttle Only'],
-      [1, 'Brake Only'],
-      [2, 'Throttle + Brake'],
-      [3, 'Auto'],
-    ],
-  ],
-  [
     'steer',
     'Steering',
     [

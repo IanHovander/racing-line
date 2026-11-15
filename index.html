@@ -39,7 +39,6 @@
     </div>
     <div id="btns" class="hide">
       <button id="bSwap">⇄ Swap Car</button>
-      <button id="bMode">Pedals</button>
       <button id="bSteer">Steer</button>
       <button id="bLine">Line</button>
       <button id="bSnd">🔊</button>
@@ -54,8 +53,7 @@
     <button id="bAudio" class="hide">🔈 Tap to enable sound</button>
     <div id="pL" class="pad hide" data-k="left">◀</div>
     <div id="pR" class="pad hide" data-k="right">▶</div>
-    <div id="pBrk" class="pad hide" data-k="brk">BRAKE</div>
-    <div id="pThr" class="pad hide" data-k="thr">GAS</div>
+    <div id="pThr" class="pad big hide" data-k="thr">GAS</div>
     <div id="pUp" class="pad hide" data-k="up">▲</div>
     <div id="pDRS" class="pad hide" data-k="drs">DRS</div>
     <div id="pDn" class="pad hide" data-k="dn">▼</div>
@@ -327,14 +325,6 @@
             <div class="sh">Driving</div>
             <div class="rules">
               <div>
-                <span>Pedals</span>
-                <div class="seg" id="sPedals">
-                  <button data-v="0">Throttle Only</button><button data-v="1">Brake Only</button
-                  ><button data-v="2">Throttle + Brake</button><button data-v="3">Auto</button>
-                </div>
-              </div>
-              <div class="note" id="pedNote"></div>
-              <div>
                 <span>Steering</span>
                 <div class="seg" id="sSteer">
                   <button data-v="0">Auto</button><button data-v="1">Lanes</button
@@ -448,13 +438,6 @@
         <div class="sect">
           <div class="sh">Driving</div>
           <div class="rules">
-            <div>
-              <span>Pedals</span>
-              <div class="seg" id="pPedals">
-                <button data-v="0">Throttle Only</button><button data-v="1">Brake Only</button
-                ><button data-v="2">Throttle + Brake</button><button data-v="3">Auto</button>
-              </div>
-            </div>
             <div>
               <span>Steering</span>
               <div class="seg" id="pSteer">

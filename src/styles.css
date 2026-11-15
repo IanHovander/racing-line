@@ -267,7 +267,6 @@ body #pThr.big {
 #board div.mate .pos {
   opacity: 1;
 }
-#bMode,
 #bSteer,
 #bLine,
 #bSnd,
@@ -674,15 +673,6 @@ body #pThr.big {
   font-size: 15px !important;
   padding: 10px 16px !important;
   min-height: 44px;
-}
-#pBrk {
-  right: 128px;
-  background: rgba(200, 40, 40, 0.5);
-}
-#pBrk.solo {
-  right: 16px;
-  width: 100px;
-  height: 100px;
 }
 #pL {
   left: 16px;
@@ -1139,9 +1129,6 @@ tr.me td {
     right: 10px;
     width: 82px;
     height: 82px;
-  }
-  #pBrk {
-    right: 98px;
   }
   #pL {
     left: 10px;
@@ -2043,7 +2030,7 @@ body.touch #notes:not(.menu) {
   width: 100%;
   height: 100%;
 }
-/* narrow speed panel beside the pedals (portrait phones): no pedal bars, smaller digits */
+/* narrow speed panel beside the GAS pad (portrait phones): no pedal bars, smaller digits */
 #spd.compact {
   padding: 6px 8px 7px;
 }

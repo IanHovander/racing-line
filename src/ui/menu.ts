@@ -186,9 +186,7 @@ export function init(): void {
   initCircuitPicker();
   $('sTeam').addEventListener('click', () => setTimeout(showTeamStats, 0));
   showTeamStats();
-  segInit('sPedals', 'pedals', Number);
   segInit('sSteer', 'steer', Number);
-  $('sPedals').addEventListener('click', () => setTimeout(syncCtrlMenu, 0));
   $('sSteer').addEventListener('click', () => setTimeout(syncCtrlMenu, 0));
   syncCtrlMenu();
   segInit('sLaps', 'laps', Number);
@@ -214,7 +212,6 @@ export function init(): void {
     ['pTow', 'tow', Number],
     ['pDRSs', 'drs', Number],
     ['pGears', 'gears', Number],
-    ['pPedals', 'pedals', Number],
     ['pSteer', 'steer', Number],
     ['pLine', 'line', Number],
     ['pDyn', 'dynlv', Number],

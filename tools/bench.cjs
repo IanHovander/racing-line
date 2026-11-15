@@ -3,7 +3,7 @@
 //                       [--race] [--diff 1] [--seed 1] [--team 0] [--track 1] [--cfg '{...}'] [--json]
 // --level: 0 = the classic fixed line, 1..4 = the dynamic line at Novice / Intermediate / Cautious Expert / Perfect Expert (default 2).
 //          (--mode classic is the same as --level 0.)
-// The bot only ever presses/releases the gas (Pedals: Throttle only, Steer: Auto), like a player on Space.
+// The bot only ever presses/releases the gas (Steer: Auto), like a player on Space.
 //   perfect  : holds gas while below the car's current safe speed, lifts otherwise
 //   lateX    : as perfect, but each lift happens X seconds late
 //   early    : lifts as soon as it is within 7% of the safe speed
@@ -44,7 +44,7 @@ function bench(o) {
   const H = load({ seed: +o.seed });
   H.ctx.__o = o;
   if (o.cfg) H.ctx.DYNCFG = typeof o.cfg === 'string' ? JSON.parse(o.cfg) : o.cfg;
-  H.run(`opts.pedals=0;opts.steer=0;opts.team=__o.team|0;opts.diff=__o.diff|0;opts.laps=__o.laps|0;opts.rain=__o.rain|0;WX.rain=opts.rain;opts.damage=0;opts.gears=0;
+  H.run(`opts.steer=0;opts.team=__o.team|0;opts.diff=__o.diff|0;opts.laps=__o.laps|0;opts.rain=__o.rain|0;WX.rain=opts.rain;opts.damage=0;opts.gears=0;
     opts.dynlv=__o.level|0;
     trackIdx=__o.track|0;buildTrack(TRACKS[trackIdx]);
     dynPrepare(true);   // build the planner's line synchronously

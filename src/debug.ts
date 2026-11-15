@@ -218,8 +218,6 @@ export function installDebug(): void {
     'musStep',
     'musNext',
     'cheerT',
-    'sqg',
-    'sqf',
     'NICK',
   ].forEach((k: string) =>
     def(
