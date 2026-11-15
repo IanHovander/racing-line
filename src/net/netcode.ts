@@ -113,6 +113,7 @@ export function startMpRace(grid, cfg, hostId) {
     opts.rain = cfg.rain ? 1 : 0;
     if (cfg.tow !== undefined) opts.tow = clamp(+cfg.tow || 0, 0, 5);
     opts.drsPow = clamp(+cfg.drsPow || 1, 1, 5); // (a host without the setting: normal)
+    opts.cgrip = cfg.cgrip === undefined ? 0 : clamp(+cfg.cgrip || 0, 0, 5); // (a host without it races without it)
     if (cfg.limits !== undefined) opts.limits = [0, 2, 3].includes(cfg.limits) ? cfg.limits : 0;
     opts.drs = cfg.drsOn === 0 ? 0 : store.get('drs', 2) || 2;
     WX.rain = opts.rain;
