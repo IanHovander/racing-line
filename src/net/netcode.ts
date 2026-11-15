@@ -191,9 +191,8 @@ export function netSet(c, a) {
   if (a.length < 11 || !a.every(v => typeof v === 'number' && isFinite(v))) return;
   // clock offset between sender and us: track the smallest (now - sent) seen, drifting slowly so a clock jump recovers
   let ts = a.length > 11 ? a[11] : null;
-  const nowMs = Date.now() % 1e9;
   if (ts !== null) {
-    const o = nowMs - ts;
+    const o = nowMs() - ts;
     c.netOff = c.netOff === undefined || o < c.netOff ? o : c.netOff + (o - c.netOff) * 0.02;
   }
   const prev = c.net;
