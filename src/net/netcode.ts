@@ -107,7 +107,6 @@ export function startMpRace(grid, cfg, hostId) {
     }
     GS.PRACTICE = !!cfg.practice;
     opts.laps = clamp(cfg.laps | 0, 1, 20);
-    opts.tyres = cfg.tyres ? 1 : 0;
     opts.damage = cfg.damage ? 1 : 0;
     opts.yellow = [0, 3, 10, 30].includes(cfg.yellow) ? cfg.yellow : 10;
     opts.diff = clamp(cfg.diff | 0, 0, 2);

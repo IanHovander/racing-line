@@ -25,30 +25,30 @@ Playable build: https://matthewtorgerson.github.io/racing-line/ (GitHub Pages, b
   - Measured with an Overtake-mode bot over four circuits: committed passes succeed ~77% on Easy, ~65% on Normal and ~60% on Hard. With the straight-only rule, contacts in auto-steered races are back at the no-defence baseline.
 - **Teams**:
 
-  | Team             | Logo                              | Drivers (nationality)                       | Car character                                         | top  | acc   | brk  | grip  | tyre wear | damage taken |
-  | ---------------- | --------------------------------- | ------------------------------------------- | ----------------------------------------------------- | ---- | ----- | ---- | ----- | --------- | ------------ |
-  | Scuderia Rosso   | red shield, yellow lightning bolt | M. Vance (Canada), L. Moreau (France)       | Power: fastest on the straights, hard on its tyres    | 1.05 | 1.02  | 1.0  | 0.984 | 1.12      | 1.0          |
-  | Argent GP        | silver hexagon, teal chevrons     | J. Keller (Germany), T. Okafor (Nigeria)    | All-rounder: no weak spot, toughest chassis           | 1.01 | 1.01  | 1.05 | 1.006 | 1.0       | 0.85         |
-  | Papaya Racing    | orange disc, blue swoosh          | E. Lindqvist (Sweden), K. Sato (Japan)      | Downforce: best in the corners, slow on the straights | 0.98 | 1.0   | 1.0  | 1.026 | 1.05      | 1.1          |
-  | Verde Motorsport | green leaf, lime V                | R. Duarte (Brazil), S. Visser (Netherlands) | Late brakers: best stopping power, kindest to tyres   | 1.01 | 1.0   | 1.36 | 1.0   | 0.75      | 1.0          |
-  | Azure F1         | blue diamond, pink star           | P. Novak (Czechia), D. Ferreira (Portugal)  | Traction: rockets out of slow corners                 | 0.99 | 1.055 | 1.0  | 0.997 | 1.0       | 1.15         |
+  | Team             | Logo                              | Drivers (nationality)                       | Car character                                         | top  | acc   | brk  | grip  | damage taken |
+  | ---------------- | --------------------------------- | ------------------------------------------- | ----------------------------------------------------- | ---- | ----- | ---- | ----- | ------------ |
+  | Scuderia Rosso   | red shield, yellow lightning bolt | M. Vance (Canada), L. Moreau (France)       | Power: fastest on the straights, edgy in the corners  | 1.05 | 1.02  | 1.0  | 0.984 | 1.0          |
+  | Argent GP        | silver hexagon, teal chevrons     | J. Keller (Germany), T. Okafor (Nigeria)    | All-rounder: no weak spot, toughest chassis           | 1.01 | 1.01  | 1.05 | 1.006 | 0.85         |
+  | Papaya Racing    | orange disc, blue swoosh          | E. Lindqvist (Sweden), K. Sato (Japan)      | Downforce: best in the corners, slow on the straights | 0.98 | 1.0   | 1.0  | 1.026 | 1.1          |
+  | Verde Motorsport | green leaf, lime V                | R. Duarte (Brazil), S. Visser (Netherlands) | Late brakers: best stopping power on the grid         | 1.01 | 1.0   | 1.36 | 1.0   | 1.0          |
+  | Azure F1         | blue diamond, pink star           | P. Novak (Czechia), D. Ferreira (Portugal)  | Traction: rockets out of slow corners                 | 0.99 | 1.055 | 1.0  | 0.997 | 1.15         |
   - Multipliers in `TEAM_STATS`; each team has its own speed profile `PROF[team]`. Balanced from measured lap-time sensitivities: all five cars lap within ~0.15 s.
   - Original inline-SVG logos (`LOGOS`) and driver flags (`FLAGS`).
 
-- **Driver traits** (v14.8, `DRIVER_STATS[team][driver]`, helper `DRV(c)`). Each driver has six traits from 0 to 1 (0.5 = average) that change how the AI races that car. They don't change how the car drives under your control, except tyre care, which always applies.
+- **Driver traits** (v14.8, `DRIVER_STATS[team][driver]`, helper `DRV(c)`). Each driver has five traits from 0 to 1 (0.5 = average) that change how the AI races that car. They don't change how the car drives under your control.
 
-  | Driver       | Pace | Aggression | Defending | Consistency | Wet | Tyre care | Summary                              |
-  | ------------ | ---- | ---------- | --------- | ----------- | --- | --------- | ------------------------------------ |
-  | M. Vance     | .80  | .75        | .60       | .55         | .60 | .40       | Fast and fearless, hard on tyres     |
-  | L. Moreau    | .65  | .50        | .70       | .75         | .50 | .60       | Steady team player                   |
-  | J. Keller    | .80  | .45        | .65       | .90         | .70 | .70       | Metronome — rarely makes a mistake   |
-  | T. Okafor    | .70  | .70        | .55       | .60         | .80 | .50       | Bold overtaker, great in the rain    |
-  | E. Lindqvist | .75  | .35        | .50       | .80         | .90 | .65       | Clean and calm, rain master          |
-  | K. Sato      | .70  | .60        | .80       | .70         | .55 | .75       | Tough to pass, kind to tyres         |
-  | R. Duarte    | .75  | .85        | .70       | .50         | .85 | .45       | All-out attacker, thrives in the wet |
-  | S. Visser    | .70  | .65        | .90       | .65         | .60 | .55       | The wall — defends everything        |
-  | P. Novak     | .60  | .40        | .45       | .85         | .50 | .85       | Tyre whisperer, long-run specialist  |
-  | D. Ferreira  | .65  | .80        | .55       | .45         | .65 | .50       | Wild card — brilliant or in the wall |
+  | Driver       | Pace | Aggression | Defending | Consistency | Wet | Summary                              |
+  | ------------ | ---- | ---------- | --------- | ----------- | --- | ------------------------------------ |
+  | M. Vance     | .80  | .75        | .60       | .55         | .60 | Fast and fearless, a little ragged   |
+  | L. Moreau    | .65  | .50        | .70       | .75         | .50 | Steady team player                   |
+  | J. Keller    | .80  | .45        | .65       | .90         | .70 | Metronome — rarely makes a mistake   |
+  | T. Okafor    | .70  | .70        | .55       | .60         | .80 | Bold overtaker, great in the rain    |
+  | E. Lindqvist | .75  | .35        | .50       | .80         | .90 | Clean and calm, rain master          |
+  | K. Sato      | .70  | .60        | .80       | .70         | .55 | Tough to pass, never rattled         |
+  | R. Duarte    | .75  | .85        | .70       | .50         | .85 | All-out attacker, thrives in the wet |
+  | S. Visser    | .70  | .65        | .90       | .65         | .60 | The wall — defends everything        |
+  | P. Novak     | .60  | .40        | .45       | .85         | .50 | Smooth and steady, lap after lap     |
+  | D. Ferreira  | .65  | .80        | .55       | .45         | .65 | Wild card — brilliant or in the wall |
 
   Effects:
   - Pace: ±1.2% AI speed.
@@ -56,8 +56,7 @@ Playable build: https://matthewtorgerson.github.io/racing-line/ (GitHub Pages, b
   - Consistency: a speed wobble of up to ±2% × (1 − consistency), re-rolled every 1.5–3.5 s. There's also an occasional late-braking moment (+3.5 m/s for 0.45 s) at a rate that grows with (1 − consistency)².
   - Aggression: looks for passes earlier (look-ahead 20 + 12×aggr m), takes gaps up to 0.25 m tighter, and follows up to 1.5 m closer before backing off.
   - Defending: scales the difficulty's defend chance by 0.4 + 1.2×defend and the cover speed by 0.7 + 0.6×defend.
-  - Tyre care: wear × (1.2 − 0.4×tyre).
-  - In the menu, the team panel shows both drivers with flag, summary and six bars.
+  - In the menu, the team panel shows five car bars and both drivers with flag and summary.
   - Test: 300 s races on four circuits with Auto pedals and steering had 0–2 contacts; the low-consistency drivers occasionally ran wide.
 
 - **Pit straight dressing** (every circuit):
@@ -98,7 +97,7 @@ Playable build: https://matthewtorgerson.github.io/racing-line/ (GitHub Pages, b
   - The brands are invented (`ADS`: VOLTRA, APEXA, NOVEX, ZEPHYRA, KITEWAY, ORBANI, TORQEL, LUMORA).
   - They're queued while the walls are built (`ADQ`) and drawn with the depth-sorted objects (type 7) using the board's middle point. That way buildings behind a board can't cover it, and cars, poles and buildings in front of it still do (v14.4). Only faces turned towards the camera get boards, with the text fitted along the wall.
 - **HUD** (v14 cleanup): one panel top left.
-  - Contents: LAP n/N with the race time (monospace), then last and best lap, tyre/damage bars when on, then the standings (position, team logo, first three letters of the surname, monospace gap). Your car's row is yellow and your teammate's light blue. There's no separate position display or flags.
+  - Contents: LAP n/N with the race time (monospace), then last and best lap, the damage bar when on, then the standings (position, team logo, first three letters of the surname, monospace gap). Your car's row is yellow and your teammate's light blue. There's no separate position display or flags.
   - In-race buttons: only Swap car and pause.
   - Pedals, steering, camera, racing line, sound effects and music are set in the main menu or in the pause menu (v14.1; both stay in sync via `SEG_SYNC`). The M/N/V/L keys are gone.
   - Narrower panel (v14.5, ~116 px on a phone): the race time sits under LAP n/N, Last and Best are on two short monospace lines, and the columns are tighter.
@@ -109,7 +108,7 @@ Playable build: https://matthewtorgerson.github.io/racing-line/ (GitHub Pages, b
   - Chosen by the user over a hotel roof that turned see-through and a glass roof with ribs. Both replaced the old translucent grey slab and have since been removed.
 - **Weather (Dry / Rain)**: lower grip on every surface, wet speed profiles, ~10% slower laps, rain visuals and hiss.
 - **Slipstream**: tow from a car 5–45 m ahead within ~2.4 m sideways; up to +7.5% top speed; subtle streaks, HUD bar and wind hiss.
-- **Race rules**: Tyre wear, Damage & knockouts, Yellow flags (Off / 3 / 10 / 30 s) with +5 s for passing under yellow.
+- **Race rules**: Damage & knockouts, Yellow flags (Off / 3 / 10 / 30 s) with +5 s for passing under yellow.
 - **Online multiplayer** via the `room` capability: QR-code lobby, host picks circuit and laps, each human drives one car, AI fills the grid, ~15 Hz presence. No swap slow-motion online.
 - **Music** (procedural WebAudio, one theme per circuit, `TRACK_THEME`):
   - Azteca `mariachi` (v13): 150 BPM ranchera in 3/4 (G major, G–D7–G–C–D7–G). Guitarrón bass on beat 1, vihuela strums on 2 and 3, violins an octave up with vibrato, and a trumpet pair in thirds from the second section; original tune.
@@ -221,14 +220,14 @@ Playable build: https://matthewtorgerson.github.io/racing-line/ (GitHub Pages, b
 
 - **Circuit step:** posters only (no name label, no button frame; selected poster lifts with a white outline, others dimmed). Below: circuit name + place (`CIRCUIT_PLACE`), description, then stats line (km · corners · DRS zones · elevation · night/street · your best), then the angled map + profile. Poster track maps are bigger (scale .92, dark under-stroke).
 - **No layout shift:** team buttons fixed 84 px with 2-line clamp; team tagline and driver taglines have fixed min-heights; settings notes have min-heights. Driver-traits explainer removed.
-- **Settings regrouped** into sections (main menu): Race (Opponents, Laps, Weather) · Driving (Pedals, Steering, Gearbox) · Rules (Tyre wear, Damage, Slipstream, DRS, Track limits, Yellow flags) · Display & sound (Camera, Racing line, Turn numbers, Sound, Music). Pause menu uses the same grouping.
+- **Settings regrouped** into sections (main menu): Race (Opponents, Laps, Weather) · Driving (Pedals, Steering, Gearbox) · Rules (Damage, Slipstream, DRS, Track limits, Yellow flags) · Display & sound (Camera, Racing line, Turn numbers, Sound, Music). Pause menu uses the same grouping.
 - **Turn numbers toggle** (`opts.turns`, default shown): hides the on-track corner boards.
 - **Menu music:** audio is started on page load where the browser allows; otherwise a small "Tap anywhere to start the music" hint shows and the first touch/click/key anywhere starts it (browsers block sound before the first interaction).
 - **Standings colours:** your row white with black text; teammate light grey (#c4c9d1).
 - **Race-control banner** moved low: just above the speed strip (desktop bottom 128 px; touch above the strip between the swap and DRS pads; landscape just above the strip).
 - **Swap:** big round SWAP pad on touch (left, above the gear/steer pads in portrait; bottom centre-right in landscape), top Swap button enlarged on desktop and hidden on touch.
 - **Crowds:** stands now draw rows of seats facing the track with people seated in rows (muted colours), replacing random coloured confetti on the roof.
-- **Lock-ups:** only when you control the brake (Brake-only or Throttle+Brake pedals). Braking hard while still turning (brake demand + cornering load > 1.32 × grip) locks the fronts: braking falls to 78% of grip and steering to 42% (runs wide), white tyre smoke from the fronts, skid marks, a tyre squeal, a "LOCK-UP" tag above the speed strip, and a small flat-spot tyre-wear cost.
+- **Lock-ups:** only when you control the brake (Brake-only or Throttle+Brake pedals). Braking hard while still turning (brake demand + cornering load > 1.32 × grip) locks the fronts: braking falls to 78% of grip and steering to 42% (runs wide), white tyre smoke from the fronts, skid marks, a tyre squeal and a "LOCK-UP" tag above the speed strip.
 - **Defaults:** Pedals = Throttle only (you hold the throttle, the car brakes itself), Steering = Auto, Gearbox = Automatic, DRS = Automatic. Applied once to existing players too (`defv4`); later choices are kept.
 - **M. Vance is Canadian** (was Irish); new `CA` flag (red-white-red with a drawn maple leaf), used in the menu, standings and pit-lane flag row.
 - **Papaya Racing logo** is now the two-tone chevron P (orange bowl, blue leg, dark counter; option g of https://claude.ai/artifact/4WGiKPFuqfU33EwQ7UMF7b). Other teams unchanged.
@@ -246,7 +245,7 @@ Playable build: https://matthewtorgerson.github.io/racing-line/ (GitHub Pages, b
 
 - Host goes straight into a lobby; Join opens the code box. Everything is chosen inside the lobby, in order: players (name), team, circuit (poster grid), race settings, then each player's own controls.
 - Up to two humans per team (teammates by join order, driver 1 then 2); a third player is moved to a team with a free seat. Empty seats are AI.
-- Host sets the circuit and race settings (Opponents, Laps, Weather, Tyre wear, Damage, Slipstream, DRS on/off, Track limits, Yellow flags); guests see them read-only. Pedals, Steering, Gearbox and DRS Button/Automatic are per player.
+- Host sets the circuit and race settings (Opponents, Laps, Weather, Damage, Slipstream, DRS on/off, Track limits, Yellow flags); guests see them read-only. Pedals, Steering, Gearbox and DRS Button/Automatic are per player.
 - Smoother remote cars: 20 Hz updates with sender timestamps, arc prediction from turn rate, out-of-order packets dropped, blend instead of jumps.
 - Contacts with a remote car only push the local car, more softly, and cause no damage — the remote position is a little old, so it shouldn't act like a wall.
 - Shared race clock: the host sends its clock; guests slew theirs to match, so countdown, lap and finish times agree on every screen.
@@ -536,6 +535,7 @@ Reported from two phones: opening the connection "is very inconsistent and often
 
 ## Change log
 
+- Tyre wear removed (Nov 2026): no Tyre Wear rule (single player or online), no tyre bar in the HUD, no Tyre Life bar on the team cards and no tyre-care driver trait. Grip now changes only with damage, dirt and weather.
 - v2–v12: see earlier entries: runoff/AI fixes, gravel, audio, slipstream, COTA/Interlagos, Monaco, tyres/damage/yellows, multiplayer, rain, Bahrain night, western theme, contact reduction, team stats/logos/flags, Lane steering, elevation, painted run-off, pits and flags, Pedals/Steering split, big painted fields, Overtake steering.
 - v12.1 (hotfix): grid cars are drawn at the right height before lights out on elevated grids.
 - v13: renamed **Racing Line**.
@@ -552,7 +552,7 @@ Reported from two phones: opening the connection "is very inconsistent and often
 
 ## Ideas next
 
-- Pit stops using the new entry/exit lanes (tyres, repairs; wet vs slick tyres), DRS zones, changing weather.
+- Pit stops using the new entry/exit lanes (repairs; wet vs slick tyres), DRS zones, changing weather.
 - Make the corner stands read better from above: roofs, or a stepped seating texture.
 - Car liveries with team logos.
 - Online: chat/reactions, spectating, flag picker for humans.

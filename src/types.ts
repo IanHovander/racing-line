@@ -6,7 +6,6 @@ export interface TeamStats {
   acc: number;
   brk: number;
   grip: number;
-  tyre: number;
   dur: number;
   [k: string]: any;
 }
@@ -40,7 +39,6 @@ export interface Car {
   out: boolean;
   outT: number;
   gone: boolean;
-  tyre: number;
   dmg: number;
   gm: number;
   tow: number;

@@ -119,15 +119,9 @@ export function hud(dt) {
     let h = '';
     const bar = (v, col) =>
       `<span class="b"><i style="width:${Math.round(v * 100)}%;background:${col}"></i></span>`;
-    if (opts.tyres)
-      h +=
-        'Tyres' +
-        bar(c.tyre, c.tyre > 0.5 ? '#5ad16b' : c.tyre > 0.25 ? '#ffc23d' : '#ff4b3e') +
-        Math.round(c.tyre * 100) +
-        '% ';
     if (opts.damage)
       h +=
-        ' Dmg' +
+        'Dmg' +
         bar(c.dmg, c.dmg < 0.35 ? '#5ad16b' : c.dmg < 0.7 ? '#ffc23d' : '#ff4b3e') +
         Math.round(c.dmg * 100) +
         '%';

@@ -359,13 +359,6 @@ export function cycleDyn(): void {
   setDynLevel((opts.dynlv + 1) % 5);
 }
 
-// ---- which line the AI and the tyres measure against ----
-/** the line a car is meant to be on: the planner's for a planned player car, the classic line when the player steers it, the AI's line otherwise */
-export function refLine(c, isPlayer: boolean) {
-  if (isPlayer) return opts.steer === 0 && dynOn(c) ? DYN.line.lat : GS.off;
-  return AIL[c.team] || GS.off;
-}
-
 // ---- drawing the line: when, and for which corners ----
 // Whether the racing line is drawn. It starts shown, in practice and in races (single player and online);
 // each of the two remembers its own choice, made in Settings, in the pause menu or with H. opts.line is the

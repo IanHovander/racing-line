@@ -86,7 +86,6 @@ export function setupRace(isAttract, mpGrid?) {
     const lat = g % 2 ? 2.8 : -2.8;
     const c: Car = {
       st: TEAM_STATS[t],
-      tyre: 1,
       dmg: 0,
       gm: 1,
       out: false,
@@ -185,7 +184,6 @@ export function init(): void {
     dynlv: clamp(store.get('dynlv', 3) | 0, 0, 4),
     crowd: store.get('crowd', 1),
     rain: store.get('rain', 0),
-    tyres: store.get('tyres', 0),
     damage: store.get('damage', 0),
     yellow: store.get('yellow', 10),
     limits: store.get('limits', 0),

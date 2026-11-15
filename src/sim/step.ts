@@ -8,10 +8,8 @@ import { netFollow } from '../net/netcode';
 import { FW, startFireworks, updateRain } from '../render/effects';
 import { STEP, controlAI, pursuitLat } from './ai';
 import { locate, physics, towTarget } from './physics';
-import { refLine } from './lines';
 import { controlPlayer } from './player';
 import { progress, secDone, statTick, tpRec } from './timing';
-import { DRV } from '../teams/drivers';
 import { NEUTRAL } from '../teams/team-stats';
 import { parts, skids } from '../track/active';
 import { cornerAt, hAt } from '../track/track';
@@ -146,7 +144,7 @@ export function step(dt) {
       }
       return;
     }
-    c.gm = (opts.tyres && !attract ? 0.72 + 0.28 * Math.sqrt(c.tyre) : 1) * (1 - 0.15 * c.dmg);
+    c.gm = 1 - 0.15 * c.dmg;
     if (c.out) {
       u = [
         0,
@@ -170,20 +168,6 @@ export function step(dt) {
     if (GS.state === 'race' && !c.out && !launchGate(c, !attract && i === GS.ctrl && !c.finished))
       u = [0, 1, u[2]];
     physics(c, dt, u[0], u[1], u[2]);
-    if (opts.tyres && !attract && GS.state === 'race' && !c.out) {
-      const k = 0.42 / (opts.laps * GS.L),
-        dist = c.v * dt;
-      const f =
-        1 +
-        0.6 * Math.min(1, Math.abs(c.lat - refLine(c, !attract && i === GS.ctrl && !c.finished)[c.idx]) / 3) +
-        c.slide * 2 +
-        [0, 0.3, 1.5, 4, 0.8, 1.2][c.surf] +
-        1.2 * c.brk;
-      c.tyre = Math.max(
-        0,
-        c.tyre - k * dist * f * (opts.rain ? 0.8 : 1) * (c.st || NEUTRAL).tyre * (1.2 - 0.4 * DRV(c).tyre),
-      );
-    }
     if (opts.rain && c.v > 22 && Math.random() < c.v / 450) {
       spawn(
         c.x - Math.cos(c.h) * 2.6 + (Math.random() - 0.5) * 1.6,
@@ -363,7 +347,6 @@ export function step(dt) {
         const w = Math.random() < 0.5 ? -0.8 : 0.8;
         spawn(c.x + ch * 1.6 - sh * w, c.y + sh * 1.6 + ch * w, 0.5, 'rgba(236,240,248,1)', 0.9, 1.8);
       }
-      if (opts.tyres) c.tyre = Math.max(0, c.tyre - dt * 0.012);
     }
     if (
       c.v > 12 &&
@@ -440,10 +423,9 @@ export function standings() {
 }
 export const c_done = mine => (mine.some(c => c.finished) ? 2.5 : 3.5);
 export const clearTime = () => opts.yellow || 3;
-// tyre and damage hits from impacts; a hard enough hit, or too much damage, knocks the car out
+// damage from impacts; a hard enough hit, or too much damage, knocks the car out
 export function hurt(c, imp, car?) {
   if (attract || c.out || c.remote || (GS.state !== 'race' && GS.state !== 'finished')) return;
-  if (opts.tyres) c.tyre = Math.max(0, c.tyre - imp * 0.003);
   if (!opts.damage) return;
   if (imp > 3) c.dmg = Math.min(1, c.dmg + (imp - 3) * (car ? 0.008 : 0.012) * (c.st || NEUTRAL).dur);
   if (imp > (car ? 34 : 27) || c.dmg >= 1) knockOut(c);

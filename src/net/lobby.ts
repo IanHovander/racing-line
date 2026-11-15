@@ -47,14 +47,6 @@ export const LB_RULES: [string, string, [number, string][]][] = [
     ],
   ],
   [
-    'tyres',
-    'Tyre Wear',
-    [
-      [0, 'Off'],
-      [1, 'On'],
-    ],
-  ],
-  [
     'damage',
     'Damage & Knockouts',
     [
@@ -190,7 +182,6 @@ export function lbRulesInit() {
     diff: opts.diff,
     laps: opts.laps,
     rain: opts.rain,
-    tyres: opts.tyres,
     damage: opts.damage,
     tow: opts.tow,
     drsOn: opts.drs ? 1 : 0,

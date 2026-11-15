@@ -908,7 +908,7 @@ export function create(geom, car, cfg?) {
       i1 = (i0 + 1) % N,
       gm = (c.gm || 1) * (1 - 0.2 * (c.dirt || 0)),
       bw = 0.6 + 0.4 * (c.gm || 1),
-      v0 = c.v; // worn tyres: less grip, and the game's brakes fade with them
+      v0 = c.v; // a damaged car has less grip, and the game's brakes fade with it
     // the car's state relative to the centreline: offset, slope and second derivative (from the last steering command)
     const tX = tx[i0] + (tx[i1] - tx[i0]) * f,
       tY = ty[i0] + (ty[i1] - ty[i0]) * f,

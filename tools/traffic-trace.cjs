@@ -14,7 +14,7 @@ if (cfg) H.ctx.DYNCFG = JSON.parse(cfg);
 const from = +arg('from', 8),
   to = +arg('to', 70),
   every = +arg('every', 0.5);
-H.run(`opts.pedals=0;opts.steer=0;opts.team=0;opts.diff=1;opts.laps=5;opts.rain=0;WX.rain=0;opts.tyres=0;opts.damage=0;opts.gears=0;opts.dynlv=LV;trackIdx=1;buildTrack(TRACKS[1]);dynPrepare(true);PRACTICE=false;setupRace(false);
+H.run(`opts.pedals=0;opts.steer=0;opts.team=0;opts.diff=1;opts.laps=5;opts.rain=0;WX.rain=0;opts.damage=0;opts.gears=0;opts.dynlv=LV;trackIdx=1;buildTrack(TRACKS[1]);dynPrepare(true);PRACTICE=false;setupRace(false);
   var __rows=[],__hits=0;
   function __tick(){const c=cars[ctrl];if(state==='race'&&START.done){input.thr=c.v<c.safeV-0.2;}
     step(STEP);if(state!=='race')return raceTime;

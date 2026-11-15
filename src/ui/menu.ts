@@ -30,7 +30,6 @@ export function teamCardHtml(team: number) {
     ['Acceleration', st.acc, 0.97, 1.07],
     ['Braking', st.brk, 0.9, 1.4],
     ['Cornering', st.grip, 0.975, 1.035],
-    ['Tyre Life', 2 - st.tyre, 0.8, 1.3],
     ['Durability', 2 - st.dur, 0.75, 1.2],
   ];
   // summary card: tagline, car bars in two columns, one line per driver
@@ -199,7 +198,6 @@ export function init(): void {
     WX.rain = opts.rain;
     buildProfile();
   });
-  segInit('sTyres', 'tyres', Number);
   segInit('sDmg', 'damage', Number);
   segInit('sYellow', 'yellow', Number);
   segInit('sLimits', 'limits', Number);

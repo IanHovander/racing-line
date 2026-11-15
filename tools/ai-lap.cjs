@@ -20,7 +20,7 @@ function aiLap(o) {
   );
   const H = load({ seed: 1 });
   H.ctx.__o = o;
-  H.run(`opts.pedals=0;opts.steer=0;opts.team=__o.team|0;opts.diff=__o.diff|0;opts.rain=__o.rain|0;WX.rain=opts.rain;opts.tyres=0;opts.damage=0;opts.gears=0;opts.dynlv=0;
+  H.run(`opts.pedals=0;opts.steer=0;opts.team=__o.team|0;opts.diff=__o.diff|0;opts.rain=__o.rain|0;WX.rain=opts.rain;opts.damage=0;opts.gears=0;opts.dynlv=0;
     trackIdx=__o.track|0;buildTrack(TRACKS[trackIdx]);
     if(__o.neutral){DRIVER_STATS.length=0;}
     setupRace(true);if(!__o.classic)dynPrepare(true);else dynDrop();      // the menu's demo race: every car is driven by the AI

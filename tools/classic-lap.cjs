@@ -12,7 +12,7 @@ const out = [];
 for (const T of String(arg('tracks', '1,3,6,7')).split(',').map(Number)) {
   const H = load({ seed: 1 });
   H.ctx.A = [T, +arg('team', 0), +arg('rain', 0)];
-  H.run(`${arg('set', '')};opts.pedals=0;opts.steer=0;opts.team=A[1];opts.rain=A[2];WX.rain=A[2];opts.tyres=0;opts.damage=0;opts.dynlv=0;
+  H.run(`${arg('set', '')};opts.pedals=0;opts.steer=0;opts.team=A[1];opts.rain=A[2];WX.rain=A[2];opts.damage=0;opts.dynlv=0;
     trackIdx=A[0];buildTrack(TRACKS[A[0]]);dynPrepare(true);PRACTICE=true;setupRace(false);
     var __env=new Float64Array(N);{const st=TEAM_STATS[opts.team],G=GPROF*WETG()*st.grip,B=BPROF*WETB()*st.brk,cap=VCAP*st.top;
       for(let i=0;i<N;i++)__env[i]=Math.min(cap*1.2,Math.sqrt(G/Math.max(rk[i],1e-6)));

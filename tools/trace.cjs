@@ -19,7 +19,7 @@ const cfg = arg('cfg', null);
 if (cfg) H.ctx.DYNCFG = JSON.parse(cfg);
 H.ctx.__b = { kind: m ? m[1] : bot, x: m ? parseFloat(m[2]) : 0, w: -1 };
 H.ctx.__detail = detail;
-H.run(`opts.pedals=0;opts.steer=0;opts.team=TM;opts.rain=RN;WX.rain=RN;opts.tyres=0;opts.damage=0;opts.gears=0;opts.dynlv=LV;trackIdx=TK;buildTrack(TRACKS[TK]);dynPrepare(true);PRACTICE=true;setupRace(false);
+H.run(`opts.pedals=0;opts.steer=0;opts.team=TM;opts.rain=RN;WX.rain=RN;opts.damage=0;opts.gears=0;opts.dynlv=LV;trackIdx=TK;buildTrack(TRACKS[TK]);dynPrepare(true);PRACTICE=true;setupRace(false);
   var __ev=[],__cur=null,__rows=[],__buf=[];
   function __row(c){const g=DYN.debug(),p=DYN.cur;return [raceTime.toFixed(2),c.idx,cornerAt(c.idx)||'-','lat '+c.lat.toFixed(2),'v '+c.v.toFixed(1),'safe '+Math.min(999,c.safeV).toFixed(1),input.thr?'GAS':'---',c.brk>0?'BRK':'   ','surf'+c.surf,p.feasible?'ok ':'XX ','slide '+(c.slide||0).toFixed(2),g.kind?'lane':g.gT?('lean'+(g.gT*Math.sign(DYN.debug().tOff||1)).toFixed(1)):'merge','plan+20m '+p.lat[10].toFixed(1),'+60m '+p.lat[30].toFixed(1)].join('  ');}
   function __tick(){const c=cars[ctrl],b=__b;if(state==='race'&&START.done){const s=c.safeV;let hold=b.kind==='flat'?true:b.kind==='eager'?c.v<s+b.x:c.v<s-0.2;if(b.kind==='late'){if(hold)b.w=-1;else{if(b.w<0)b.w=raceTime;if(raceTime-b.w<b.x)hold=true;}}input.thr=hold;}
