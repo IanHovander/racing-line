@@ -4,17 +4,19 @@
 // and the stylesheet shows #mpWait with "Loading the game…"; the first call here takes over.
 import { $ } from '../core/dom';
 
-/** what a join is doing right now: reaching the matchmaking server, connecting to the host, or opening a room */
-export type JoinStep = 'start' | 'server' | 'host' | 'room';
+/** what a join is doing right now: reaching the matchmaking server, connecting to the host, looking again for a
+ *  room the server did not know, or opening a room */
+export type JoinStep = 'start' | 'server' | 'host' | 'find' | 'room';
 
 const STEP_TEXT: Record<JoinStep, string> = {
   start: 'Getting ready…',
   server: 'Reaching the matchmaking server…',
   host: 'Connecting to the host…',
+  find: 'Looking for the room…',
   room: 'Opening your room…',
 };
 /** how far along the loading bar each step is, in percent; it creeps on from there while the step lasts */
-const STEP_AT: Record<JoinStep, number> = { start: 24, server: 42, room: 55, host: 68 };
+const STEP_AT: Record<JoinStep, number> = { start: 24, server: 42, room: 55, host: 68, find: 68 };
 const CREEP = 16;
 let slowT: ReturnType<typeof setTimeout> | undefined, creepT: ReturnType<typeof setTimeout> | undefined;
 let cancelFn: (() => void) | null = null,
@@ -35,11 +37,16 @@ function show(on: boolean): void {
   $('mpWait').classList.toggle('hide', !on);
   if (on) for (const id of ['menu', 'home', 'joinDlg', 'results', 'pause']) $(id).classList.add('hide');
 }
-/** start waiting: `code` is the room being joined (null while a new room is opened); `onCancel` backs out */
-export function showJoining(code: string | null, asHost: boolean, onCancel: () => void): void {
+/**
+ * Start waiting: `code` is the room being joined (null while a new room is opened); `onCancel` backs out;
+ * `back`: getting back into a room the player was dropped from.
+ */
+export function showJoining(code: string | null, asHost: boolean, onCancel: () => void, back = false): void {
   cancelFn = onCancel;
   retryFn = null;
-  $('mwTitle').textContent = asHost ? 'Opening Your Room' : 'Joining Race ' + (code || '').toUpperCase();
+  $('mwTitle').textContent = asHost
+    ? 'Opening Your Room'
+    : (back ? 'Reconnecting to Race ' : 'Joining Race ') + (code || '').toUpperCase();
   $('mwProg').classList.remove('hide');
   $('mwRetry').classList.add('hide');
   $('mwCancel').textContent = 'Cancel';
@@ -52,12 +59,16 @@ export function showJoining(code: string | null, asHost: boolean, onCancel: () =
     $('mwHint').textContent = 'Still connecting. On some networks this takes up to ten seconds.';
   }, 4000);
 }
-export function joinStep(step: JoinStep): void {
-  $('mwStep').textContent = STEP_TEXT[step] || STEP_TEXT.start;
+/** `attempt` of `of`: a step that is being tried again says so */
+export function joinStep(step: JoinStep, attempt = 1, of = 3): void {
+  $('mwStep').textContent =
+    (step === 'host' && attempt > 1 ? 'Still connecting to the host…' : STEP_TEXT[step] || STEP_TEXT.start) +
+    (attempt > 1 ? ` (try ${attempt} of ${of})` : '');
   bar(STEP_AT[step] || STEP_AT.start);
 }
 /** the join did not work: say why, offer Try Again and a way back */
-export function joinFailed(message: string, onRetry: () => void, onBack: () => void): void {
+export function joinFailed(message: string, onRetry: () => void, onBack: () => void, title?: string): void {
+  if (title) $('mwTitle').textContent = title;
   clearTimeout(slowT);
   clearTimeout(creepT);
   cancelFn = onBack;

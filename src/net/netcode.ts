@@ -5,7 +5,7 @@ import { cheer } from '../audio/crowd';
 import { $, clamp, store, wrapA } from '../core/dom';
 import { cars, goAt, opts, setupRace } from '../game/race';
 import { lobbyOrder, renderLobby } from './lobby';
-import { MP, hostPeer, mpCfg, mpPresence } from './multiplayer';
+import { MP, cleanNick, hostPeer, mpCfg, mpPresence } from './multiplayer';
 import { buildProfile } from '../sim/profile';
 import { buildTrack } from '../track/build';
 import { TRACKS } from '../track/circuits';
@@ -68,7 +68,7 @@ export function hostStart() {
     const d = used[t] || 0;
     if (d >= 2) continue;
     used[t] = d + 1;
-    grid.push({ p: p.peer, t, d, n: String(p.presence.nick || 'Driver').slice(0, 16) });
+    grid.push({ p: p.peer, t, d, n: cleanNick(p.presence.nick) || 'Driver' });
   } // up to two players per team
   const ai = [];
   for (let t = 0; t < 5; t++)
@@ -126,7 +126,14 @@ export function startMpRace(grid, cfg, hostId) {
   $('home').classList.add('hide');
   setupRace(
     false,
-    grid.map(e => ({ p: e.p, t: clamp(e.t | 0, 0, 4), d: e.d ? 1 : 0, n: e.n, owner: e.p || hostId })),
+    // names come from other players' browsers and end up in on-screen messages: letters, digits and . _ - only
+    grid.map(e => ({
+      p: e.p,
+      t: clamp(e.t | 0, 0, 4),
+      d: e.d ? 1 : 0,
+      n: e.n === undefined ? e.n : cleanNick(e.n) || 'Driver',
+      owner: e.p || hostId,
+    })),
   );
   raceTrackStarted();
   ['tl', 'board', 'spd', 'btns'].forEach(id => $(id).classList.remove('hide'));
