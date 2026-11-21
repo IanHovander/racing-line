@@ -1,26 +1,21 @@
 // Race starts are about timing: the cars sit on the grid until the driver reacts to lights out.
-//  - Your car launches when you press the throttle after the lights go out (or tap / press any key
-//    in pedal modes without a GAS pad). Reaction time sets the launch: under 0.2 s is a perfect
-//    start (extra traction for 2 s), under 0.35 s a good one, slower than 0.6 s a slow one.
+//  - Your car launches when you press the throttle after the lights go out. Reaction time sets the
+//    launch: under 0.2 s is a perfect start (extra traction for 2 s), under 0.35 s a good one,
+//    slower than 0.6 s a slow one.
 //  - Holding the throttle as the lights go out is a jump start: +5 s (a warning in practice).
 //  - If you don't react within 3 s the car goes anyway (a slow start), so nobody is stuck.
 //  - AI cars react after 0.12–0.55 s, quicker for consistent drivers.
 import { GS } from '../state';
-import { attract, cars, opts } from '../game/race';
+import { attract, cars } from '../game/race';
 import { input } from '../input/input';
 import { DRV } from '../teams/drivers';
 import { feedback } from '../ui/feedback';
 import { rcBanner } from '../ui/controls';
 
-/** a tap or key press since lights out (used as the launch input when there's no GAS pad) */
-export const START = { tap: false, jump: false, done: false };
-
-/** pedal modes with a throttle the player works themselves */
-const usesThrottle = () => opts.pedals === 0 || opts.pedals === 2;
+export const START = { jump: false, done: false };
 
 /** called once, at lights out */
 export function lightsOut(): void {
-  START.tap = false;
   START.jump = false;
   if (attract) return;
   const c = cars[GS.ctrl];
@@ -67,8 +62,7 @@ export function launchGate(c, isPlayer: boolean): boolean {
     return true;
   } // joined late, swapped cars, etc.
   if (isPlayer) {
-    const go = input.thr || (!usesThrottle() && START.tap);
-    if (go || GS.raceTime > 3) launch(c, GS.raceTime);
+    if (input.thr || GS.raceTime > 3) launch(c, GS.raceTime);
     return !!c.launched;
   }
   if (c.react === undefined) c.react = 0.12 + Math.random() * 0.23 + (1 - DRV(c).consist) * 0.2;
@@ -78,5 +72,5 @@ export function launchGate(c, isPlayer: boolean): boolean {
 
 /** text under the start lights */
 export function startHint(): string {
-  return usesThrottle() ? 'Hit the GAS when the lights go out' : 'Tap when the lights go out';
+  return 'Hit the GAS when the lights go out';
 }

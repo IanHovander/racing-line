@@ -50,8 +50,14 @@ import * as m46 from './game/loop';
 import * as m47 from './sim/start';
 import * as m48 from './ui/home';
 import * as m49 from './ui/notify';
+import * as m52 from './sim/lines';
+import * as m54 from './net/joining';
+import * as m53 from './sim/dynline';
 
 const MODS: any[] = [
+  m54,
+  m52,
+  m53,
   m47,
   m48,
   m49,
@@ -212,8 +218,6 @@ export function installDebug(): void {
     'musStep',
     'musNext',
     'cheerT',
-    'sqg',
-    'sqf',
     'NICK',
   ].forEach((k: string) =>
     def(

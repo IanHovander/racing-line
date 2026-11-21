@@ -7,8 +7,8 @@ Playable build: https://matthewtorgerson.github.io/racing-line/ (GitHub Pages, b
 ## What's in the game
 
 - **View**: helicopter chase cam (rotates with the car, looks ahead with speed, and follows the car's height) or fixed isometric; 2.5D projection with extruded cars, trees, grandstands, garages and buildings.
-- **Controls**: two independent settings, in the menu and as in-race buttons (keys M and N).
-  - **Pedals** (`opts.pedals`): Throttle only (lift and the car auto-brakes to the safe speed), Brake only (the car accelerates by itself; only the brake keys brake), Throttle + Brake, and Auto (v14.7, `opts.pedals=3`: the car works both pedals itself to the safe speed for the steering mode, like the AI; on touch the GAS and BRAKE buttons are hidden). All 16 pedal/steering combinations are tested.
+- **Controls**: you work the throttle only, plus a Steering setting in the menu.
+  - **Throttle**: hold the gas (Up / W / Space, or the GAS pad on touch); lift and the car brakes itself to the safe speed for the next corner. There is no brake input. (Until Nov 2026 a Pedals setting also offered Brake only, Throttle + Brake and Auto.)
   - **Steering** (`opts.steer`):
     - 0 Auto: follows the racing line and steers around traffic (passes on its own).
     - 1 Lanes: tap left/right to pick left side / racing line / right side (`pursuitLane()`, `laneProfile()`); HUD LEFT / LINE / RIGHT and a yellow dashed target line.
@@ -25,30 +25,30 @@ Playable build: https://matthewtorgerson.github.io/racing-line/ (GitHub Pages, b
   - Measured with an Overtake-mode bot over four circuits: committed passes succeed ~77% on Easy, ~65% on Normal and ~60% on Hard. With the straight-only rule, contacts in auto-steered races are back at the no-defence baseline.
 - **Teams**:
 
-  | Team             | Logo                              | Drivers (nationality)                       | Car character                                         | top  | acc   | brk  | grip  | tyre wear | damage taken |
-  | ---------------- | --------------------------------- | ------------------------------------------- | ----------------------------------------------------- | ---- | ----- | ---- | ----- | --------- | ------------ |
-  | Scuderia Rosso   | red shield, yellow lightning bolt | M. Vance (Canada), L. Moreau (France)       | Power: fastest on the straights, hard on its tyres    | 1.05 | 1.02  | 1.0  | 0.984 | 1.12      | 1.0          |
-  | Argent GP        | silver hexagon, teal chevrons     | J. Keller (Germany), T. Okafor (Nigeria)    | All-rounder: no weak spot, toughest chassis           | 1.01 | 1.01  | 1.05 | 1.006 | 1.0       | 0.85         |
-  | Papaya Racing    | orange disc, blue swoosh          | E. Lindqvist (Sweden), K. Sato (Japan)      | Downforce: best in the corners, slow on the straights | 0.98 | 1.0   | 1.0  | 1.026 | 1.05      | 1.1          |
-  | Verde Motorsport | green leaf, lime V                | R. Duarte (Brazil), S. Visser (Netherlands) | Late brakers: best stopping power, kindest to tyres   | 1.01 | 1.0   | 1.36 | 1.0   | 0.75      | 1.0          |
-  | Azure F1         | blue diamond, pink star           | P. Novak (Czechia), D. Ferreira (Portugal)  | Traction: rockets out of slow corners                 | 0.99 | 1.055 | 1.0  | 0.997 | 1.0       | 1.15         |
+  | Team             | Logo                              | Drivers (nationality)                       | Car character                                         | top  | acc   | brk  | grip  | damage taken |
+  | ---------------- | --------------------------------- | ------------------------------------------- | ----------------------------------------------------- | ---- | ----- | ---- | ----- | ------------ |
+  | Scuderia Rosso   | red shield, yellow lightning bolt | M. Vance (Canada), L. Moreau (France)       | Power: fastest on the straights, edgy in the corners  | 1.05 | 1.02  | 1.0  | 0.984 | 1.0          |
+  | Argent GP        | silver hexagon, teal chevrons     | J. Keller (Germany), T. Okafor (Nigeria)    | All-rounder: no weak spot, toughest chassis           | 1.01 | 1.01  | 1.05 | 1.006 | 0.85         |
+  | Papaya Racing    | orange disc, blue swoosh          | E. Lindqvist (Sweden), K. Sato (Japan)      | Downforce: best in the corners, slow on the straights | 0.98 | 1.0   | 1.0  | 1.026 | 1.1          |
+  | Verde Motorsport | green leaf, lime V                | R. Duarte (Brazil), S. Visser (Netherlands) | Late brakers: best stopping power on the grid         | 1.01 | 1.0   | 1.36 | 1.0   | 1.0          |
+  | Azure F1         | blue diamond, pink star           | P. Novak (Czechia), D. Ferreira (Portugal)  | Traction: rockets out of slow corners                 | 0.99 | 1.055 | 1.0  | 0.997 | 1.15         |
   - Multipliers in `TEAM_STATS`; each team has its own speed profile `PROF[team]`. Balanced from measured lap-time sensitivities: all five cars lap within ~0.15 s.
   - Original inline-SVG logos (`LOGOS`) and driver flags (`FLAGS`).
 
-- **Driver traits** (v14.8, `DRIVER_STATS[team][driver]`, helper `DRV(c)`). Each driver has six traits from 0 to 1 (0.5 = average) that change how the AI races that car. They don't change how the car drives under your control, except tyre care, which always applies.
+- **Driver traits** (v14.8, `DRIVER_STATS[team][driver]`, helper `DRV(c)`). Each driver has five traits from 0 to 1 (0.5 = average) that change how the AI races that car. They don't change how the car drives under your control.
 
-  | Driver       | Pace | Aggression | Defending | Consistency | Wet | Tyre care | Summary                              |
-  | ------------ | ---- | ---------- | --------- | ----------- | --- | --------- | ------------------------------------ |
-  | M. Vance     | .80  | .75        | .60       | .55         | .60 | .40       | Fast and fearless, hard on tyres     |
-  | L. Moreau    | .65  | .50        | .70       | .75         | .50 | .60       | Steady team player                   |
-  | J. Keller    | .80  | .45        | .65       | .90         | .70 | .70       | Metronome — rarely makes a mistake   |
-  | T. Okafor    | .70  | .70        | .55       | .60         | .80 | .50       | Bold overtaker, great in the rain    |
-  | E. Lindqvist | .75  | .35        | .50       | .80         | .90 | .65       | Clean and calm, rain master          |
-  | K. Sato      | .70  | .60        | .80       | .70         | .55 | .75       | Tough to pass, kind to tyres         |
-  | R. Duarte    | .75  | .85        | .70       | .50         | .85 | .45       | All-out attacker, thrives in the wet |
-  | S. Visser    | .70  | .65        | .90       | .65         | .60 | .55       | The wall — defends everything        |
-  | P. Novak     | .60  | .40        | .45       | .85         | .50 | .85       | Tyre whisperer, long-run specialist  |
-  | D. Ferreira  | .65  | .80        | .55       | .45         | .65 | .50       | Wild card — brilliant or in the wall |
+  | Driver       | Pace | Aggression | Defending | Consistency | Wet | Summary                              |
+  | ------------ | ---- | ---------- | --------- | ----------- | --- | ------------------------------------ |
+  | M. Vance     | .80  | .75        | .60       | .55         | .60 | Fast and fearless, a little ragged   |
+  | L. Moreau    | .65  | .50        | .70       | .75         | .50 | Steady team player                   |
+  | J. Keller    | .80  | .45        | .65       | .90         | .70 | Metronome — rarely makes a mistake   |
+  | T. Okafor    | .70  | .70        | .55       | .60         | .80 | Bold overtaker, great in the rain    |
+  | E. Lindqvist | .75  | .35        | .50       | .80         | .90 | Clean and calm, rain master          |
+  | K. Sato      | .70  | .60        | .80       | .70         | .55 | Tough to pass, never rattled         |
+  | R. Duarte    | .75  | .85        | .70       | .50         | .85 | All-out attacker, thrives in the wet |
+  | S. Visser    | .70  | .65        | .90       | .65         | .60 | The wall — defends everything        |
+  | P. Novak     | .60  | .40        | .45       | .85         | .50 | Smooth and steady, lap after lap     |
+  | D. Ferreira  | .65  | .80        | .55       | .45         | .65 | Wild card — brilliant or in the wall |
 
   Effects:
   - Pace: ±1.2% AI speed.
@@ -56,8 +56,7 @@ Playable build: https://matthewtorgerson.github.io/racing-line/ (GitHub Pages, b
   - Consistency: a speed wobble of up to ±2% × (1 − consistency), re-rolled every 1.5–3.5 s. There's also an occasional late-braking moment (+3.5 m/s for 0.45 s) at a rate that grows with (1 − consistency)².
   - Aggression: looks for passes earlier (look-ahead 20 + 12×aggr m), takes gaps up to 0.25 m tighter, and follows up to 1.5 m closer before backing off.
   - Defending: scales the difficulty's defend chance by 0.4 + 1.2×defend and the cover speed by 0.7 + 0.6×defend.
-  - Tyre care: wear × (1.2 − 0.4×tyre).
-  - In the menu, the team panel shows both drivers with flag, summary and six bars.
+  - In the menu, the team panel shows five car bars and both drivers with flag and summary.
   - Test: 300 s races on four circuits with Auto pedals and steering had 0–2 contacts; the low-consistency drivers occasionally ran wide.
 
 - **Pit straight dressing** (every circuit):
@@ -98,9 +97,9 @@ Playable build: https://matthewtorgerson.github.io/racing-line/ (GitHub Pages, b
   - The brands are invented (`ADS`: VOLTRA, APEXA, NOVEX, ZEPHYRA, KITEWAY, ORBANI, TORQEL, LUMORA).
   - They're queued while the walls are built (`ADQ`) and drawn with the depth-sorted objects (type 7) using the board's middle point. That way buildings behind a board can't cover it, and cars, poles and buildings in front of it still do (v14.4). Only faces turned towards the camera get boards, with the text fitted along the wall.
 - **HUD** (v14 cleanup): one panel top left.
-  - Contents: LAP n/N with the race time (monospace), then last and best lap, tyre/damage bars when on, then the standings (position, team logo, first three letters of the surname, monospace gap). Your car's row is yellow and your teammate's light blue. There's no separate position display or flags.
+  - Contents: LAP n/N with the race time (monospace), then last and best lap, the damage bar when on, then the standings (position, team logo, first three letters of the surname, monospace gap). Your car's row is yellow and your teammate's light blue. There's no separate position display or flags.
   - In-race buttons: only Swap car and pause.
-  - Pedals, steering, camera, racing line, sound effects and music are set in the main menu or in the pause menu (v14.1; both stay in sync via `SEG_SYNC`). The M/N/V/L keys are gone.
+  - Steering, camera, racing line, sound effects and music are set in the main menu or in the pause menu (v14.1; both stay in sync via `SEG_SYNC`). The M/N/V/L keys are gone.
   - Narrower panel (v14.5, ~116 px on a phone): the race time sits under LAP n/N, Last and Best are on two short monospace lines, and the columns are tighter.
 - **Buildings in the way sink** (v14.1, reworked v14.6): a tall building sinks if its whole footprint is nearer the camera than any piece of road on screen it covers. The road's centre line and both barriers count, sampled every 4 m around the whole lap wherever it's in view, so you can always see all the road in shot. Buildings beyond the road stay full height. It sinks smoothly to ~7% of its height (`b.sink`, about 0.2 s), replacing the old 16% fade; the chase cam no longer shrinks all buildings, and window rows are batched into one fill per building.
 - Night performance (v14.1): the light pools use two pre-rendered sprites (`POOLS`) instead of a new radial gradient per pool per frame, and the dark layer renders at half resolution.
@@ -109,7 +108,7 @@ Playable build: https://matthewtorgerson.github.io/racing-line/ (GitHub Pages, b
   - Chosen by the user over a hotel roof that turned see-through and a glass roof with ribs. Both replaced the old translucent grey slab and have since been removed.
 - **Weather (Dry / Rain)**: lower grip on every surface, wet speed profiles, ~10% slower laps, rain visuals and hiss.
 - **Slipstream**: tow from a car 5–45 m ahead within ~2.4 m sideways; up to +7.5% top speed; subtle streaks, HUD bar and wind hiss.
-- **Race rules**: Tyre wear, Damage & knockouts, Yellow flags (Off / 3 / 10 / 30 s) with +5 s for passing under yellow.
+- **Race rules**: Damage & knockouts, Yellow flags (Off / 3 / 10 / 30 s) with +5 s for passing under yellow.
 - **Online multiplayer** via the `room` capability: QR-code lobby, host picks circuit and laps, each human drives one car, AI fills the grid, ~15 Hz presence. No swap slow-motion online.
 - **Music** (procedural WebAudio, one theme per circuit, `TRACK_THEME`):
   - Azteca `mariachi` (v13): 150 BPM ranchera in 3/4 (G major, G–D7–G–C–D7–G). Guitarrón bass on beat 1, vihuela strums on 2 and 3, violins an octave up with vibrato, and a trumpet pair in thirds from the second section; original tune.
@@ -144,7 +143,7 @@ Playable build: https://matthewtorgerson.github.io/racing-line/ (GitHub Pages, b
 - **Camera**: isometric is the default, and every existing player is switched to it once (`camv2`). The labels are now "Isometric" / "Chase", and the menu subtitle reads "Formula racing from above".
 - **HUD**:
   - Driver codes in the standings are monospace.
-  - The speed panel has a red brake bar on the left and a green throttle bar on the right, filled by the current pedal values (`c.thr`, `c.brk`).
+  - The speed panel has a red brake bar on the left and a green throttle bar on the right, filled by the current pedal values (`c.thr`, `c.brk`; the brake is the car's own auto-braking).
 - **Finish**:
   - Fireworks: rockets and bursts with pops on a top layer (`#fwc`) from the moment your car finishes, for ~14 s, above the results card.
   - Flag marshal: an orange-suited figure on the pit wall at the line waves a chequered flag once the leader starts the last lap.
@@ -191,7 +190,7 @@ Playable build: https://matthewtorgerson.github.io/racing-line/ (GitHub Pages, b
   - Zones: the 2–3 longest straights (curvature < 1/500 over ±8 samples, at least 280 m). Each zone starts 30 m into its straight and ends 50 m before the braking point, with a detection point 120 m before the straight starts.
   - Zone lengths: Azteca 798/520 m, Lone Star 622/250, Paulista 396/384/200, Monte Porto 218, Desert Lights 470/236, Sakura 572/408/206, Ardennes 470/246, Marina 374/220.
   - Rule: crossing the detection point less than 1.0 s behind the car ahead (gap ÷ your speed) enables DRS for that zone. It's not allowed on the first lap, under yellow or in the rain. Braking or leaving the zone closes it.
-  - Effect: +5.5% top speed and +6% pull while open. The AI and the throttle/auto-pedal assists may go above the usual speed cap on the straight.
+  - Effect: +5.5% top speed and +6% pull while open. The AI and the throttle assist may go above the usual speed cap on the straight.
   - Button mode is for your car (F or Enter; a DRS pad on touch above GAS, glowing green when ready). Automatic opens it for you when you're on the throttle. The AI always uses Automatic.
   - Display: a "DRS enabled" toast, and a DRS pill in the speed panel (outline, green flashing when ready, solid blue when open). The rear wing opens visibly (a raised blue flap). Each zone start has a blue "DRS" board and the detection point a blue dashed line.
   - Test: speeds up to ~325 km/h with DRS open, and contacts about the same as with DRS off.
@@ -221,15 +220,14 @@ Playable build: https://matthewtorgerson.github.io/racing-line/ (GitHub Pages, b
 
 - **Circuit step:** posters only (no name label, no button frame; selected poster lifts with a white outline, others dimmed). Below: circuit name + place (`CIRCUIT_PLACE`), description, then stats line (km · corners · DRS zones · elevation · night/street · your best), then the angled map + profile. Poster track maps are bigger (scale .92, dark under-stroke).
 - **No layout shift:** team buttons fixed 84 px with 2-line clamp; team tagline and driver taglines have fixed min-heights; settings notes have min-heights. Driver-traits explainer removed.
-- **Settings regrouped** into sections (main menu): Race (Opponents, Laps, Weather) · Driving (Pedals, Steering, Gearbox) · Rules (Tyre wear, Damage, Slipstream, DRS, Track limits, Yellow flags) · Display & sound (Camera, Racing line, Turn numbers, Sound, Music). Pause menu uses the same grouping.
+- **Settings regrouped** into sections (main menu): Race (Opponents, Laps, Weather) · Driving (Steering, Gearbox) · Rules (Damage, Slipstream, DRS, Track limits, Yellow flags) · Display & sound (Camera, Racing line, Turn numbers, Sound, Music). Pause menu uses the same grouping.
 - **Turn numbers toggle** (`opts.turns`, default shown): hides the on-track corner boards.
 - **Menu music:** audio is started on page load where the browser allows; otherwise a small "Tap anywhere to start the music" hint shows and the first touch/click/key anywhere starts it (browsers block sound before the first interaction).
 - **Standings colours:** your row white with black text; teammate light grey (#c4c9d1).
 - **Race-control banner** moved low: just above the speed strip (desktop bottom 128 px; touch above the strip between the swap and DRS pads; landscape just above the strip).
 - **Swap:** big round SWAP pad on touch (left, above the gear/steer pads in portrait; bottom centre-right in landscape), top Swap button enlarged on desktop and hidden on touch.
 - **Crowds:** stands now draw rows of seats facing the track with people seated in rows (muted colours), replacing random coloured confetti on the roof.
-- **Lock-ups:** only when you control the brake (Brake-only or Throttle+Brake pedals). Braking hard while still turning (brake demand + cornering load > 1.32 × grip) locks the fronts: braking falls to 78% of grip and steering to 42% (runs wide), white tyre smoke from the fronts, skid marks, a tyre squeal, a "LOCK-UP" tag above the speed strip, and a small flat-spot tyre-wear cost.
-- **Defaults:** Pedals = Throttle only (you hold the throttle, the car brakes itself), Steering = Auto, Gearbox = Automatic, DRS = Automatic. Applied once to existing players too (`defv4`); later choices are kept.
+- **Defaults:** Steering = Auto, Gearbox = Automatic, DRS = Automatic. Applied once to existing players too (`defv4`); later choices are kept.
 - **M. Vance is Canadian** (was Irish); new `CA` flag (red-white-red with a drawn maple leaf), used in the menu, standings and pit-lane flag row.
 - **Papaya Racing logo** is now the two-tone chevron P (orange bowl, blue leg, dark counter; option g of https://claude.ai/artifact/4WGiKPFuqfU33EwQ7UMF7b). Other teams unchanged.
 - Option pages for pending choices: team logos https://claude.ai/artifact/2voBPsJDVV3VAkeSQxRNm9 ; car markers + defend notifications https://claude.ai/artifact/5T4gSnxxS7UPRTN4oLxcR3
@@ -237,16 +235,16 @@ Playable build: https://matthewtorgerson.github.io/racing-line/ (GitHub Pages, b
 ## GitHub Pages + WebRTC multiplayer (v15.7)
 
 - **Hosted at https://matthewtorgerson.github.io/racing-line/** from repo `matthewtorgerson/racing-line` (branch `main`, root): `index.html`, `vendor/peerjs.min.js` (PeerJS 1.5.5, MIT), README. The old `matthewtorgerson.github.io` repo's custom-domain claim (www.matthewtorgerson.com) was removed so project pages stop redirecting to the Squarespace site.
-- **Multiplayer outside claude.ai** uses PeerJS (`makeP2PApi`), modelled on the RoboRally website mode: same interface as claude.ai's room service (`join → onPeers / presence / leave`). The first browser to open a code (since v17.13: the host, and only the host) registers `racingline-mt-<code>` on PeerJS's free cloud server and becomes the hub; guests connect to it with a reliable JSON data channel. Presence is merged per player and the hub rebroadcasts the full list on change (66 ms tick) or every 2 s; guests heartbeat every 2 s; silent guests drop after 8 s, a silent hub after 10 s. On claude.ai the room capability is still used. Invite link = the page URL + `#code`.
+- **Multiplayer outside claude.ai** uses PeerJS (`makeP2PApi`), modelled on the RoboRally website mode: same interface as claude.ai's room service (`join → onPeers / presence / leave`). The first browser to open a code (since v17.16: the host, and only the host) registers `racingline-mt-<code>` on PeerJS's free cloud server and becomes the hub; guests connect to it with a reliable JSON data channel. Presence is merged per player and the hub rebroadcasts the full list on change (66 ms tick) or every 2 s; guests heartbeat every 2 s; silent guests drop after 8 s, a silent hub after 10 s. On claude.ai the room capability is still used. Invite link = the page URL + `#code`.
 - **One team per player** (v15.8): the lobby has a team picker (`lbTeams`); teams held by others are greyed with their name. Lobby order = host first, then join time (`presence.jt`); if two players hold the same team, the later one is moved to a free team with a toast (`resolveTeam`). Each human drives car 1 of their team, the teammate is AI. Max 5 racers; extra players get a "race is full" note and are left out of the grid. Pasting a room link into an open tab joins it (`hashchange`).
-- STUN only (Google, Cloudflare) until v17.13, which adds PeerJS's own relay (see below). A `TURN` constant is ready for a relay login (e.g. the user's own Metered account) for players on mobile data or strict networks; RoboRally's relay login was deliberately not reused.
+- STUN only (Google, Cloudflare) until v17.18, which adds PeerJS's own relay (see below). A `TURN` constant is ready for a relay login (e.g. the user's own Metered account) for players on mobile data or strict networks; RoboRally's relay login was deliberately not reused.
 - Tested: two pages with a simulated PeerJS (lobby, race start, car sync, guest drop); on the live site hosting registers with PeerJS's server and shows the lobby/QR. A second tab in the same cloud test browser couldn't connect (that sandbox likely blocks peer connections), so a real two-device test is still needed. Join errors now say whether the code wasn't found, the host couldn't be reached, or the matchmaking server is down.
 
 ## Multiplayer lobby + netcode (v15.9)
 
 - Host goes straight into a lobby; Join opens the code box. Everything is chosen inside the lobby, in order: players (name), team, circuit (poster grid), race settings, then each player's own controls.
 - Up to two humans per team (teammates by join order, driver 1 then 2); a third player is moved to a team with a free seat. Empty seats are AI.
-- Host sets the circuit and race settings (Opponents, Laps, Weather, Tyre wear, Damage, Slipstream, DRS on/off, Track limits, Yellow flags); guests see them read-only. Pedals, Steering, Gearbox and DRS Button/Automatic are per player.
+- Host sets the circuit and race settings (Opponents, Laps, Weather, Damage, Slipstream, DRS on/off, Track limits, Yellow flags); guests see them read-only. Steering, Gearbox and DRS Button/Automatic are per player.
 - Smoother remote cars: 20 Hz updates with sender timestamps, arc prediction from turn rate, out-of-order packets dropped, blend instead of jumps.
 - Contacts with a remote car only push the local car, more softly, and cause no damage — the remote position is a little old, so it shouldn't act like a wall.
 - Shared race clock: the host sends its clock; guests slew theirs to match, so countdown, lap and finish times agree on every screen.
@@ -286,7 +284,7 @@ Playable build: https://matthewtorgerson.github.io/racing-line/ (GitHub Pages, b
 ## v17.2 — timing-based starts (`src/sim/start.ts`)
 
 - Cars stay on the grid after lights out until their driver reacts.
-- **Your launch:** press the throttle after the lights go out. In pedal modes without a GAS pad (Brake only, Auto), any tap or key launches the car. The text under the lights says which ("Hit the GAS / Tap when the lights go out").
+- **Your launch:** press the throttle after the lights go out ("Hit the GAS when the lights go out" under the lights).
 - **Reaction time sets the launch**, shown as a coaching message:
   - under 0.2 s: "Perfect start", +15% drive for 2 s
   - under 0.35 s: "Good start", +7% for 2 s
@@ -334,12 +332,12 @@ Playable build: https://matthewtorgerson.github.io/racing-line/ (GitHub Pages, b
 
 ## v17.6 — one notification style
 
-- Every in-race message uses the coaching pill (dark, rounded, coloured dot, optional second line) in one place: top centre on desktop, above the pedals on touch screens (centred right of the Swap button), top centre in the menus. `notify(text, col, {sub, ttl, key, strong})` in `ui/notify.ts`; `showToast` and `rcBanner` are thin wrappers. Up to 3 stack, newest nearest the anchor; a note with the same `key` replaces the older one (`rc`, `lap`, `coach`).
+- Every in-race message uses the coaching pill (dark, rounded, coloured dot, optional second line) in one place: top centre on desktop, above the GAS pad on touch screens (centred right of the Swap button), top centre in the menus. `notify(text, col, {sub, ttl, key, strong})` in `ui/notify.ts`; `showToast` and `rcBanner` are thin wrappers. Up to 3 stack, newest nearest the anchor; a note with the same `key` replaces the older one (`rc`, `lap`, `coach`).
 - Dot colours (`NCOL`): purple best/fastest, green good, yellow slow, red off track / out, orange lost place, white race-control warning, orange (with outline) penalty, grey info.
 - Lap complete is now one line: laps done and the gap to the leader ("Lap 2 of 5 · 3.4 s behind Vance", or "Leading by 1.8 s"); the dot colour still grades the lap. The big lap card, the old centre toast and the race-control banner are gone.
 - Timing panel: no Last / Best lines. Time penalties are a yellow "+5" / "+10" badge floating just right of the panel on that driver's row. Your teammate's row is outlined instead of filled grey.
 - Race-control notes: a black-and-white track-limits flag icon for track-limits warnings, a warning-triangle icon (and orange outline) for time penalties.
-- Touch layout (`layoutPads()` in `ui/controls.ts`, run by `updatePads` and on resize): the speed panel sits left of the pedal pads, bottom-aligned (compact: no pedal bars, when narrower than 250 px; above the steering pads when those take the left side); Swap sits centred above the main pedal (above the gear-up / DRS pads if present). The big throttle-only GAS pad is `min(40vw, 190px)` wide.
+- Touch layout (`layoutPads()` in `ui/controls.ts`, run by `updatePads` and on resize): the speed panel sits left of the GAS pad, bottom-aligned (compact: no pedal bars, when narrower than 250 px; above the steering pads when those take the left side); Swap sits centred above GAS (above the gear-up / DRS pads if present). The big GAS pad is `min(40vw, 190px)` wide.
 - Timing panel: no race clock (only "Get ready…" before the start).
 - Timing panel gaps are relative to your car: −x.x for cars ahead, +x.x behind, ±nL when lapped; your own row has no gap.
 - Fonts: **Geist** (sans, SIL OFL, `public/fonts/Geist-Variable.woff2`, CSS `--sans`) for all text, Geist Mono (`--mono`) for numbers; canvas labels use Geist too.
@@ -387,27 +385,103 @@ Playable build: https://matthewtorgerson.github.io/racing-line/ (GitHub Pages, b
 
 - Online races start from a random grid with the human players at the back: the AI cars shuffled at the front, the players shuffled behind them (`hostStart` in `net/netcode.ts`). The host picks the grid and sends it, so every player sees the same one.
 
-## v17.13 — joining a room: retries, a relay, hosts that stay findable; name read again
+## v17.13 — dynamic racing line (`src/sim/dynline.ts`, `src/sim/lines.ts`)
 
-Reported from two phones: opening the connection "is very inconsistent and often doesn't complete", and the name typed in the lobby wasn't there at the next join. Everything here is in `net/multiplayer.ts` unless noted; `tests/multiplayer.spec.ts` covers it with a stand-in for PeerJS that lives inside the page (no internet needed).
+Full write-up: [dynamic-racing-line.md](dynamic-racing-line.md). Tools: [tools/README.md](../tools/README.md).
 
-- **Relay (TURN).** `makeP2PApi` gave PeerJS its own `config` (two STUN servers), which _replaces_ PeerJS's defaults, and the defaults are where its free TURN relay is (`eu-0`/`us-0.turn.peerjs.com`). So there was no relay at all: two devices that can't reach each other directly (mobile data, guest Wi-Fi, a router that keeps its devices apart) could never connect. `iceServers()` now merges our STUN servers with whatever the loaded PeerJS ships with (`window.peerjs.util.defaultConfig`), without duplicates, plus the `TURN` constant if filled in. Not verified from the build sandbox (it blocks STUN/TURN traffic); a relay login of your own in `TURN` is still the dependable option.
-- **Host and guest are fixed roles.** Before, every joiner first tried to register the room's id and only became a guest when that failed. A guest who arrived while the host was off the matchmaking server (see below) therefore opened a second, empty room under the same code ("No host here yet"), and the real host could then never get its id back. Now `join(code, { host })`: the host registers `racingline-mt-<code>`, guests only ever connect to it. A new room whose code is taken picks another code (up to 3).
-- **Retries** (`P2P.tries` = 3), each step shown in the joining dialog:
+- **Why:** in one-button driving the car chased one fixed line; arriving too fast or off it meant a skid back towards it. Now a planner re-plans from the car's real position, heading and speed and steers along that plan. Controls are unchanged (hold or lift the gas).
+- **Line Difficulty** (Settings · Driving, pause menu, lobby; `L` cycles in a race; `opts.dynlv`, default 3): Novice / Intermediate / Cautious Expert / Perfect Expert, or Classic (the old fixed line). Each level is the fastest line within its reserves:
+  - Novice: 86% of the grip, 62% of the brakes, 2.2 m from the road edge; lifting holds your speed.
+  - Intermediate: 93%, 78%, 1.5 m.
+  - Cautious Expert: 97%, 90%, 1.0 m.
+  - Perfect Expert: 99.5%, 98.5%, 0.3 m, and it plans skids into its braking.
+- **The reserve is the player's:** with the gas held the car uses its real grip, so lifting later than the line says is faster until the road runs out. When too fast the driver turns in at the tyre limit and skids the speed off.
+- **Racing Line** setting (`opts.line`: 0 Hidden, 2 Difficult Turns, 1 Shown; `H` cycles): shown by default (v17.14; races used to start hidden); practice and races each remember their own choice (`lineP` / `lineR`). Difficult Turns draws only each circuit's three to five heaviest braking points (lose 100 km/h or more, or drop to 55% of the speed or less), from about two seconds before the braking point.
+- **The drawn line** (`src/render/line.ts`): the level's own line, the same every lap (v17.17; until then the plan being steered was drawn solid from the car and the level's line dashed beyond it). Green gas / yellow hold / red brake / orange brake with a skid, a white bar where each braking starts.
+- **Opponents drive the lines too:** Easy = Novice, Medium = Intermediate (was "Normal"), Hard = Cautious Expert, each for its own car, at about 96.5% / 97.5% / 97.5% of the line's own speeds (`DYN_AIB`), with the existing traffic and defending logic. Lone Star solo AI laps: 57.0 / 54.0 / 52.8 s (were 66.5 / 62.7 / 60.0 s on the fixed line).
+- **Other cars:** the player's planned path ignores moving cars (a pass-planning version was removed: unpredictable); the contact assist brakes behind them; stopped cars are steered round.
+- **Lines are ready-made:** `public/dynlines.json` holds all 320 (8 circuits × 5 cars × 4 levels × dry/wet), built by `npm run lines`, fetched at start-up outside the bundle. A missing or out-of-date line is built in the browser in the background and cached in `localStorage`.
+- **Online:** every player's car is planned locally at their own Line Difficulty (a personal control in the lobby); the host drives the AI on the room's Opponents line. The network protocol is unchanged.
+- **Line builder:** periodic B-spline of lateral offsets (848 control points), lap model with the game's physics and curvature measured on the drawn path, searched by smooth multi-point bumps coarse to fine, then a wide-entry step per corner. Lone Star, Rosso, bot lifting on time: Novice 56.1 s, Intermediate 53.7 s, Cautious Expert 52.4 s, Perfect Expert 51.4 s (fixed line: 61.1 s).
+
+## v17.14 — Classic from the experts, AI timing
+
+- **Classic is a fixed line taken from the experts** (`adoptClassic`, `src/sim/lines.ts`): the average of the five cars' Cautious Expert lines for the circuit and weather, scaled in to the classic 1.1 m edge margin, replacing the elastic-band line once the ready-made lines have arrived. Still one fixed line for everyone, followed by pure pursuit; Lanes and Overtake steering use it too. Its speed profile uses the line's own curvature taken 10% sharper (`CLASSIC.care`). Lone Star in Classic: 54.8 s (was 61.1 s), with under a second of sliding a lap.
+- **AI timing** (`AI_TIMING`, `src/sim/ai.ts`): on a dynamic line each braking zone is met early or late by a normally distributed error, spread 0.20 s Easy / 0.12 s Medium / 0.08 s Hard (a quarter less for the most consistent drivers), around an aim 0.10 / 0.08 / 0.08 s early. This replaces the wandering pace and the random late-braking moment (both still used on the classic line).
+- **AI in traffic** (`AI_LANE`): a car away from its line takes corners up to 12% slower, in proportion to its distance from the line (full at 3 m) and how hard the line corners over the next 1.5 s.
+- **Pace** (`DYN_AIB`): 97.3% / 98.3% / 98.3% of the line's speeds, which with the early aim keeps AI lap times where they were (Lone Star solo 57.1 / 54.1 / 52.9 s).
+- **Racing Line is shown by default** in races as well as in practice (races used to start with it hidden). Practice and races still remember their own choice.
+- **Result:** AI time off the tarmac in test races fell from 0.7–2.3% of race time to 0.1–0.5%, and contacts fell with it (`node tools/ai-offs.cjs`).
+
+## v17.15 — remote cars where they really are
+
+Players saw each other's cars about 15–18 m behind where they really were (more than three car lengths at racing speed), so side-by-side racing didn't line up between screens. Two causes, both fixed in `net/netcode.ts`:
+
+- **Latency was assumed, not measured.** The extrapolation added a fixed 50 ms for the network. Every presence now carries the sender's clock (`ts`) and an echo of each peer's last `ts` with how long it was held; the peer that gets its own `ts` back computes the round trip in its own clock (`MP.rtt`, minimum seen drifting up slowly). Half of it is the one-way delay used to extrapolate remote cars (`oneWay()`) and to follow the host's race clock.
+- **The smoothing lagged.** On each new state the correction was measured against where the car was drawn on the previous frame, so every packet pulled the car back by a frame of travel. Now the correction is the gap between the previous state's prediction and the new one at the same moment (`predict()`), fading at 6/s, while the prediction moves the car at full speed in between.
+
+Measured with two games side by side in one page (fake PeerJS, 2 players, 20 s of racing at 40–90 m/s), error of each player's view of the other car along its heading:
+
+| One-way latency                  | Before                          | After                            |
+| -------------------------------- | ------------------------------- | -------------------------------- |
+| 30 ± 10 ms                       | —                               | +0.2 m median, 95% within 2 m    |
+| 120 ± 30 ms                      | −17.5 m median, 5–8% within 2 m | 0.0 m median, 89–95% within 2 m  |
+| 150 ± 60 ms, 2% stalls of 300 ms | —                               | −0.1 m median, 84–89% within 2 m |
+
+What remains is what any extrapolation has: when a driver brakes or turns in, the other screen finds out one latency later (≈ v × latency of error until the next state, a car length or two at 150 ms). Contacts with remote cars still only move the local car.
+
+## v17.16 — joining a room, and the lobby's settings
+
+Joining showed nothing until the lobby appeared (3.3 s from an invite link), and a mistyped code "joined" an empty room with no host. `net/multiplayer.ts` (`enterRoom`, `makeP2PApi`) and the new `net/joining.ts`:
+
+- **Waiting screen** (`#mpWait`): up at once when a room is opened or joined, with a loading bar and the step in progress ("Reaching the matchmaking server…", "Connecting to the host…", "Opening your room…"), a Cancel button, and after 4 s a line saying it can take up to ten seconds. Each step moves the bar on and it creeps in between, so it never stands still.
+- **An invite link shows the screen with the first paint**, before the game's code has loaded: a two-line script in `index.html` sets the class `joining` on `<html>` when the address has a room code, and the stylesheet shows `#mpWait` ("Joining Race · Loading the game…") in place of the main screen. `net/joining.ts` takes over when it runs.
+- **Your name is remembered** in `localStorage` (`hcgp_nick`, as before) and now also in a year-long cookie of the same name (`cookie` in `core/dom.ts`); whichever survives restores the other at start-up. Clearing the box keeps the old name until a new one is typed. The name is read from the box on every kind of edit (`commitName`: input, change, key up, end of composition, blur, leaving the page) and again whenever the player's state is sent to the room, because autofill and some phone keyboards fill a box without an `input` event and the name was then shown but not saved. `store.set` no longer gives up when storage is full: it drops the cached racing lines (`hcgp_dynl_*`, which can be rebuilt) and saves again.
+- **Clear buttons:** the name box and both room-code boxes have an × in a circle at their right end (`.clr` / `.clrX`), 46 px wide, always shown; the text never runs under it. One tap empties the box and keeps the keyboard up. The button keeps the focus in the box by cancelling `mousedown`, not `pointerdown`: in Safari a cancelled `pointerdown` drops the click that follows a tap, so the first version of the button did nothing on an iPhone, and what was typed after tapping it never reached the box (found with Playwright's WebKit and iPhone emulation; Chromium does not show it).
+- **A guest's Room page** starts with their name and the players; the invite code and QR, which they have just used, come below (`#lobby.guest`). The host's still starts with the code and QR.
+- **Failures are explained**, with Try Again and Back (Back returns to the join box with the code still in it): no race with that code, the host can't be reached, the matchmaking server can't be reached.
+- **Faster:**
+  - Outside claude.ai the game no longer waits 1.6 s for claude.ai's room service before loading PeerJS.
+  - A guest connects straight to the host. It used to ask for the room's own id first, a wasted round trip to the matchmaking server, and the reason a wrong code opened an empty room.
+  - The connection to the matchmaking server is opened ahead of time when the Multiplayer panel or the join box is opened (`mpWarm`), and dropped after 90 s if unused.
+  - Measured on one machine (two tabs): invite link to lobby 3.3 s → 1.2 s, with the waiting screen up from 0.45 s; join by code 1.6 s → 1.2 s, or 0.4 s with the connection already open; online play ready after page load 2.0 s → 0.5 s.
+- **A new room's code that is already taken** is replaced by another (up to three tries) instead of failing.
+- **More than one tab:**
+  - The invite link opened in a second tab of the host's browser joins as a second player.
+  - A host that reloads its page takes its room back (the tab remembers the code in `sessionStorage`).
+  - A host that closed its tab and opens the link again reopens the room as host (the browser remembers the last room it hosted for 12 hours, `hcgp_mphost`); if another tab still hosts it, the link joins that one.
+  - A host tab in the background keeps its room going. Browsers slow a hidden tab's timers to once a second and later once a minute, and the hub sent the player list on a timer; it now also sends it when a guest connects and when a guest's update or heartbeat arrives late for the timer, and a guest answers the hub's list with a heartbeat when its own timer is late.
+  - Not changed: a hidden tab does not draw or simulate (the browser stops its frames), so in a race only the tab in front drives.
+- **Lobby settings:** the Settings step now has everything the pause menu has. "Display & Sound" (`LB_VIEW` in `net/lobby.ts`): Camera, Racing Line, Turn Numbers, Sound Effects, Music, each player's own and saved as in the menu. The Racing Line row shows the practice or race choice to match the host's Session (`linePractice()` reads the room's session while in the lobby).
+
+## v17.17 — the drawn line is the level's fixed line
+
+- **What is drawn** on Novice, Intermediate, Cautious Expert and Perfect Expert (`src/render/line.ts`): the best line for that Line Difficulty, fixed on the road for the whole lap, solid, coloured by the line's own speeds (green gas, yellow hold, red brake, orange brake with a skid) with a white bar where each braking zone starts. It does not move with the car.
+- **What drives the car** is unchanged: the planner. On the line and at its speeds the car follows the painted line. Off it, or too fast for it, the planner works out the best way on from where the car really is and steers that; this path is no longer drawn, and neither is the pulsing red that warned when no path stayed on the road.
+- **Why:** a line that redrew itself under the car told the player where the car was going rather than where it should be. The fixed line is the reference to drive to; the planner quietly handles the recovery. Measured in practice at Lone Star: knocked 3.5 m off the line at 310 km/h, the car is back within 0.25 m of it about 2 s later while the painted line stays put.
+- Difficult Turns still shows only the heaviest braking points, now of the fixed line. Classic is unchanged.
+
+## v17.18 — joining a room: retries, a relay, hosts that stay findable; name read again
+
+Reported from two phones: opening the connection "is very inconsistent and often doesn't complete", and the name typed in the lobby wasn't there at the next join. This was written on an older base and carried over onto v17.16's join flow, whose waiting screen (`#mpWait`), fixed host and guest roles and host reload it shares. Everything here is in `net/multiplayer.ts` unless noted; `tests/multiplayer.spec.ts` covers it with a stand-in for PeerJS that lives inside the page (no internet needed).
+
+- **Relay (TURN).** `makeP2PApi` gave PeerJS its own `config` (two STUN servers), which _replaces_ PeerJS's defaults, and the defaults are where its free TURN relay is (`eu-0`/`us-0.turn.peerjs.com`). So there was no relay at all: two devices that can't reach each other directly (mobile data, guest Wi-Fi, a router that keeps its devices apart) could never connect. `iceServers()` now merges our STUN servers with whatever the loaded PeerJS ships with (`window.peerjs.util.defaultConfig`), without duplicates, plus the `TURN` constant if filled in. Not verified: the sandbox it was written in blocks STUN/TURN traffic. A relay login of your own in `TURN` is still the dependable option.
+- **Retries** (`P2P.tries` = 3), each step and attempt shown on the waiting screen ("Still connecting to the host… (try 2 of 3)"):
   - Matchmaking server: 10 s per attempt (`openMs`), again on network/server/socket errors and timeouts, pausing 0.5 s then 1 s.
   - Connection to the host: 8 s per attempt (`connMs`). If the host hasn't answered the request after 3.5 s (`answerMs`, no remote description on the connection) the attempt is dropped and repeated straight away.
-  - "No such room": asked twice, 3.5 s apart (`findMs`), before saying so.
+  - "No such room": asked twice, 3.5 s apart (`findMs`), before saying so ("Looking for the room…").
   - These numbers come from measuring the PeerJS cloud server: it answers "no such peer" in ~0.2 s, but only once per room every ~3 s (requests in between get no reply, from any sender), and it does not hold a request for a host that registers a moment later.
 - **Hosts stay findable.** A phone drops the socket to the matchmaking server when its screen locks or another app is in front, often without telling the page; the room then can't be found. So:
   - `keepRegistered`: reconnect when the socket drops (pauses of 0.25 s doubling to 8 s), and at once on `visibilitychange`/`online`. A host whose page was hidden for more than 4 s (`staleMs`) registers afresh on coming back, whatever the socket claims. Open connections are not affected.
   - Screen wake lock (`holdScreen`) while in a room, taken again whenever the page becomes visible.
-  - A reloaded host page comes back as host of the same code: `sessionStorage` `hcgp_hosting` = `{ code, token, t }` (6 h), and the same PeerJS `token` lets it take its id back even if the server still holds the old registration. Cleared on leaving the room.
+  - A reloaded host page takes its room back with the key it was opened with: `sessionStorage` `hcgp_hosting` = `{ code, token, t }` (this replaces v17.16's `rl_host`), and the same PeerJS `token` lets it have its id back even if the server still holds the old registration. Cleared on leaving the room. The browser-wide memory of the last hosted room (`hcgp_mphost`, v17.16) is unchanged.
   - The hub keeps its own copy of its id (PeerJS clears `peer.id` while it's off the server, which made the host lose its "(you)" row).
   - After a freeze (tick gap > 3 s on the hub, heartbeat gap > 5 s on a guest) the silence timers start again instead of dropping everyone at once.
-- **Joining dialog** (`#mpConn`): up at once for an invite link, before online play is even ready (hosting: only if it takes more than 0.6 s). Shows the step and attempt; Cancel stops waiting; a second Join tap while one is running is ignored (`MP.joining`), which also ends the doubled "Joining…" rows. On failure it stays up with the reason and Try Again (`joinError`): no such room / the host isn't answering (screen off?) / found the room but no route between the devices / matchmaking server unreachable.
-- **Faster start:** outside claude.ai the game no longer waits 1.6 s for claude.ai's room service before loading PeerJS. Measured against the real server from one machine: online play ready 2.3 s → 0.7 s after load, guest in the lobby 3.9 s → 1.9 s after opening the invite link (the old flow also registered twice).
-- A guest dropped while in the lobby rejoins by itself ("Reconnecting to Room …"); in a race it's still "Lost connection" and back to the menu.
-- **Name.** It was read from storage once, at page load, so a tab or home-screen app that had been open since before the name was last typed kept showing (and sending) the old one. Now `loadNick()` runs every time a room is entered and the lobby opens, a `storage` event and `visibilitychange` keep an open tab in step, and `saveNick()` saves on every keystroke and on leaving the box (which then shows what was saved: letters, digits, space and `. _ -`, 16 characters). Names arriving from other players get the same filter before they reach on-screen messages (`netcode.ts`). What can't be fixed from the page: a private tab, an in-app browser, or a home-screen icon each keep their own storage, so a name typed in one isn't known in another.
+- **Failures say more** (`joinError`): no such room / the host isn't answering (screen off?) / found the room but no route between the devices / matchmaking server unreachable. The failure screen has its own title ("Couldn't Join AB3K9", "Lost Connection to AB3K9"). Cancel and Back also clear the room code from the address.
+- **A guest dropped while in the lobby rejoins by itself** ("Reconnecting to Race …"); if the room has gone it says so, and Back goes to the main screen. In a race it's still "Lost connection" and back to the menu.
+- **The lobby opens with the players already in it:** a guest waits up to 1.5 s for the hub's first list before the lobby is shown.
+- **Name.** It was read from storage once, at page load, so a tab or home-screen app that had been open since before the name was last typed kept showing (and sending) the old one. Now `loadNick()` runs every time a room is entered and the lobby opens, and a `storage` event and `visibilitychange` keep an open tab in step. Runs of spaces are collapsed. Names arriving from other players get the same filter (`cleanNick`) before they reach on-screen messages (`netcode.ts`). What can't be fixed from the page: a private tab, an in-app browser, or a home-screen icon each keep their own storage, so a name typed in one isn't known in another.
+- **Tests:** eight in `tests/multiplayer.spec.ts`: a guest retries until the connection opens; a guest never opens a room of its own; a failed join says why and Try Again gets in; Cancel stops a waiting join and a second tap starts no other; a dropped guest rejoins; a reloaded host comes back as host; the name is saved as typed and read again; the relay is in the server list.
 
 ## Model
 
@@ -443,7 +517,7 @@ Reported from two phones: opening the connection "is very inconsistent and often
   - `band()`/`edge()` take `SIDES={R,L}`.
   - Side effect: running wide on the inside now meets a wall sooner. COTA flat-out vs ideal went from ~−0.6 s to +3.9 s.
 - **Elevation**: `HT[i]`, `SL[i]`; gravity along the slope; slope shading; gradient readout. Cars are placed at the right height when the grid is set up (`locate()` in `setupRace`). This fixed cars floating or sinking before lights out on raised grids such as Interlagos and COTA (hot-fixed live first).
-- The racing line comes from elastic-band curvature minimisation. Speed profiles come from `profileFor(stats)` (grip, braking and acceleration passes, rain, slope, team).
+- The classic racing line comes from elastic-band curvature minimisation (the dynamic lines of v17.13 are searched for lap time instead). Speed profiles come from `profileFor(stats)` (grip, braking and acceleration passes, rain, slope, team).
 - Surfaces (grip; extra drag):
   - 0 asphalt: 34.
   - 1 kerb: 31.
@@ -460,6 +534,11 @@ Reported from two phones: opening the connection "is very inconsistent and often
 
 ## Change log
 
+- Catch-up sliders to 50× (Nov 2026): Slipstream, DRS Strength and Catch-up Grip now reach 50×. The sliders step through fixed stops (`STRENGTH` in `src/ui/widgets.ts`: 0.25 apart up to 2, then 2.5–5 by halves, 6–10, 12, 15, 20 and every 5 to 50) so the range near Normal stays easy to hit on a phone.
+- Catch-up grip (Nov 2026): in races, every car behind the leader gets more grip the further back it is: at Normal up to +5% at 1000 m (about 13–15 s) behind, rising evenly from nothing at the leader (`CATCHUP` in `src/sim/step.ts`). The **Catch-up Grip** slider (Rules, pause menu, lobby) goes from Off through Normal to 5× (`opts.cgrip`, stored as `hcgp_cgrip`, Normal by default). It works through `c.gm`, the car's grip multiplier, so the physics, the AI's corner speeds, the auto-brake assist and the planner all use it. Not in practice sessions. Online the host sets it; a guest of a host without the setting races without it. The strength sliders also lost the text-box frame that `.card input` gave them.
+- Catch-up strength (Nov 2026): Slipstream is a slider from Off (0) and Normal (1) up to 5× in steps of 0.25 (`opts.tow`; a stored 1 from the old On stays Normal), and a new **DRS Strength** slider goes from Normal (1) to 5× (`opts.drsPow`, stored as `hcgp_drsPow`; turning DRS off is still the DRS rule). Both multiply the effect in `physics()` (slipstream: +7.5% top speed and +0.9 m/s² pull at full tow; DRS: +5.5% top speed and +6% pull) and the matching AI and assist speed allowances. `c.tow` itself stays 0..1 (how much tow the car has), so the HUD chevrons, the wind sound and the Slipstream King award are unchanged. Online, the host sets both for everyone in the lobby.
+- Throttle only (Nov 2026): the Pedals setting is gone (main menu, pause menu, online lobby and the in-race button), and with it Brake only, Throttle + Brake and Auto pedals, the BRAKE pad, the brake keys (Down / S) and the "tap to launch" start. Lock-ups went too: they only happened when you worked the brake yourself.
+- Tyre wear removed (Nov 2026): no Tyre Wear rule (single player or online), no tyre bar in the HUD, no Tyre Life bar on the team cards and no tyre-care driver trait. Grip now changes only with damage, dirt and weather.
 - v2–v12: see earlier entries: runoff/AI fixes, gravel, audio, slipstream, COTA/Interlagos, Monaco, tyres/damage/yellows, multiplayer, rain, Bahrain night, western theme, contact reduction, team stats/logos/flags, Lane steering, elevation, painted run-off, pits and flags, Pedals/Steering split, big painted fields, Overtake steering.
 - v12.1 (hotfix): grid cars are drawn at the right height before lights out on elevated grids.
 - v13: renamed **Racing Line**.
@@ -476,9 +555,16 @@ Reported from two phones: opening the connection "is very inconsistent and often
 
 ## Ideas next
 
-- Pit stops using the new entry/exit lanes (tyres, repairs; wet vs slick tyres), DRS zones, changing weather.
+- Pit stops using the new entry/exit lanes (repairs; wet vs slick tyres), DRS zones, changing weather.
 - Make the corner stands read better from above: roofs, or a stepped seating texture.
 - Car liveries with team logos.
 - Online: chat/reactions, spectating, flag picker for humans.
 - Crowd audio only with a real recorded sample.
 - Performance: if phones struggle on Sakura Ring or Neon Strip, cut petal count, batch neon strokes, or cache the crossover quads.
+
+## v17.18 — Isometric camera only, no lift bars
+
+- The chase camera is gone: the camera always looks along the fixed isometric bearing `ISO_A` (−45°, tilt 0.5,
+  height scale 0.8). Removed with it: the Camera setting (Settings, pause menu, lobby view options), the hidden
+  Cam button and `toggleCam`. A stored `hcgp_cam` is now ignored.
+- The racing line no longer draws the white bar where each braking zone starts; the red section shows it.

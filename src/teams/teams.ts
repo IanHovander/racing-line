@@ -3,13 +3,19 @@ import { clamp } from '../core/dom';
 // ---------- team logos and driver flags (original artwork, inline SVG) ----------
 export const LOGOS = [
   '<path d="M20 2 L36 8 V20 C36 30 28 36 20 38 C12 36 4 30 4 20 V8 Z" fill="#d81f26" stroke="#ffd400" stroke-width="2"/><path d="M23 7 L13 22 H19 L16 33 L27 17 H21 Z" fill="#ffd400"/>',
-  '<path d="M20 2 L36 11 V29 L20 38 L4 29 V11 Z" fill="#c8cdd3" stroke="#00b3a4" stroke-width="2"/><path d="M8 24 L20 12 L32 24 H27 L20 17 L13 24 Z" fill="#00b3a4"/><path d="M12 30 L20 22 L28 30 H24 L20 26 L16 30 Z" fill="#4a515b"/>',
-  '<path d="M6 34L14 6h12c7 0 10 4 9 9s-6 8-12 8h-5l-3 11z" fill="#ff7a00"/><path d="M6 34l5-18h8l-1.5 7H18l-3 11z" fill="#1d8cff"/><path d="M19 12l-2 6h6c3 0 4-1 4.5-3S27 12 24 12z" fill="#0d1014"/>', // Papaya: two-tone chevron P
-  '<path d="M20 2 C34 8 38 22 20 38 C2 22 6 8 20 2 Z" fill="#0e8a55" stroke="#c9f24d" stroke-width="2"/><path d="M11 11 H17 L20 23 L23 11 H29 L22 30 H18 Z" fill="#c9f24d"/>',
+  '', // Argent GP logo is the supplied transparent PNG asset.
+  '', // Papaya logo is the supplied transparent PNG asset.
+  '', // Verde logo is the supplied transparent PNG asset.
   '<path d="M20 1 L38 20 L20 39 L2 20 Z" fill="#2449c4" stroke="#ff3b6b" stroke-width="2"/><path d="M20 9 L23 17 H31 L25 22 L27 30 L20 25 L13 30 L15 22 L9 17 H17 Z" fill="#ff3b6b"/>',
 ];
 export const teamLogo = (t, s) =>
-  `<svg class="logo" width="${s}" height="${s}" viewBox="0 0 40 40" aria-hidden="true">${LOGOS[t] || ''}</svg>`;
+  t === 1
+    ? `<img class="logo" width="${s}" height="${s}" src="./argent-gp-logo.png" alt="" aria-hidden="true">`
+    : t === 2
+      ? `<img class="logo" width="${s}" height="${s}" src="./papaya-racing-logo.png" alt="" aria-hidden="true">`
+      : t === 3
+        ? `<img class="logo" width="${s}" height="${s}" src="./verde-team-logo.png" alt="" aria-hidden="true">`
+        : `<svg class="logo" width="${s}" height="${s}" viewBox="0 0 40 40" aria-hidden="true">${LOGOS[t] || ''}</svg>`;
 export const FLAGS = {
   MX: [
     'Mexico',

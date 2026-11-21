@@ -1,5 +1,6 @@
 import { GS } from '../state';
 import { cars, opts } from '../game/race';
+import { DYN, dynOn } from '../sim/lines';
 import { PROF } from '../sim/profile';
 import { standings } from '../sim/step';
 import { gapT, progress } from '../sim/timing';
@@ -32,7 +33,7 @@ export function coach(c, dt) {
   }
   if (K.n > 0 && K.C) {
     const C = K.C,
-      pv = PROF[c.team] || GS.vf;
+      pv = opts.steer === 0 && dynOn(c) ? DYN.line.v : PROF[c.team] || GS.vf; // the line being driven
     K.minV = Math.min(K.minV, c.v);
     K.minP = Math.min(K.minP, pv[c.idx]);
     if (c.surf >= 2 || Math.abs(c.lat) > GS.HW + 0.8) K.off = true;

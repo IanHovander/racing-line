@@ -154,18 +154,18 @@ test('a guest never opens a room of its own: a code nobody is hosting is reporte
 test('a failed join says why, and Try Again gets in once the host is there', async ({ page }) => {
   const errors = await open(page);
   await page.evaluate(() => window.enterRoom('late1', false));
-  await expect(page.locator('#mpConn')).toBeVisible();
-  await expect(page.locator('#mcMsg')).toContainText('No race found with code LATE1');
-  await expect(page.locator('#bMcRetry')).toBeVisible();
+  await expect(page.locator('#mpWait')).toBeVisible();
+  await expect(page.locator('#mwStep')).toContainText('No race found with code LATE1');
+  await expect(page.locator('#mwRetry')).toBeVisible();
   expect(await page.evaluate(() => [!!window.MP.room, !!window.MP.joining])).toEqual([false, false]);
   // the host opens the room; the guest taps Try Again
   await page.evaluate(async host => {
     window.__hub = await window.makeP2PApi().join('late1', { host: true });
     await window.__hub.presence(host);
   }, HOST);
-  await page.click('#bMcRetry');
+  await page.click('#mwRetry');
   await expect(page.locator('#lobby')).toBeVisible();
-  await expect(page.locator('#mpConn')).toBeHidden();
+  await expect(page.locator('#mpWait')).toBeHidden();
   await expect(page.locator('#lbPlayers')).toContainText('Hosty');
   await expect(page.locator('#lbPlayers')).toContainText('(you)');
   expect(await page.evaluate(() => [window.MP.host, window.MP.code, location.hash])).toEqual([
@@ -186,10 +186,10 @@ test('Cancel stops a join that is still waiting, and a second tap on Join does n
     window.enterRoom('slow1', false);
     window.enterRoom('slow1', false); // an impatient second tap
   });
-  await expect(page.locator('#mcMsg')).toContainText('Connecting to the host');
+  await expect(page.locator('#mwStep')).toContainText('Connecting to the host');
   expect(await page.evaluate(() => window.__net.connects)).toBe(1);
-  await page.click('#bMcCancel');
-  await expect(page.locator('#mpConn')).toBeHidden();
+  await page.click('#mwCancel');
+  await expect(page.locator('#mpWait')).toBeHidden();
   await expect(page.locator('#home')).toBeVisible();
   expect(await page.evaluate(() => [!!window.MP.room, !!window.MP.joining, location.hash])).toEqual([
     false,
@@ -214,7 +214,7 @@ test('a guest dropped while waiting in the lobby gets straight back in', async (
     await window.__hub.presence(host);
   }, HOST);
   await expect.poll(() => page.evaluate(() => window.__net.connects)).toBeGreaterThan(1);
-  await expect(page.locator('#mpConn')).toBeHidden();
+  await expect(page.locator('#mpWait')).toBeHidden();
   await expect(page.locator('#lobby')).toBeVisible();
   await expect(page.locator('#lbPlayers')).toContainText('(you)');
   await expect(page.locator('#lbPlayers')).toContainText('Hosty');
@@ -225,9 +225,9 @@ test('a guest dropped while waiting in the lobby gets straight back in', async (
   ]);
   // if the room has really gone, the player is told, and Close goes back to the main screen
   await page.evaluate(() => window.__hub.leave());
-  await expect(page.locator('#mcTitle')).toHaveText('Lost Connection to DROP1');
-  await expect(page.locator('#mcMsg')).toContainText('no longer open');
-  await page.click('#bMcCancel');
+  await expect(page.locator('#mwTitle')).toHaveText('Lost Connection to DROP1');
+  await expect(page.locator('#mwStep')).toContainText('no longer open');
+  await page.click('#mwCancel');
   await expect(page.locator('#home')).toBeVisible();
   await expect(page.locator('#lobby')).toBeHidden();
   expect(errors).toEqual([]);

@@ -5,8 +5,10 @@ import { MP, hostPeer, mpCfg, mpPresence } from './multiplayer';
 import { qrSvg } from './qr';
 import { TEAMS, teamLogo } from '../teams/teams';
 import { TRACKS } from '../track/circuits';
+import { setMusic, setSfx, unlockAudio } from '../audio/audio';
+import { lineLoad, lineSave } from '../sim/lines';
 import { showToast } from '../ui/controls';
-import { syncAllSegs } from '../ui/widgets';
+import { STRENGTH, STRENGTH_OFF, makeSlider, syncAllSegs } from '../ui/widgets';
 import { placeCircuitPicker, showCircuit, teamCardHtml } from '../ui/menu';
 // ---- lobby: circuit (host), race settings (host), controls (each player)
 export const LB_RULES: [string, string, [number, string][]][] = [
@@ -23,7 +25,7 @@ export const LB_RULES: [string, string, [number, string][]][] = [
     'Opponents',
     [
       [0, 'Easy'],
-      [1, 'Normal'],
+      [1, 'Medium'],
       [2, 'Hard'],
     ],
   ],
@@ -45,24 +47,8 @@ export const LB_RULES: [string, string, [number, string][]][] = [
     ],
   ],
   [
-    'tyres',
-    'Tyre Wear',
-    [
-      [0, 'Off'],
-      [1, 'On'],
-    ],
-  ],
-  [
     'damage',
     'Damage & Knockouts',
-    [
-      [0, 'Off'],
-      [1, 'On'],
-    ],
-  ],
-  [
-    'tow',
-    'Slipstream',
     [
       [0, 'Off'],
       [1, 'On'],
@@ -98,16 +84,6 @@ export const LB_RULES: [string, string, [number, string][]][] = [
 ];
 export const LB_CTRL: [string, string, [number, string][]][] = [
   [
-    'pedals',
-    'Pedals',
-    [
-      [0, 'Throttle Only'],
-      [1, 'Brake Only'],
-      [2, 'Throttle + Brake'],
-      [3, 'Auto'],
-    ],
-  ],
-  [
     'steer',
     'Steering',
     [
@@ -115,6 +91,17 @@ export const LB_CTRL: [string, string, [number, string][]][] = [
       [1, 'Lanes'],
       [2, 'Manual'],
       [3, 'Overtake'],
+    ],
+  ],
+  [
+    'dynlv',
+    'Line Difficulty',
+    [
+      [1, 'Novice'],
+      [2, 'Intermediate'],
+      [3, 'Cautious Expert'],
+      [4, 'Perfect Expert'],
+      [0, 'Classic'],
     ],
   ],
   [
@@ -134,16 +121,54 @@ export const LB_CTRL: [string, string, [number, string][]][] = [
     ],
   ],
 ];
+// What the pause menu offers under Display & Sound, so nothing has to wait until the race has started.
+// (Sound Effects and Music are on/off switches: 1 and 0 here, booleans in opts.)
+export const LB_VIEW: [string, string, [number, string][]][] = [
+  [
+    'line',
+    'Racing Line',
+    [
+      [0, 'Hidden'],
+      [2, 'Difficult Turns'],
+      [1, 'Shown'],
+    ],
+  ],
+  [
+    'turns',
+    'Turn Numbers',
+    [
+      [0, 'Hidden'],
+      [1, 'Shown'],
+    ],
+  ],
+  [
+    'sound',
+    'Sound Effects',
+    [
+      [1, 'On'],
+      [0, 'Off'],
+    ],
+  ],
+  [
+    'music',
+    'Music',
+    [
+      [1, 'On'],
+      [0, 'Off'],
+    ],
+  ],
+];
 export function lbRulesInit() {
   MP.rules = {
     practice: 0,
     diff: opts.diff,
     laps: opts.laps,
     rain: opts.rain,
-    tyres: opts.tyres,
     damage: opts.damage,
     tow: opts.tow,
     drsOn: opts.drs ? 1 : 0,
+    drsPow: opts.drsPow,
+    cgrip: opts.cgrip,
     limits: opts.limits,
     yellow: opts.yellow,
   };
@@ -200,6 +225,31 @@ export function renderLobbySettings(cfg) {
         renderLobby();
       }),
     );
+  // catch-up strength: sliders, sent to everyone once the host lets go
+  for (const [k, label, stops] of [
+    ['tow', 'Slipstream', STRENGTH_OFF],
+    ['drsPow', 'DRS Strength', STRENGTH],
+    ['cgrip', 'Catch-up Grip', STRENGTH_OFF],
+  ] as [string, string, number[]][]) {
+    const d = document.createElement('div'),
+      sp = document.createElement('span'),
+      box = document.createElement('div');
+    sp.textContent = label;
+    d.append(sp, box);
+    r.appendChild(d);
+    makeSlider(
+      box,
+      stops,
+      src[k] === undefined ? 1 : +src[k],
+      !MP.host,
+      () => {},
+      v => {
+        MP.rules[k] = v;
+        mpPresence();
+        renderLobby();
+      },
+    );
+  }
   $('lbRulesNote').textContent = MP.host
     ? 'You set these for everyone.'
     : cfg
@@ -214,6 +264,31 @@ export function renderLobbySettings(cfg) {
       segRow(label, list, cur, false, v => {
         if (k === 'drsMode') {
           store.set('drs', v);
+        } else {
+          opts[k] = v;
+          store.set(k, v);
+        }
+        try {
+          syncAllSegs();
+        } catch (e) {}
+        renderLobby();
+      }),
+    );
+  }
+  // display and sound: the same switches as the pause menu
+  if (MP.phase === 'lobby') lineLoad(); // the Racing Line choice for the session the host has picked (practice or race)
+  const vw = $('lbView');
+  vw.textContent = '';
+  for (const [k, label, list] of LB_VIEW) {
+    const cur = k === 'sound' || k === 'music' ? (opts[k] ? 1 : 0) : opts[k];
+    vw.appendChild(
+      segRow(label, list, cur, false, v => {
+        if (k === 'sound' || k === 'music') {
+          unlockAudio();
+          (k === 'sound' ? setSfx : setMusic)(!!v);
+        } else if (k === 'line') {
+          opts.line = v;
+          lineSave();
         } else {
           opts[k] = v;
           store.set(k, v);
@@ -322,6 +397,7 @@ export function renderLobby() {
     ? `${TRACKS[clamp(cfg.track | 0, 0, TRACKS.length - 1)].name} · ${cfg.laps | 0} Laps · ${cfg.rain ? 'Rain' : 'Dry'}${cfg.practice ? ' · Practice' : ''}`
     : 'Waiting for the host…';
   $('lbRoomTag').textContent = MP.code ? '· Room ' + MP.code.toUpperCase() : '';
+  $('lobby').classList.toggle('guest', !MP.host);
   $('lbCrumb').innerHTML = cfg
     ? `<span class="crumb">›</span><span class="crumb2">${cfg.practice ? 'Practice' : 'Race'}</span>`
     : '';

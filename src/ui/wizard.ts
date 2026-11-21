@@ -1,4 +1,5 @@
 import { GS } from '../state';
+import { lineLoad } from '../sim/lines';
 import { setMusic, setSfx, unlockAudio } from '../audio/audio';
 import { $, clamp, store } from '../core/dom';
 import { opts } from '../game/race';
@@ -10,20 +11,12 @@ import {
   leaveRoom,
   mpCode,
   mpPresence,
+  mpWarm,
   normCode,
-  saveNick,
+  commitName,
 } from '../net/multiplayer';
 import { hostStart } from '../net/netcode';
-import {
-  cycleMode,
-  cycleSteer,
-  resetCar,
-  showToast,
-  swapCar,
-  toggleCam,
-  toggleLine,
-  togglePause,
-} from './controls';
+import { cycleSteer, resetCar, showToast, swapCar, toggleLine, togglePause } from './controls';
 // ---- menu wizard: Mode -> Team -> Circuit -> Settings ----
 export let WZ: any;
 export function wzSteps() {
@@ -118,6 +111,7 @@ export const wzMode = m => {
   WZ.mode = m;
   WZ.picked = true;
   store.set('wzmode', m);
+  lineLoad(); // the Racing Line setting shows the choice for practice or for races
   wzGo(1);
 };
 export const wzHost = () => {
@@ -129,6 +123,7 @@ export const wzJoin = () => {
   $('home').classList.add('hide');
   $('joinDlg').classList.remove('hide');
   $('joinCode').focus();
+  mpWarm(); // a join is coming: connect to the matchmaking server while the code is typed
 };
 export function init(): void {
   WZ = { s: 0, mode: store.get('wzmode', 'solo'), max: 0, group: 'solo' };
@@ -170,14 +165,32 @@ export function init(): void {
       showToast('Copy failed — select the link below');
     }
   };
-  // your name: saved with every keystroke, and tidied (what was actually saved) when you leave the box
-  const nick = $('nick');
-  nick.addEventListener('input', () => {
-    if (saveNick(nick.value)) mpPresence();
+  const nick = $('nick') as HTMLInputElement;
+  // The name is taken from the box on every kind of edit, not only on "input": autofill and some phone keyboards
+  // fill a box without that event, and the name was then shown but never saved.
+  const commit = () => {
+    if (commitName()) mpPresence();
+  };
+  for (const ev of ['input', 'change', 'keyup', 'compositionend']) nick.addEventListener(ev, commit);
+  nick.addEventListener('blur', () => {
+    commit();
+    nick.value = GS.NICK; // (an empty box keeps the name until a new one is typed)
   });
-  nick.addEventListener('change', () => {
-    if (saveNick(nick.value)) mpPresence();
-    nick.value = GS.NICK;
+  addEventListener('pagehide', commit);
+  nick.addEventListener('keydown', e => {
+    if (e.key === 'Enter') nick.blur();
+  });
+  // text boxes with a clear button (.clrX): one tap empties the box and leaves the keyboard up for the new text
+  document.querySelectorAll<HTMLButtonElement>('.clrX').forEach(b => {
+    const box = $(b.dataset.for) as HTMLInputElement;
+    // Do not take the focus from the box (a mouse press on a button would). This must be mousedown: cancelling
+    // pointerdown makes Safari drop the click that follows a tap, and the button then did nothing on an iPhone.
+    b.addEventListener('mousedown', e => e.preventDefault());
+    b.onclick = () => {
+      box.value = '';
+      box.focus();
+      box.dispatchEvent(new Event('input', { bubbles: true }));
+    };
   });
   $('bResume').onclick = togglePause;
   $('bReset').onclick = resetCar;
@@ -190,9 +203,7 @@ export function init(): void {
     $('pSwap').classList.add('on');
     setTimeout(() => $('pSwap').classList.remove('on'), 180);
   });
-  $('bMode').onclick = cycleMode;
   $('bSteer').onclick = cycleSteer;
-  $('bCam').onclick = toggleCam;
   $('bLine').onclick = toggleLine;
   $('bSnd').onclick = () => {
     unlockAudio();

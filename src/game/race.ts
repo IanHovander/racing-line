@@ -3,10 +3,11 @@ import type { Car } from '../types';
 import { GS } from '../state';
 import { H, W, clamp, store } from '../core/dom';
 import { MP } from '../net/multiplayer';
-import { cam } from '../render/camera';
+import { ISO_A, cam } from '../render/camera';
 import { FW } from '../render/effects';
 import { flagFrames, flagImg } from '../render/scenery';
 import { renderLaneInd } from '../sim/ai';
+import { dynPrepare, lineLoad } from '../sim/lines';
 import { locate } from '../sim/physics';
 import { TEAM_STATS } from '../teams/team-stats';
 import { TEAMS } from '../teams/teams';
@@ -38,7 +39,6 @@ export function prewarmFlags() {
 }
 export function setupRace(isAttract, mpGrid?) {
   START.done = false;
-  START.tap = false;
   setTimeout(prewarmFlags, 30);
   GS.LANE_SEL = 0;
   GS.SWAP = null;
@@ -85,7 +85,6 @@ export function setupRace(isAttract, mpGrid?) {
     const lat = g % 2 ? 2.8 : -2.8;
     const c: Car = {
       st: TEAM_STATS[t],
-      tyre: 1,
       dmg: 0,
       gm: 1,
       out: false,
@@ -156,6 +155,8 @@ export function setupRace(isAttract, mpGrid?) {
     GS.mateIdx = cars.findIndex(c => c.mine && c.drv === 1);
   }
   if (isAttract) GS.PRACTICE = false;
+  dynPrepare(); // racing lines for this circuit, weather, Opponents level and the car you drive (now that the grid is known)
+  lineLoad(); // whether the line is drawn: practice and races each remember their own choice
   if (isAttract) {
     GS.ctrl = 0;
     GS.state = 'menu';
@@ -167,25 +168,30 @@ export function setupRace(isAttract, mpGrid?) {
   const cc = cars[Math.max(0, GS.ctrl)];
   cam.x = cc.x;
   cam.y = cc.y;
-  cam.a = opts.cam === 0 ? cc.h : -Math.PI / 4;
+  cam.a = ISO_A;
 }
 export function init(): void {
   opts = {
-    pedals: store.get('defv4', 0) ? store.get('pedals', 0) : (store.set('pedals', 0), 0),
     steer: store.get('defv4', 0) ? store.get('steer', 0) : (store.set('steer', 0), 0),
     team: store.get('team', 0),
     laps: store.get('laps', 5),
     diff: store.get('diff', 1),
-    cam: store.get('camv2', 0) ? store.get('cam', 1) : (store.set('camv2', 1), store.set('cam', 1), 1),
-    line: store.get('line', true),
+    /** the racing line on screen: 0 hidden, 1 shown, 2 difficult turns only. Set by lineLoad() for practice or races */
+    line: 0,
+    /** the line you follow: 0 classic, 1..4 Novice / Intermediate / Cautious Expert / Perfect Expert (sim/lines.ts) */
+    dynlv: clamp(store.get('dynlv', 3) | 0, 0, 4),
     crowd: store.get('crowd', 1),
     rain: store.get('rain', 0),
-    tyres: store.get('tyres', 0),
     damage: store.get('damage', 0),
     yellow: store.get('yellow', 10),
     limits: store.get('limits', 0),
     drs: store.get('defv4', 0) ? store.get('drs', 2) : (store.set('drs', 2), 2),
-    tow: store.get('tow', 1),
+    /** slipstream strength: 0 off, 1 normal, up to 5 (5× as strong) */
+    tow: clamp(+store.get('tow', 1) || 0, 0, 50),
+    /** how much DRS adds: 1 normal, up to 5 (turning DRS off is opts.drs) */
+    drsPow: clamp(+store.get('drsPow', 1) || 1, 1, 50),
+    /** catch-up grip for cars behind the leader: 0 off, 1 normal, up to 5 (sim/step.ts CATCHUP) */
+    cgrip: clamp(+store.get('cgrip', 1) || 0, 0, 50),
     turns: store.get('turns', 1),
     gears: store.get('defv4', 0) ? store.get('gears', 0) : (store.set('gears', 0), store.set('defv4', 1), 0),
     sound: store.get('sound', true),

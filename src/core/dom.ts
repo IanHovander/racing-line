@@ -1,11 +1,12 @@
 // ================= Setup =================
 export const cv = document.getElementById('c') as HTMLCanvasElement,
   ctx = cv.getContext('2d');
+export const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 export let W = 0,
   H = 0,
   DPR = 1;
 export function resize() {
-  DPR = Math.min(2, window.devicePixelRatio || 1);
+  DPR = Math.min(isTouch ? 1.5 : 2, window.devicePixelRatio || 1);
   W = innerWidth;
   H = innerHeight;
   cv.width = Math.round(W * DPR);
@@ -26,7 +27,6 @@ export const wrapA = a => {
   if (a < 0) a += 2 * Math.PI;
   return a - Math.PI;
 };
-export const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 export const store = {
   get(k, d) {
     try {
@@ -37,8 +37,44 @@ export const store = {
     }
   },
   set(k, v) {
+    const s = JSON.stringify(v);
     try {
-      localStorage.setItem('hcgp_' + k, JSON.stringify(v));
+      localStorage.setItem('hcgp_' + k, s);
+    } catch (e) {
+      // Storage is full. The racing lines cached by sim/lines.ts are the only large entries and can be worked out
+      // again, so they make room for the setting (a full store used to drop every later save without a word).
+      try {
+        for (const key of Object.keys(localStorage))
+          if (key.startsWith('hcgp_dynl_')) localStorage.removeItem(key);
+        localStorage.setItem('hcgp_' + k, s);
+      } catch (_) {}
+    }
+  },
+};
+/**
+ * A year-long cookie, as a second place beside `store` for the little that should outlive a browser clearing a
+ * site's storage (the player's name). Same `hcgp_` prefix; kept to the game's own folder.
+ */
+export const cookie = {
+  get(k: string): string | null {
+    try {
+      const m = document.cookie.match(new RegExp('(?:^|; )hcgp_' + k + '=([^;]*)'));
+      return m ? decodeURIComponent(m[1]) : null;
+    } catch (e) {
+      return null;
+    }
+  },
+  set(k: string, v: string): void {
+    try {
+      document.cookie =
+        'hcgp_' +
+        k +
+        '=' +
+        encodeURIComponent(v) +
+        '; max-age=31536000; path=' +
+        location.pathname.replace(/[^/]*$/, '') +
+        '; SameSite=Lax' +
+        (location.protocol === 'https:' ? '; Secure' : '');
     } catch (e) {}
   },
 };

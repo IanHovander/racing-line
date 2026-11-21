@@ -6,6 +6,7 @@ import { cars, opts, setupRace } from '../game/race';
 import { MP, leaveRoom, mpOn, mpPresence, showLobby } from '../net/multiplayer';
 import { renderLobby } from '../net/lobby';
 import { renderLaneInd } from '../sim/ai';
+import { dynPrepare, lineSave, setDynLevel } from '../sim/lines';
 import { buildProfile } from '../sim/profile';
 import { DRIVER_STATS } from '../teams/drivers';
 import { TEAM_STATS } from '../teams/team-stats';
@@ -18,7 +19,7 @@ import { CIRCUIT_PLACE, bindTrackMap, drawTrackMap, elevProfile, setMapData } fr
 import { CIRCUIT_COLS, CIRCUIT_FLAG } from './circuits';
 import { showToast, syncCtrlMenu, updatePads } from './controls';
 import { fmt, updateLights } from './hud';
-import { segInit, syncAllSegs } from './widgets';
+import { STRENGTH, STRENGTH_OFF, segInit, sliderInit, syncAllSegs } from './widgets';
 import { WZ, wzHost, wzJoin } from './wizard';
 /** summary card for one team: tagline, car bars in two columns, one line per driver (team step and lobby) */
 export function teamCardHtml(team: number) {
@@ -29,7 +30,6 @@ export function teamCardHtml(team: number) {
     ['Acceleration', st.acc, 0.97, 1.07],
     ['Braking', st.brk, 0.9, 1.4],
     ['Cornering', st.grip, 0.975, 1.035],
-    ['Tyre Life', 2 - st.tyre, 0.8, 1.3],
     ['Durability', 2 - st.dur, 0.75, 1.2],
   ];
   // summary card: tagline, car bars in two columns, one line per driver
@@ -43,6 +43,13 @@ export function teamCardHtml(team: number) {
     h += `<div class="drv">${flag(t.nat[d], 13)}<b>${t.drivers[d]}</b><span>${DRIVER_STATS[team][d].tag}</span></div>`;
   return h + '</div>';
 }
+const DYN_LV_NOTE = [
+  'Classic: one fixed line, taken from the experts. The car is steered back to it and nothing is re-planned.',
+  'Novice: a slower line with big reserves. Lifting holds your speed, so just lift before the bar; a late lift is forgiven.',
+  'Intermediate: quicker, with a moderate reserve for late lifts and early gas.',
+  'Cautious Expert: close to the limit. A small reserve only.',
+  'Perfect Expert: the fastest possible line, skids included. No reserve at all: it needs exact timing.',
+];
 export function showTeamStats() {
   $('teamStats').innerHTML = teamCardHtml(opts.team);
 }
@@ -179,39 +186,39 @@ export function init(): void {
   initCircuitPicker();
   $('sTeam').addEventListener('click', () => setTimeout(showTeamStats, 0));
   showTeamStats();
-  segInit('sPedals', 'pedals', Number);
   segInit('sSteer', 'steer', Number);
-  $('sPedals').addEventListener('click', () => setTimeout(syncCtrlMenu, 0));
   $('sSteer').addEventListener('click', () => setTimeout(syncCtrlMenu, 0));
   syncCtrlMenu();
   segInit('sLaps', 'laps', Number);
   segInit('sDiff', 'diff', Number);
-  segInit('sCam', 'cam', Number);
   segInit('sRain', 'rain', Number);
   $('sRain').addEventListener('click', () => {
     WX.rain = opts.rain;
     buildProfile();
   });
-  segInit('sTyres', 'tyres', Number);
   segInit('sDmg', 'damage', Number);
   segInit('sYellow', 'yellow', Number);
   segInit('sLimits', 'limits', Number);
   segInit('sDRS', 'drs', Number);
-  segInit('sTow', 'tow', Number);
+  // catch-up strength: slipstream and catch-up grip Off (0) or Normal (1) up to 50×, DRS Normal up to 50×
+  for (const p of ['s', 'p']) {
+    sliderInit(p + 'Tow', 'tow', STRENGTH_OFF);
+    sliderInit(p + 'DRSp', 'drsPow', STRENGTH);
+    sliderInit(p + 'CGrip', 'cgrip', STRENGTH_OFF);
+  }
   segInit('sTurns', 'turns', Number);
   $('sDRS').addEventListener('click', () => setTimeout(updatePads, 0));
-  segInit('sLine', 'line', v => v === '1');
+  segInit('sLine', 'line', Number);
+  segInit('sDyn', 'dynlv', Number);
   segInit('sGears', 'gears', Number);
   $('sGears').addEventListener('click', () => setTimeout(updatePads, 0));
   for (const [id, key, cast] of [
     ['pTurns', 'turns', Number],
-    ['pTow', 'tow', Number],
     ['pDRSs', 'drs', Number],
     ['pGears', 'gears', Number],
-    ['pPedals', 'pedals', Number],
     ['pSteer', 'steer', Number],
-    ['pCam', 'cam', Number],
-    ['pLine', 'line', v => v === '1'],
+    ['pLine', 'line', Number],
+    ['pDyn', 'dynlv', Number],
     ['pSnd', 'sound', v => v === '1'],
     ['pMus', 'music', v => v === '1'],
   ])
@@ -228,6 +235,28 @@ export function init(): void {
       syncAllSegs();
     }, 0);
   });
+  // the Racing Line switch sets the choice for practice or for races, whichever is on
+  for (const id of ['sLine', 'pLine'])
+    $(id).addEventListener('click', e => {
+      if ((e.target as HTMLElement).closest('button')) setTimeout(lineSave, 0);
+    });
+  // picking the line you follow (the buttons themselves are ordinary segmented controls on opts.dynlv)
+  const dynLvSync = () => {
+    $('dynLvNote').textContent = DYN_LV_NOTE[opts.dynlv];
+  };
+  for (const id of ['pDyn', 'sDyn'])
+    $(id).addEventListener('click', e => {
+      if (!(e.target as HTMLElement).closest('button')) return;
+      setTimeout(() => {
+        setDynLevel(opts.dynlv);
+        dynLvSync();
+        syncCtrlMenu();
+      }, 0);
+    });
+  dynLvSync();
+  // the lines depend on the car, the weather and the Opponents level
+  for (const id of ['sTeam', 'sRain', 'sDiff'])
+    $(id).addEventListener('click', () => setTimeout(dynPrepare, 0));
   segInit('sSnd', 'sound', v => v === '1');
   segInit('sMus', 'music', v => v === '1');
   $('sSnd').addEventListener('click', () =>

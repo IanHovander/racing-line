@@ -1,4 +1,5 @@
 import type { Tree } from '../types';
+import { dynDrop } from '../sim/lines';
 import { GS } from '../state';
 import { clamp } from '../core/dom';
 import { DS, GIN, WALL } from '../sim/car-model';
@@ -8,6 +9,7 @@ import { skids } from './active';
 import { buildCity, buildPits } from './city';
 import { PIT_RL, catmull, hAt, inWater, outSideT, resample, rnd } from './track';
 export function buildTrack(T) {
+  dynDrop(); // the racing lines belong to the old track
   GS.TR = T;
   GS.seed = T.seed;
   GS.HW = T.hw || 7;

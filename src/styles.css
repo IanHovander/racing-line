@@ -267,9 +267,7 @@ body #pThr.big {
 #board div.mate .pos {
   opacity: 1;
 }
-#bMode,
 #bSteer,
-#bCam,
 #bLine,
 #bSnd,
 #bMus,
@@ -676,15 +674,6 @@ body #pThr.big {
   padding: 10px 16px !important;
   min-height: 44px;
 }
-#pBrk {
-  right: 128px;
-  background: rgba(200, 40, 40, 0.5);
-}
-#pBrk.solo {
-  right: 16px;
-  width: 100px;
-  height: 100px;
-}
 #pL {
   left: 16px;
 }
@@ -762,6 +751,64 @@ body #pThr.big {
   background: #ff3b30;
   border-color: #ff6a60;
 }
+/* strength sliders (Rules): a big thumb for fingers, the filled part white up to the thumb */
+.sld {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+.sld input[type='range'] {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 32px;
+  margin: 0;
+  padding: 0;
+  border: 0; /* (not the text-box frame that .card input gives) */
+  border-radius: 0;
+  background: transparent;
+  -webkit-appearance: none;
+  appearance: none;
+  touch-action: pan-y;
+}
+.sld input[type='range']::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 3px;
+  background: linear-gradient(90deg, #f2f4f7 var(--p, 0%), rgba(255, 255, 255, 0.18) var(--p, 0%));
+}
+.sld input[type='range']::-moz-range-track {
+  height: 6px;
+  border-radius: 3px;
+  background: linear-gradient(90deg, #f2f4f7 var(--p, 0%), rgba(255, 255, 255, 0.18) var(--p, 0%));
+}
+.sld input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 26px;
+  height: 26px;
+  margin-top: -10px;
+  border-radius: 50%;
+  background: #fff;
+  border: 0;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+}
+.sld input[type='range']::-moz-range-thumb {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #fff;
+  border: 0;
+}
+.sld input[type='range']:disabled {
+  opacity: 0.5;
+}
+.sld b {
+  flex: 0 0 64px;
+  text-align: right;
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 600;
+}
 
 svg.flag {
   border-radius: 2px;
@@ -770,6 +817,11 @@ svg.flag {
 }
 svg.logo {
   flex: 0 0 auto;
+  vertical-align: middle;
+}
+img.logo {
+  flex: 0 0 auto;
+  object-fit: contain;
   vertical-align: middle;
 }
 .rules > div {
@@ -1135,9 +1187,6 @@ tr.me td {
     right: 10px;
     width: 82px;
     height: 82px;
-  }
-  #pBrk {
-    right: 98px;
   }
   #pL {
     left: 10px;
@@ -1893,7 +1942,7 @@ body.touch #spd {
   margin: 0;
   white-space: nowrap;
 }
-.lbname input {
+.lbname .clr {
   flex: 1;
   min-width: 0;
 }
@@ -2039,7 +2088,7 @@ body.touch #notes:not(.menu) {
   width: 100%;
   height: 100%;
 }
-/* narrow speed panel beside the pedals (portrait phones): no pedal bars, smaller digits */
+/* narrow speed panel beside the GAS pad (portrait phones): no pedal bars, smaller digits */
 #spd.compact {
   padding: 6px 8px 7px;
 }
@@ -2127,4 +2176,107 @@ body.touch #notes:not(.menu) {
   min-width: 44px;
   height: 44px;
   z-index: 6;
+}
+/* waiting screen while a room is opened or joined */
+#mpWait .card {
+  max-width: 420px;
+}
+#mwStep {
+  min-height: 20px;
+  margin: 4px 0 10px;
+  font-size: 15px;
+}
+/* the loading bar: each step of a join moves it on, and it creeps in between so it never looks stuck */
+#mwProg {
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.16);
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+#mwFill {
+  display: block;
+  height: 100%;
+  width: 4%;
+  border-radius: 3px;
+  background: #fff;
+  transition: width 0.45s ease-out;
+}
+#mwFill.creep {
+  transition: width 9s cubic-bezier(0.1, 0.6, 0.3, 1);
+}
+/* opened from an invite link: the joining screen is up before the game has loaded (class set in index.html) */
+html.joining #mpWait.hide {
+  display: flex !important;
+}
+html.joining #home,
+html.joining #mwBar {
+  display: none;
+}
+html.joining #mwFill {
+  animation: mwLoad 8s cubic-bezier(0.1, 0.6, 0.3, 1) forwards;
+}
+@keyframes mwLoad {
+  from {
+    width: 3%;
+  }
+  to {
+    width: 22%;
+  }
+}
+#mwHint {
+  min-height: 18px;
+  margin-bottom: 10px;
+}
+#mwBar {
+  display: flex;
+  gap: 8px;
+}
+#mwBar button {
+  flex: 1;
+  min-height: 44px;
+}
+/* ---- a text box with a clear button: an x in a circle at its right end, always there and always tappable ---- */
+.clr {
+  position: relative;
+  display: block;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.clr input {
+  padding-right: 46px !important;
+}
+.ov .clr .clrX,
+#home .clr .clrX {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 46px;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 9px;
+  background: none;
+  color: #fff;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.clr .clrX svg {
+  width: 24px;
+  height: 24px;
+  pointer-events: none;
+}
+.clr .clrX:active {
+  color: #9aa1aa;
+}
+/* a guest's Room page starts with their name and the players; the invite code and QR, which they used already, follow */
+@media not ((max-height: 520px) and (orientation: landscape)) {
+  #lobby.guest .roomCols {
+    flex-direction: column-reverse;
+  }
 }

@@ -1,15 +1,15 @@
-import { START } from '../sim/start';
+import { cycleDyn } from '../sim/lines';
 import { GS } from '../state';
 import { audioStatus } from '../audio/audio';
 import { attract, cars, opts } from '../game/race';
 import { mpOn } from '../net/multiplayer';
 import { laneShift, passPick } from '../sim/ai';
-import { resetCar, sfxShift, shift, swapCar, togglePause } from '../ui/controls';
+import { resetCar, sfxShift, shift, swapCar, toggleLine, togglePause } from '../ui/controls';
 import { startRace } from '../ui/menu';
 import { $ } from '../core/dom';
 import { WZ } from '../ui/wizard';
 // ================= Input =================
-export const input = { thr: false, brk: false, left: false, right: false };
+export const input = { thr: false, left: false, right: false };
 export function pressDRS() {
   const c = cars[GS.ctrl];
   if (!c || attract || opts.drs !== 1 || GS.state !== 'race') return;
@@ -23,8 +23,6 @@ export const KEYMAP = {
   ArrowUp: 'thr',
   KeyW: 'thr',
   Space: 'thr',
-  ArrowDown: 'brk',
-  KeyS: 'brk',
   ArrowLeft: 'left',
   KeyA: 'left',
   ArrowRight: 'right',
@@ -36,18 +34,6 @@ export const typing = e => {
   return !!t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable);
 };
 export function init(): void {
-  // any tap or key after lights out can launch the car in pedal modes without a GAS pad (capture phase: pads stop propagation)
-  const tap = () => {
-    if (GS.state === 'race') START.tap = true;
-  };
-  addEventListener('pointerdown', tap, true);
-  addEventListener(
-    'keydown',
-    e => {
-      if (!typing(e) && !e.repeat) tap();
-    },
-    true,
-  );
   addEventListener('keydown', e => {
     if (typing(e)) return;
     if (opts.steer === 1 && !e.repeat && (KEYMAP[e.code] === 'left' || KEYMAP[e.code] === 'right'))
@@ -64,6 +50,8 @@ export function init(): void {
       e.preventDefault();
       swapCar();
     } else if (e.code === 'KeyR') resetCar();
+    else if (e.code === 'KeyL' && GS.state !== 'menu') cycleDyn(); // the line you follow
+    else if (e.code === 'KeyH' && GS.state !== 'menu') toggleLine(); // the line on screen
     else if (e.code === 'Escape' && GS.state === 'menu' && !$('menu').classList.contains('hide'))
       $('menu').classList.add('hide');
     else if (e.code === 'KeyP' || e.code === 'Escape') togglePause();

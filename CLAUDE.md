@@ -39,18 +39,18 @@ and commits the result, for when there's no local Node to run them.
 `index.html` is the page shell (all the menu / HUD / lobby markup), `src/styles.css` all the styling,
 `src/main.ts` the entry point. Modules by area:
 
-| Folder    | What's there                                                                                                                                                                                                                                                                   |
-| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `core/`   | canvas setup and resize, `$` (getElementById), `clamp`, `wrapA`, `store` (localStorage, `hcgp_` prefix — keep it so players keep their settings)                                                                                                                               |
-| `track/`  | circuit data (`circuits.ts`: control points, elevation, scenery options), geometry state and helpers (`track.ts`), the big `buildTrack` (spline, walls, run-off, gravel, paint, racing line, scenery), street-circuit city, the active track                                   |
-| `teams/`  | teams, logos, flags, car stats, driver traits                                                                                                                                                                                                                                  |
-| `sim/`    | car model (gears, top speeds), speed profiles and racing-line colours (`profile.ts`), AI driving and racecraft (`ai.ts`), the player's assists (`player.ts`), physics, timing/sectors/stats, and `step.ts` (the fixed-step simulation, collisions, standings, damage, yellows) |
-| `render/` | camera + projection (`P(x,y,z)`), primitives (`prism`, track bands), cars, trees/flags, walls/sponsor boards/tunnel/bridge, effects (fireworks, rain, night glow), buildings, and `render.ts` (one frame)                                                                      |
-| `ui/`     | HUD, lap card + coaching messages, results and awards, menu wizard, circuit posters/maps, settings widgets                                                                                                                                                                     |
-| `audio/`  | engine/impact sounds, crowd (disabled), procedural music themes per circuit                                                                                                                                                                                                    |
-| `net/`    | multiplayer: transport (claude.ai room or PeerJS), lobby, netcode (state sync, smoothing, shared race clock), QR codes                                                                                                                                                         |
-| `vendor/` | third-party QR code generator                                                                                                                                                                                                                                                  |
-| `game/`   | race setup (`setupRace`, options, race state) and the main loop                                                                                                                                                                                                                |
+| Folder    | What's there                                                                                                                                                                                                                                                                                                                                                         |
+| --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `core/`   | canvas setup and resize, `$` (getElementById), `clamp`, `wrapA`, `store` (localStorage, `hcgp_` prefix — keep it so players keep their settings)                                                                                                                                                                                                                     |
+| `track/`  | circuit data (`circuits.ts`: control points, elevation, scenery options), geometry state and helpers (`track.ts`), the big `buildTrack` (spline, walls, run-off, gravel, paint, racing line, scenery), street-circuit city, the active track                                                                                                                         |
+| `teams/`  | teams, logos, flags, car stats, driver traits                                                                                                                                                                                                                                                                                                                        |
+| `sim/`    | car model (gears, top speeds), speed profiles and racing-line colours (`profile.ts`), AI driving and racecraft (`ai.ts`), the player's assists (`player.ts`), the dynamic racing line (`dynline.ts` the planner, `lines.ts` the game's side of it), physics, timing/sectors/stats, and `step.ts` (the fixed-step simulation, collisions, standings, damage, yellows) |
+| `render/` | camera + projection (`P(x,y,z)`), primitives (`prism`, track bands), cars, trees/flags, walls/sponsor boards/tunnel/bridge, effects (fireworks, rain, night glow), buildings, and `render.ts` (one frame)                                                                                                                                                            |
+| `ui/`     | HUD, lap card + coaching messages, results and awards, menu wizard, circuit posters/maps, settings widgets                                                                                                                                                                                                                                                           |
+| `audio/`  | engine/impact sounds, crowd (disabled), procedural music themes per circuit                                                                                                                                                                                                                                                                                          |
+| `net/`    | multiplayer: transport (claude.ai room or PeerJS), lobby, netcode (state sync, smoothing, shared race clock), QR codes                                                                                                                                                                                                                                               |
+| `vendor/` | third-party QR code generator                                                                                                                                                                                                                                                                                                                                        |
+| `game/`   | race setup (`setupRace`, options, race state) and the main loop                                                                                                                                                                                                                                                                                                      |
 
 ### State and start-up — read before adding code
 
@@ -77,7 +77,43 @@ simulation faster than real time (`for (...) step(STEP)`) instead of waiting. (`
 hook that makes its `let` exports writable from there.)
 
 When you change racing behaviour, measure it: run AI or bot laps through `step()` and compare lap times,
-contacts and time off track before and after, as the existing tests do.
+contacts and time off track before and after, as the existing tests do. `tools/` has a headless harness and
+one-button bots for exactly that (below).
+
+### The dynamic racing line and its tools
+
+In Steering: Auto a planner drives the car along the fastest line for the chosen Line Difficulty and the AI
+cars drive the line of the Opponents level. Read [docs/dynamic-racing-line.md](docs/dynamic-racing-line.md)
+(design, the line builder, what went wrong on the way) and [tools/README.md](tools/README.md) (every tool)
+before changing `src/sim/dynline.ts`, `src/sim/lines.ts` or `controlAI`.
+
+```sh
+node tools/smoke.cjs                           # boots the game headless (no browser), both line modes
+node tools/test-dynline.cjs --level 3          # planner checks on real track geometry
+node tools/bench.cjs --level 3 --bot late0.2   # one-button bot laps: time, sliding, time off the road
+node tools/rollout.cjs                         # every circuit, car, level and weather, plus races (5 to 10 min)
+node tools/mp-test.cjs                         # a two-player online race without a network
+npm run lines                                  # regenerate public/dynlines.json (about 15 min on many cores)
+```
+
+Rules that have already cost time:
+
+- **Measure, then drive.** A lower lap time in the planner's model is not a result until `tools/build-drive.cjs`
+  or `tools/bench.cjs` shows the bot is faster and stays on the road.
+- **Take "that does not look like a racing line" seriously.** The first line builder was 2 s a lap short and the
+  only symptom was the car sitting mid-road before corners. `tools/line-shape.cjs`, `tools/line-pin.cjs` and
+  `tools/line-improve.cjs` turn that kind of doubt into numbers.
+- **Regenerate the lines** (`npm run lines`) after changing `LEVELS`, car stats, a circuit or `build()`, and bump
+  the builder version in the planner's `sig` when `build()` would give a different line. `public/dynlines.json`
+  is generated: never edit it by hand. Until it is regenerated the game falls back to building lines in the
+  browser, which is slow.
+- **Run `node tools/rollout.cjs` before handing over** a change to the planner or the AI. A change that is fine
+  on Lone Star can fail on the street circuits.
+- **Race results depend on the grid.** Compare several seeds (`tools/races.cjs`), never one race.
+- **Predictability over cleverness.** A version that planned overtakes around moving cars was removed because
+  the path became hard to predict. The path depends on the track and the player's own car only.
+- **Do not let test bots leave records behind** when driving the game in a real browser: a bot's lap is saved
+  as the circuit record in that browser's `localStorage` (`hcgp_best_<circuit>`). Save and restore it.
 
 ## Conventions
 

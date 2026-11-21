@@ -6,7 +6,6 @@ export interface TeamStats {
   acc: number;
   brk: number;
   grip: number;
-  tyre: number;
   dur: number;
   [k: string]: any;
 }
@@ -40,7 +39,6 @@ export interface Car {
   out: boolean;
   outT: number;
   gone: boolean;
-  tyre: number;
   dmg: number;
   gm: number;
   tow: number;
@@ -104,6 +102,10 @@ export interface MPState {
   jt?: number;
   p2p?: boolean;
   hostOff?: number;
+  /** round-trip time to each peer, ms (minimum seen, drifting up slowly), measured by echoing timestamps */
+  rtt?: Record<string, number>;
+  /** last presence timestamp received from each peer (their clock) and when it arrived (ours) */
+  rx?: Record<string, { ts: number; at: number }>;
   [k: string]: any;
 }
 

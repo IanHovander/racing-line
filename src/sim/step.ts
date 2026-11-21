@@ -10,7 +10,6 @@ import { STEP, controlAI, pursuitLat } from './ai';
 import { locate, physics, towTarget } from './physics';
 import { controlPlayer } from './player';
 import { progress, secDone, statTick, tpRec } from './timing';
-import { DRV } from '../teams/drivers';
 import { NEUTRAL } from '../teams/team-stats';
 import { parts, skids } from '../track/active';
 import { cornerAt, hAt } from '../track/track';
@@ -113,6 +112,11 @@ export function spawn(x, y, z, col, life, sp) {
     r: 0.3 + Math.random() * 0.5,
   });
 }
+/**
+ * Catch-up grip (Rules: Catch-up Grip, opts.cgrip 0 off, 1 normal, up to 5): a car behind the leader gets up to
+ * `grip` more grip at Normal, rising evenly with the distance behind until `full` metres (about 13–15 s).
+ */
+export const CATCHUP = { grip: 0.05, full: 1000 };
 export function step(dt) {
   if (GS.state === 'countdown') {
     GS.cdT += dt;
@@ -134,6 +138,10 @@ export function step(dt) {
     const tt = opts.tow ? towTarget(c) : 0;
     c.tow += (tt - c.tow) * Math.min(1, dt * (tt > c.tow ? 3 : 6));
   }
+  // catch-up grip: how far the leader is round the race, to give the cars behind more grip
+  let lead = 0;
+  const cg = GS.state === 'race' && !GS.PRACTICE ? opts.cgrip || 0 : 0;
+  if (cg) for (const c of cars) if (!c.out && !c.gone) lead = Math.max(lead, progress(c));
   cars.forEach((c, i) => {
     let u;
     if (c.gone) return;
@@ -145,7 +153,10 @@ export function step(dt) {
       }
       return;
     }
-    c.gm = (opts.tyres && !attract ? 0.72 + 0.28 * Math.sqrt(c.tyre) : 1) * (1 - 0.15 * c.dmg);
+    // grip: less with damage, more the further behind the leader (everything that judges speed reads c.gm)
+    c.gm =
+      (1 - 0.15 * c.dmg) *
+      (1 + (cg ? cg * CATCHUP.grip * Math.min(1, Math.max(0, lead - progress(c)) / CATCHUP.full) : 0));
     if (c.out) {
       u = [
         0,
@@ -169,20 +180,6 @@ export function step(dt) {
     if (GS.state === 'race' && !c.out && !launchGate(c, !attract && i === GS.ctrl && !c.finished))
       u = [0, 1, u[2]];
     physics(c, dt, u[0], u[1], u[2]);
-    if (opts.tyres && !attract && GS.state === 'race' && !c.out) {
-      const k = 0.42 / (opts.laps * GS.L),
-        dist = c.v * dt;
-      const f =
-        1 +
-        0.6 * Math.min(1, Math.abs(c.lat - GS.off[c.idx]) / 3) +
-        c.slide * 2 +
-        [0, 0.3, 1.5, 4, 0.8, 1.2][c.surf] +
-        1.2 * c.brk;
-      c.tyre = Math.max(
-        0,
-        c.tyre - k * dist * f * (opts.rain ? 0.8 : 1) * (c.st || NEUTRAL).tyre * (1.2 - 0.4 * DRV(c).tyre),
-      );
-    }
     if (opts.rain && c.v > 22 && Math.random() < c.v / 450) {
       spawn(
         c.x - Math.cos(c.h) * 2.6 + (Math.random() - 0.5) * 1.6,
@@ -355,19 +352,7 @@ export function step(dt) {
     } else if (c.prevS < 80 && c.s > GS.L - 80) c.cross--;
     c.prevS = c.s;
     // effects
-    if (c.lock > 0.5 && c.v > 8) {
-      if (Math.random() < 0.7) {
-        const ch = Math.cos(c.h),
-          sh = Math.sin(c.h);
-        const w = Math.random() < 0.5 ? -0.8 : 0.8;
-        spawn(c.x + ch * 1.6 - sh * w, c.y + sh * 1.6 + ch * w, 0.5, 'rgba(236,240,248,1)', 0.9, 1.8);
-      }
-      if (opts.tyres) c.tyre = Math.max(0, c.tyre - dt * 0.012);
-    }
-    if (
-      c.v > 12 &&
-      (c.slide > 0.2 || c.lock > 0.5 || (c.brk > 0.95 && c.v > 55 && c.surf === 0 && Math.random() < 0.15))
-    ) {
+    if (c.v > 12 && (c.slide > 0.2 || (c.brk > 0.95 && c.v > 55 && c.surf === 0 && Math.random() < 0.15))) {
       const ch = Math.cos(c.h),
         sh = Math.sin(c.h);
       for (let w = 0; w < 2; w++) {
@@ -439,10 +424,9 @@ export function standings() {
 }
 export const c_done = mine => (mine.some(c => c.finished) ? 2.5 : 3.5);
 export const clearTime = () => opts.yellow || 3;
-// tyre and damage hits from impacts; a hard enough hit, or too much damage, knocks the car out
+// damage from impacts; a hard enough hit, or too much damage, knocks the car out
 export function hurt(c, imp, car?) {
   if (attract || c.out || c.remote || (GS.state !== 'race' && GS.state !== 'finished')) return;
-  if (opts.tyres) c.tyre = Math.max(0, c.tyre - imp * 0.003);
   if (!opts.damage) return;
   if (imp > 3) c.dmg = Math.min(1, c.dmg + (imp - 3) * (car ? 0.008 : 0.012) * (c.st || NEUTRAL).dur);
   if (imp > (car ? 34 : 27) || c.dmg >= 1) knockOut(c);

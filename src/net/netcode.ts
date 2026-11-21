@@ -32,6 +32,7 @@ export function mpPeers(ch) {
       startMpRace(hp.presence.grid, hp.presence.cfg, hp.peer);
     }
   }
+  measureRtt(ch.peers);
   if (MP.phase === 'race')
     for (const p of ch.peers) {
       if (p.sameTab) continue;
@@ -106,12 +107,13 @@ export function startMpRace(grid, cfg, hostId) {
     }
     GS.PRACTICE = !!cfg.practice;
     opts.laps = clamp(cfg.laps | 0, 1, 20);
-    opts.tyres = cfg.tyres ? 1 : 0;
     opts.damage = cfg.damage ? 1 : 0;
     opts.yellow = [0, 3, 10, 30].includes(cfg.yellow) ? cfg.yellow : 10;
     opts.diff = clamp(cfg.diff | 0, 0, 2);
     opts.rain = cfg.rain ? 1 : 0;
-    if (cfg.tow !== undefined) opts.tow = cfg.tow ? 1 : 0;
+    if (cfg.tow !== undefined) opts.tow = clamp(+cfg.tow || 0, 0, 50);
+    opts.drsPow = clamp(+cfg.drsPow || 1, 1, 50); // (a host without the setting: normal)
+    opts.cgrip = cfg.cgrip === undefined ? 0 : clamp(+cfg.cgrip || 0, 0, 50); // (a host without it races without it)
     if (cfg.limits !== undefined) opts.limits = [0, 2, 3].includes(cfg.limits) ? cfg.limits : 0;
     opts.drs = cfg.drsOn === 0 ? 0 : store.get('drs', 2) || 2;
     WX.rain = opts.rain;
@@ -163,14 +165,42 @@ export function netState(c) {
     Date.now() % 1e9,
   ];
 }
+// ---- latency: every presence carries the sender's clock (ts) and, for each peer heard from, an echo of that
+// peer's last ts and how long we held it. A peer that sees its own ts come back knows the round trip in its own
+// clock: RTT = now - echoed ts - hold time. Half the round trip is the one-way delay used to extrapolate cars.
+const nowMs = () => Date.now() % 1e9;
+function measureRtt(peers) {
+  MP.rx = MP.rx || {};
+  MP.rtt = MP.rtt || {};
+  const now = nowMs();
+  for (const p of peers) {
+    if (p.sameTab || p.peer === MP.me) continue;
+    const pr = p.presence || {};
+    if (typeof pr.ts === 'number' && (!MP.rx[p.peer] || MP.rx[p.peer].ts !== pr.ts))
+      MP.rx[p.peer] = { ts: pr.ts, at: now };
+    const e = pr.echo && pr.echo[MP.me];
+    if (Array.isArray(e) && e.length === 2 && isFinite(e[0]) && isFinite(e[1])) {
+      if (MP.rtt['_e' + p.peer] === e[0]) continue; // this echo was already counted
+      MP.rtt['_e' + p.peer] = e[0];
+      const r = now - e[0] - e[1];
+      if (r < 0 || r > 3000) continue;
+      const o = MP.rtt[p.peer];
+      MP.rtt[p.peer] = o === undefined || r < o ? r : o + (r - o) * 0.03;
+    }
+  }
+}
+/** one-way delay to a peer, seconds (100 ms until it has been measured) */
+export function oneWay(peer): number {
+  const r = MP.rtt && MP.rtt[peer];
+  return r === undefined ? 0.1 : r / 2000;
+}
 // last field: sender clock (ms) so receivers can time-stamp each state
 export function netSet(c, a) {
   if (a.length < 11 || !a.every(v => typeof v === 'number' && isFinite(v))) return;
   // clock offset between sender and us: track the smallest (now - sent) seen, drifting slowly so a clock jump recovers
   let ts = a.length > 11 ? a[11] : null;
-  const nowMs = Date.now() % 1e9;
   if (ts !== null) {
-    const o = nowMs - ts;
+    const o = nowMs() - ts;
     c.netOff = c.netOff === undefined || o < c.netOff ? o : c.netOff + (o - c.netOff) * 0.02;
   }
   const prev = c.net;
@@ -197,18 +227,16 @@ export function netSet(c, a) {
     t: performance.now(),
   };
 }
-// remote cars glide towards where their owner says they are, extrapolated by speed
-export function netFollow(c, dt) {
-  const n = c.net;
-  if (!n) return;
-  // how old this state really is: sender-clock age (jitter-free) plus ~50 ms one-way latency; falls back to arrival time
+/** where a car is now according to state n: extrapolated along an arc (speed and turn rate) by the state's age */
+function predict(c, n): [number, number, number] {
+  // how old this state really is. netOff is the smallest (now - sent) seen = clock difference + the fastest
+  // delivery, so (now - sent - netOff) is the extra delay of this packet; add the measured one-way delay.
   const age = Math.min(
     1.0,
     n.ts !== null && c.netOff !== undefined
-      ? Math.max(0, ((Date.now() % 1e9) - n.ts - c.netOff) / 1000 + 0.05)
+      ? Math.max(0, ((Date.now() % 1e9) - n.ts - c.netOff) / 1000 + oneWay(c.owner))
       : (performance.now() - n.t) / 1000,
   );
-  // predict along an arc using the measured turn rate, so cars keep following the corner between updates
   let px = n.x,
     py = n.y,
     ph = n.h;
@@ -219,19 +247,34 @@ export function netFollow(c, dt) {
     px += Math.cos(ph) * n.v * sdt;
     py += Math.sin(ph) * n.v * sdt;
   }
-  const ex = px - c.x,
-    ey = py - c.y;
-  const e2 = ex * ex + ey * ey;
-  if (e2 > 3600) {
-    c.x = px;
-    c.y = py;
-    c.h = ph;
-  } else {
-    const k = Math.min(1, dt * (e2 < 25 ? 14 : 7));
-    c.x += ex * k;
-    c.y += ey * k;
-    c.h = wrapA(c.h + wrapA(ph - c.h) * k);
+  return [px, py, ph];
+}
+// remote cars: drawn at the prediction from their owner's latest state, plus a correction that fades out
+export function netFollow(c, dt) {
+  const n = c.net;
+  if (!n) return;
+  const [px, py, ph] = predict(c, n);
+  // When a new state arrives, the correction is the gap between the previous state's prediction and the new one,
+  // both for this moment, so the car doesn't jump; between states the prediction itself moves the car at full speed.
+  if (c.netSeen !== n.t) {
+    const old = c.netPrev;
+    c.netSeen = n.t;
+    c.netPrev = n;
+    if (old) {
+      const q = predict(c, old);
+      c.ex = (c.ex || 0) + q[0] - px;
+      c.ey = (c.ey || 0) + q[1] - py;
+      c.eh = wrapA((c.eh || 0) + wrapA(q[2] - ph));
+    } else c.ex = c.ey = c.eh = 0;
+    if (c.ex * c.ex + c.ey * c.ey > 3600) c.ex = c.ey = c.eh = 0; // too far off: snap
   }
+  const f = Math.exp(-dt * 6);
+  c.ex = (c.ex || 0) * f;
+  c.ey = (c.ey || 0) * f;
+  c.eh = (c.eh || 0) * f;
+  c.x = px + c.ex;
+  c.y = py + c.ey;
+  c.h = wrapA(ph + c.eh);
   c.v = n.v;
   c.tow = n.tow;
   c.dmg = n.dmg;
@@ -261,7 +304,8 @@ export function mpSyncClock(clk) {
   if (!isFinite(hv) || !isFinite(hts)) return;
   const o = (Date.now() % 1e9) - hts;
   MP.hostOff = MP.hostOff === undefined || o < MP.hostOff ? o : MP.hostOff + (o - MP.hostOff) * 0.02;
-  const target = hv + Math.max(0, ((Date.now() % 1e9) - hts - MP.hostOff) / 1000 + 0.05),
+  const hp = hostPeer();
+  const target = hv + Math.max(0, ((Date.now() % 1e9) - hts - MP.hostOff) / 1000 + oneWay(hp && hp.peer)),
     diff = target - mpClock();
   if (Math.abs(diff) < 0.004) return;
   const nv = mpClock() + (Math.abs(diff) > 0.4 ? diff : diff * 0.15);
@@ -283,7 +327,10 @@ export function mpSend(dt) {
   if (MP.sendT > 0) return;
   MP.sendT = 1 / 20;
   const me = cars[GS.ctrl];
-  const p: any = { me: me ? netState(me) : null };
+  const now = nowMs();
+  const echo = {};
+  for (const id in MP.rx || {}) if (now - MP.rx[id].at < 3000) echo[id] = [MP.rx[id].ts, now - MP.rx[id].at];
+  const p: any = { me: me ? netState(me) : null, ts: now, echo };
   if (MP.host) {
     p.ai = cars.map((c, i) => (!c.human && !c.remote ? [i].concat(netState(c)) : null)).filter(Boolean);
     p.clk = [Math.round(mpClock() * 1000) / 1000, Date.now() % 1e9];
