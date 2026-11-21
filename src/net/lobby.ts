@@ -388,7 +388,10 @@ export function renderLobby() {
       String(pr.nick || 'Joining…').slice(0, 16) + (p.sameTab ? ' (you)' : '') + (p.guest ? ' · guest' : '');
     d.appendChild(n);
     const r = document.createElement('small');
-    r.textContent = pr.role === 'host' ? 'Host' : pr.phase === 'race' ? 'Racing' : 'Ready';
+    r.textContent =
+      (pr.role === 'host' ? 'Host' : pr.phase === 'race' ? 'Racing' : 'Ready') +
+      (pr.link === 'relay' ? ' · Relay' : '');
+    if (pr.link === 'relay') r.title = 'Connected to the host through a relay server';
     d.appendChild(r);
     list.appendChild(d);
   }

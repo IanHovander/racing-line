@@ -31,14 +31,29 @@ export const mpOn = () => !!MP.room;
 // tries again, it does not open a room of its own.
 // Each player's presence object is merged into the hub's list, and the hub sends the whole list to everyone ~15 times a second.
 // Relay (TURN): when two players can't reach each other directly (mobile data, guest Wi-Fi, a router that keeps
-// its devices apart) the connection has to go through a relay. PeerJS's own free relay is used (see iceServers);
-// fill in a relay login of your own here (e.g. a free Metered account) to add a second one.
-export const TURN = { urls: [], username: '', credential: '' };
+// its devices apart) the connection has to go through a relay. PeerJS's own free relays (and Metered's no-account
+// ones) stopped working in Oct 2026, so this uses a Metered relay login, the same one RoboRally uses. It is public on
+// purpose: anyone can read it, and the worst they can do is use up the free allowance (20 GB a month). If that
+// happens, make a new login in the Metered dashboard (that turns the old one off) and put it here.
+// Port 443 over TLS (turns:) gets through strict school and office networks.
+export const TURN = {
+  urls: [
+    'turn:global.relay.metered.ca:80',
+    'turn:global.relay.metered.ca:80?transport=tcp',
+    'turn:global.relay.metered.ca:443',
+    'turns:global.relay.metered.ca:443?transport=tcp',
+  ],
+  username: '00c37d5b222f4156de1baec6',
+  credential: '7yIfebKivlmtyvHI',
+};
+/** STUN helps every device find a route. Metered's is on port 80, which strict networks usually allow. */
+export const STUN = [
+  'stun:stun.relay.metered.ca:80',
+  'stun:stun.l.google.com:19302',
+  'stun:stun.cloudflare.com:3478',
+];
 export const P2P = {
   prefix: 'racingline-mt-',
-  ice: [{ urls: ['stun:stun.l.google.com:19302', 'stun:stun.cloudflare.com:3478'] }].concat(
-    TURN.urls.length ? [TURN] : [],
-  ),
   /** attempts at reaching the matchmaking server, and at connecting to the host, before giving up */
   tries: 3,
   /** ms to wait for the matchmaking server, per attempt */
@@ -54,20 +69,40 @@ export const P2P = {
   /** ms the page must have been hidden before the host registers afresh on coming back */
   staleMs: 4000,
 };
-/** The STUN and relay servers for a connection: ours plus the ones PeerJS ships with, which include its free TURN
- *  relay. (Giving PeerJS a `config` replaces its defaults, so without this there is no relay at all and players
- *  who can't reach each other directly never connect.) */
+/** The STUN and relay servers for a connection. */
 export function iceServers(): any[] {
-  const lib = window.peerjs && window.peerjs.util && window.peerjs.util.defaultConfig;
-  const seen = new Set<string>();
-  const out = [];
-  for (const srv of [...P2P.ice, ...((lib && lib.iceServers) || [])]) {
-    const urls = [].concat(srv.urls).filter(u => !seen.has(u));
-    if (!urls.length) continue;
-    urls.forEach(u => seen.add(u));
-    out.push(Object.assign({}, srv, { urls }));
-  }
-  return out;
+  return [{ urls: STUN }, { urls: TURN.urls, username: TURN.username, credential: TURN.credential }];
+}
+/** The connection settings handed to PeerJS. Testing switches in the address: ?relay=1 sends every connection
+ *  through the relay (like phones on mobile data), ?tls=1 uses only the relay over TLS on port 443 (like the
+ *  strictest networks). Both ends' switches count: a connection is relayed if either one asks for it. */
+export function iceConfig(): any {
+  const q = new URLSearchParams(location.search);
+  if (q.has('tls'))
+    return {
+      iceServers: [{ ...iceServers()[1], urls: TURN.urls.filter(u => u.startsWith('turns:')) }],
+      iceTransportPolicy: 'relay',
+    };
+  return { iceServers: iceServers(), iceTransportPolicy: q.has('relay') ? 'relay' : 'all' };
+}
+/** 'relay' or 'direct': how a WebRTC connection actually ended up connected (null if not known yet). */
+export async function linkType(pc: RTCPeerConnection | null | undefined): Promise<'relay' | 'direct' | null> {
+  if (!pc || !pc.getStats) return null;
+  const stats = await pc.getStats();
+  let pair = null;
+  stats.forEach((r: any) => {
+    if (r.type === 'transport' && r.selectedCandidatePairId) pair = stats.get(r.selectedCandidatePairId);
+  });
+  if (!pair)
+    stats.forEach((r: any) => {
+      if (r.type === 'candidate-pair' && r.state === 'succeeded' && (r.nominated || r.selected)) pair = r;
+    });
+  if (!pair) return null;
+  const local = stats.get(pair.localCandidateId),
+    remote = stats.get(pair.remoteCandidateId);
+  return (local && local.candidateType === 'relay') || (remote && remote.candidateType === 'relay')
+    ? 'relay'
+    : 'direct';
 }
 export function loadPeerJS() {
   return new Promise<void>((res, rej) => {
@@ -111,7 +146,7 @@ const tag = (e: any, stage: string) => {
 export function makeP2PApi(PeerCls?) {
   PeerCls = PeerCls || window.Peer;
   const peerOpts = (token?: string) =>
-    Object.assign({ debug: 0, config: { iceServers: iceServers() } }, token ? { token } : {});
+    Object.assign({ debug: 0, config: iceConfig() }, token ? { token } : {});
   /** register with the matchmaking server once (no id: the server picks one) */
   const openOnce = (id: string | null, token?: string) =>
     new Promise<any>((res, rej) => {
@@ -319,7 +354,7 @@ export function makeP2PApi(PeerCls?) {
         }
         myId = peer.id;
         const conns = new Map();
-        const pres = new Map([[myId, mine]]);
+        const pres = new Map<string, any>([[myId, mine]]);
         const seen = new Map();
         let dirty = true,
           lastB = 0;
@@ -351,6 +386,19 @@ export function makeP2PApi(PeerCls?) {
             seen.set(c.peer, Date.now());
             if (!pres.has(c.peer)) pres.set(c.peer, {});
             broadcast(Date.now());
+            // how this guest is connected (shown in the lobby): asked again a moment later, as the route can change
+            const look = () =>
+              linkType(c.peerConnection)
+                .then(k => {
+                  const p = pres.get(c.peer);
+                  if (k && p && p.link !== k) {
+                    p.link = k;
+                    dirty = true;
+                  }
+                })
+                .catch(() => {});
+            look();
+            setTimeout(look, 3000);
           });
           c.on('data', m => {
             seen.set(c.peer, Date.now());

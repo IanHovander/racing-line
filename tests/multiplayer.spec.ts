@@ -296,15 +296,28 @@ test('your name is saved as you type and read again every time the lobby opens',
 test('connections get a relay to fall back on when two players cannot reach each other directly', async ({
   page,
 }) => {
-  // the real PeerJS this time (served from dist/vendor): its default servers are merged into ours
   await page.goto('/?debug');
-  await page.waitForFunction(() => window.MP && window.MP.api && window.peerjs);
+  await page.waitForFunction(() => window.MP && window.MP.api);
   const urls: string[] = await page.evaluate(() => window.iceServers().flatMap((s: any) => s.urls));
   expect(urls.some(u => u.startsWith('stun:'))).toBe(true);
   expect(urls.some(u => u.startsWith('turn:'))).toBe(true);
+  expect(urls.some(u => u.startsWith('turns:') && u.includes(':443'))).toBe(true); // strict networks
   expect(new Set(urls).size).toBe(urls.length);
   const relay = await page.evaluate(() =>
     window.iceServers().find((s: any) => s.urls.some((u: string) => u.startsWith('turn:'))),
   );
   expect(relay.username && relay.credential).toBeTruthy();
+  expect((await page.evaluate(() => window.iceConfig())).iceTransportPolicy).toBe('all');
+
+  // testing switches: ?relay=1 sends everything through the relay, ?tls=1 only through the relay on port 443
+  await page.goto('/?debug&relay=1');
+  await page.waitForFunction(() => window.MP && window.MP.api);
+  expect((await page.evaluate(() => window.iceConfig())).iceTransportPolicy).toBe('relay');
+  await page.goto('/?debug&tls=1');
+  await page.waitForFunction(() => window.MP && window.MP.api);
+  const tls = await page.evaluate(() => window.iceConfig());
+  expect(tls.iceTransportPolicy).toBe('relay');
+  expect(tls.iceServers.flatMap((s: any) => s.urls)).toEqual([
+    'turns:global.relay.metered.ca:443?transport=tcp',
+  ]);
 });
