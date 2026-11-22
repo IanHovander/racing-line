@@ -237,7 +237,7 @@ Playable build: https://matthewtorgerson.github.io/racing-line/ (GitHub Pages, b
 - **Hosted at https://matthewtorgerson.github.io/racing-line/** from repo `matthewtorgerson/racing-line` (branch `main`, root): `index.html`, `vendor/peerjs.min.js` (PeerJS 1.5.5, MIT), README. The old `matthewtorgerson.github.io` repo's custom-domain claim (www.matthewtorgerson.com) was removed so project pages stop redirecting to the Squarespace site.
 - **Multiplayer outside claude.ai** uses PeerJS (`makeP2PApi`), modelled on the RoboRally website mode: same interface as claude.ai's room service (`join → onPeers / presence / leave`). The first browser to open a code (since v17.16: the host, and only the host) registers `racingline-mt-<code>` on PeerJS's free cloud server and becomes the hub; guests connect to it with a reliable JSON data channel. Presence is merged per player and the hub rebroadcasts the full list on change (66 ms tick) or every 2 s; guests heartbeat every 2 s; silent guests drop after 8 s, a silent hub after 10 s. On claude.ai the room capability is still used. Invite link = the page URL + `#code`.
 - **One team per player** (v15.8): the lobby has a team picker (`lbTeams`); teams held by others are greyed with their name. Lobby order = host first, then join time (`presence.jt`); if two players hold the same team, the later one is moved to a free team with a toast (`resolveTeam`). Each human drives car 1 of their team, the teammate is AI. Max 5 racers; extra players get a "race is full" note and are left out of the grid. Pasting a room link into an open tab joins it (`hashchange`).
-- STUN only (Google, Cloudflare) until v17.18, which adds PeerJS's own relay (see below). A `TURN` constant is ready for a relay login (e.g. the user's own Metered account) for players on mobile data or strict networks; RoboRally's relay login was deliberately not reused.
+- STUN only (Google, Cloudflare) until v17.18, which adds PeerJS's own relay (see below). Since v17.19 the relay is a Metered login, the same one RoboRally uses (see the v17.19 entry).
 - Tested: two pages with a simulated PeerJS (lobby, race start, car sync, guest drop); on the live site hosting registers with PeerJS's server and shows the lobby/QR. A second tab in the same cloud test browser couldn't connect (that sandbox likely blocks peer connections), so a real two-device test is still needed. Join errors now say whether the code wasn't found, the host couldn't be reached, or the matchmaking server is down.
 
 ## Multiplayer lobby + netcode (v15.9)
@@ -568,3 +568,20 @@ Reported from two phones: opening the connection "is very inconsistent and often
   height scale 0.8). Removed with it: the Camera setting (Settings, pause menu, lobby view options), the hidden
   Cam button and `toggleCam`. A stored `hcgp_cam` is now ignored.
 - The racing line no longer draws the white bar where each braking zone starts; the red section shows it.
+
+## v17.19 — a relay that works: RoboRally's Metered login
+
+- **PeerJS's free relays (and Metered's no-account ones) stopped working in Oct 2026** (found in RoboRally), so the
+  v17.18 relay was in fact none, and players who can't reach each other directly (most phones on mobile data,
+  guest or school Wi-Fi) could not connect. `TURN` in `net/multiplayer.ts` now holds the Metered relay login from
+  RoboRally's `public/js/config.js`: `global.relay.metered.ca` on UDP 80, TCP 80, 443 and TLS 443 (`turns:`, which
+  gets through strict school and office networks). STUN: Metered's on port 80, Google, Cloudflare.
+- The login is public on purpose (as in RoboRally): the worst anyone can do with it is use up the free allowance
+  (20 GB a month), shared with RoboRally. If that happens, make a new login in the Metered dashboard (that turns
+  the old one off) and put it in `TURN` here and in RoboRally's `config.js`.
+- PeerJS's default servers are no longer merged in (`iceServers()` returns ours only): dead servers only slow down
+  finding a route.
+- **Testing switches** (`iceConfig()`), as in RoboRally: `?relay=1` in the address sends every connection through the
+  relay (`iceTransportPolicy: 'relay'`, like phones on mobile data); `?tls=1` uses only the relay over TLS on port 443.
+- **Lobby:** the host measures how each guest is connected (`linkType`, from the WebRTC stats' selected candidate
+  pair, again after 3 s) and puts it in that guest's presence (`link`); a relayed player's row says "Ready · Relay".
