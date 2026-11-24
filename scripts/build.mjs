@@ -13,11 +13,18 @@ const out = path.join(root, 'dist');
 function copyStatic() {
   fs.mkdirSync(out, { recursive: true });
   fs.copyFileSync(path.join(root, 'index.html'), path.join(out, 'index.html'));
+  fs.copyFileSync(path.join(root, 'art.html'), path.join(out, 'art.html'));
+  fs.copyFileSync(path.join(root, 'intro.html'), path.join(out, 'intro.html'));
   fs.cpSync(path.join(root, 'public'), out, { recursive: true });
 }
 
 const options = {
-  entryPoints: { main: path.join(root, 'src/main.ts') },
+  // art.html is the art kit's gallery (src/art/), intro.html the campaign's intro (src/intro/)
+  entryPoints: {
+    main: path.join(root, 'src/main.ts'),
+    art: path.join(root, 'src/art/gallery.ts'),
+    intro: path.join(root, 'src/intro/intro.ts'),
+  },
   bundle: true,
   format: 'esm',
   splitting: true,

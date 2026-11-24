@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Racing Line Art Kit</title>
+    <style>
+      @font-face {
+        font-family: 'Geist';
+        src: url('./fonts/Geist-Variable.woff2') format('woff2');
+        font-weight: 100 900;
+      }
+      @font-face {
+        font-family: 'Geist Mono';
+        src: url('./fonts/GeistMono-Variable.woff2') format('woff2');
+        font-weight: 100 900;
+      }
+      :root {
+        --bg: #0c0f13;
+        --panel: #151a20;
+        --rule: #272d36;
+        --ink: #f2f4f7;
+        --muted: #9aa1aa;
+        --sans: 'Geist', system-ui, -apple-system, sans-serif;
+        --mono: 'Geist Mono', ui-monospace, Menlo, monospace;
+        color-scheme: dark;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font: 15px/1.5 var(--sans);
+        padding: 28px max(16px, env(safe-area-inset-left)) 64px max(16px, env(safe-area-inset-right));
+      }
+      main {
+        max-width: 1040px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 40px;
+      }
+      header {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        max-width: 64ch;
+      }
+      h1 {
+        margin: 0;
+        font-size: clamp(30px, 7vw, 48px);
+        line-height: 1;
+        font-weight: 800;
+        font-style: italic;
+        letter-spacing: -0.03em;
+      }
+      h2 {
+        margin: 0;
+        font-size: 20px;
+        letter-spacing: -0.01em;
+      }
+      p {
+        margin: 0;
+      }
+      .eyebrow,
+      figcaption,
+      code {
+        font-family: var(--mono);
+      }
+      .eyebrow {
+        font-size: 12px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+      .muted {
+        color: var(--muted);
+      }
+      section {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+      .row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 14px;
+        align-items: flex-end;
+      }
+      figure {
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        align-items: flex-start;
+        min-width: 0;
+      }
+      figure canvas {
+        display: block;
+        image-rendering: pixelated;
+        background: var(--panel);
+        border: 1px solid var(--rule);
+        border-radius: 8px;
+        max-width: 100%;
+      }
+      figcaption {
+        font-size: 11.5px;
+        color: var(--muted);
+      }
+      .stage canvas {
+        width: 100%;
+        height: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="c" width="1" height="1" hidden></canvas>
+    <main id="gallery">
+      <header>
+        <p class="eyebrow">Racing Line · art kit</p>
+        <h1>Drawn in code, pixel by pixel.</h1>
+        <p class="muted">
+          Every sprite here is painted at its true size from a palette and a grid or a few shapes in
+          <code>src/art/</code>, then scaled up crisp. Liveries are slots, so each drawing serves every team.
+        </p>
+      </header>
+    </main>
+    <script type="module" src="./assets/art.js"></script>
+  </body>
+</html>
