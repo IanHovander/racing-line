@@ -1,15 +1,53 @@
-// The small moments, as HTML the game and the campaign can drop in. Styles are in art.css.
-//   bulbsHTML(lit)        the race's own start bulbs, five in a row: anything counted to five uses them (a drill
-//                         streak lights one per clean attempt; the fifth is followed by lights out).
-//   rollHTML(from, to)    a pass: the position rolls like a timing tower (P5 -> P4) and one white streak shoots in.
-//                         playRoll(el) runs it (again).
-//   streaksSVG()          the logo's speed streaks, for anything that has to look fast.
-//   powerHTML(words)      words of power in Geist 800 italic, the last one in red ("Turn 1. *Again.*").
-import { MARK, PAPER } from './tokens';
+// The story layer's moments, as HTML the game and the campaign drop in, drawn like the game's own UI (clean-line
+// comic: a 2.5 px ink border, flat fills, a hard ink shadow offset down-right). Styles are in art.css.
+//   panelHTML(html)          a comic panel: cream, inked, with the hard shadow, like the game's Practice button
+//   balloonHTML(text, tail)  a speech balloon on paper, its tail pointing at the speaker ('left' | 'right' | 'down')
+//   captionHTML(text)        a narration box: rectangular, mono caps ("FINAL ROUND · LAP 71")
+//   gusSays(face, text)      Gus's portrait with his line in a balloon pointing at him
+//   bulbsHTML(lit)           the start lights, five in a row; anything counted to five uses them (a drill streak
+//                            lights one per clean attempt; the fifth is followed by lights out). No glow: a lit bulb is
+//                            a flat red disc with short ink rays, the comic way to draw light.
+//   rollHTML(from, to)       a pass: the position rolls in an ink badge like the race's own position badge
+//                            (P5 -> P4), and one ink speed streak shoots in. playRoll(el) runs it (again).
+//   streaksSVG()             the logo's speed streaks, for anything that has to look fast
+//   powerHTML(words)         words of power in Geist 800 italic, the starred word in red ("Turn 1. *Again.*")
+import { gusSVG, type GusFace } from './portraits';
+import { INK, RED } from './tokens';
 
+const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+
+export function panelHTML(html: string, cls = '') {
+  return `<div class="lc-panel${cls ? ' ' + cls : ''}">${html}</div>`;
+}
+export function balloonHTML(text: string, tail: 'left' | 'right' | 'down' = 'left') {
+  return `<div class="lc-balloon" data-tail="${tail}">${esc(text)}</div>`;
+}
+export function captionHTML(text: string) {
+  return `<div class="lc-caption">${esc(text)}</div>`;
+}
+/** Gus speaking: his portrait and his line in a balloon that points at him. */
+export function gusSays(face: GusFace, text: string, size = 64) {
+  return `<div class="lc-says">${gusSVG(face, { size })}${balloonHTML(text, 'left')}</div>`;
+}
+
+const BULB =
+  '<svg viewBox="-16 -16 32 32" aria-hidden="true">' +
+  `<g class="rays" stroke="${INK}" stroke-width="2" stroke-linecap="round">` +
+  [0, 45, 90, 135, 180, 225, 270, 315]
+    .map(a => {
+      const r = (a * Math.PI) / 180,
+        c = Math.cos(r),
+        s = Math.sin(r);
+      return `<path d="M${(c * 11.6).toFixed(1)} ${(s * 11.6).toFixed(1)}L${(c * 15).toFixed(1)} ${(s * 15).toFixed(1)}"/>`;
+    })
+    .join('') +
+  '</g>' +
+  `<circle class="disc" r="8.6" stroke="${INK}" stroke-width="2"/>` +
+  '<ellipse class="hi" cx="-3" cy="-3.4" rx="2.2" ry="1.5" transform="rotate(-35 -3 -3.4)"/>' +
+  '</svg>';
 export function bulbsHTML(lit: number, total = 5, label = `${lit} of ${total}`) {
   let s = `<span class="bulbs" role="img" aria-label="${label}">`;
-  for (let i = 0; i < total; i++) s += `<i${i < lit ? ' class="on"' : ''}></i>`;
+  for (let i = 0; i < total; i++) s += `<i${i < lit ? ' class="on"' : ''}>${BULB}</i>`;
   return s + '</span>';
 }
 /** Light n bulbs of a .bulbs row (0 is lights out). */
@@ -38,25 +76,24 @@ export function playRoll(el: Element) {
 }
 
 /** The logo's four streaks, tapering to the left. */
-export function streaksSVG(width: number | string = 72, colour = PAPER) {
+export function streaksSVG(width: number | string = 72, colour = INK) {
   const w = typeof width === 'number' ? width + 'px' : width;
   return (
     `<svg class="streaks" viewBox="0 0 40 13" style="display:block;width:${w};height:auto" aria-hidden="true">` +
-    `<g transform="translate(4.7 1) skewX(-20)" fill="${colour}" opacity=".5">` +
-    `<path d="M0 1.8L34 1.55L34 2.05Z"/><path d="M0 4.8L34 4.35L34 5.25Z"/>` +
-    `<path d="M0 7.8L34 7.55L34 8.05Z"/><path d="M0 10.8L34 10.35L34 11.25Z"/>` +
+    `<g transform="translate(4.7 1) skewX(-20)" fill="${colour}">` +
+    `<path d="M0 1.8L34 1.3L34 2.3Z"/><path d="M0 4.8L34 4.2L34 5.4Z"/>` +
+    `<path d="M0 7.8L34 7.3L34 8.3Z"/><path d="M0 10.8L34 10.2L34 11.4Z"/>` +
     `</g></svg>`
   );
 }
 
 /** Two or three words of power; wrap the word to colour in *stars* ("Turn 1. *Again.*"). New lines with \n. */
 export function powerHTML(words: string) {
-  const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
   return (
     `<span class="power">` +
     esc(words)
       .split('\n')
-      .map(l => l.replace(/\*([^*]+)\*/g, `<em style="color:${MARK}">$1</em>`))
+      .map(l => l.replace(/\*([^*]+)\*/g, `<em style="color:${RED}">$1</em>`))
       .join('<br>') +
     `</span>`
   );
