@@ -7,3 +7,5 @@ playwright-report/
 tools/.lines/
 tools/.rollout/
 tools/.cache.json
+# agent working copies (Claude Code worktrees)
+.claude/worktrees/
