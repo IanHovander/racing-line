@@ -16,14 +16,14 @@
         font-weight: 100 900;
       }
       :root {
-        --bg: #0c0f13;
-        --panel: #151a20;
-        --rule: #272d36;
-        --ink: #f2f4f7;
-        --muted: #9aa1aa;
+        --bg: #faf4e4;
+        --panel: #fffdf7;
+        --rule: #141418;
+        --ink: #141418;
+        --muted: #5f5c55;
         --sans: 'Geist', system-ui, -apple-system, sans-serif;
         --mono: 'Geist Mono', ui-monospace, Menlo, monospace;
-        color-scheme: dark;
+        color-scheme: light;
       }
       * {
         box-sizing: border-box;
@@ -104,9 +104,18 @@
         min-height: 72px;
         padding: 12px;
         background: var(--panel);
-        border: 1px solid var(--rule);
-        border-radius: 12px;
+        border: 2.5px solid var(--rule);
+        border-radius: 10px;
+        box-shadow: 3px 3px 0 var(--rule);
         max-width: 100%;
+      }
+      figure.wide {
+        flex: 1 1 320px;
+        max-width: 460px;
+      }
+      figure.wide .art {
+        justify-content: flex-start;
+        width: 100%;
       }
       figure.tap {
         cursor: pointer;
@@ -122,10 +131,11 @@
     <main id="gallery">
       <header>
         <p class="eyebrow">Racing Line · art kit</p>
-        <h1>Black, white, <span style="color: #e0232b">one red.</span></h1>
+        <h1>Ink, paper, <span style="color: #d93829">one red.</span></h1>
         <p class="muted">
-          The story layer's art, drawn in code as flat vector in <code>src/art/</code>: two or three tones a
-          face, lit from the top left, Geist and Geist Mono. Colour belongs to racing.
+          The story layer's art, drawn in code in <code>src/art/</code> like the game it ships in: one ink
+          line round every shape, flat fills, hard shadows down-right, Geist and Geist Mono. Before lights out
+          the world is an uncoloured comic page; colour belongs to racing.
         </p>
       </header>
     </main>

@@ -1,30 +1,156 @@
-/* The art kit's moments (src/art/moments.ts). The story layer: black, white, one red; Geist and Geist Mono. */
+/* The art kit's moments (src/art/moments.ts), drawn like the game's own UI: a clean-line comic. One 2.5 px ink
+   border, flat fills, a hard ink shadow offset down-right, no gradients, blur or glow. */
+:root {
+  --lc-ink: #141418;
+  --lc-paper: #fffdf7;
+  --lc-cream: #faf4e4;
+  --lc-pencil: #8f8c84;
+  --lc-wash: #ece5d3;
+  --lc-red: #d93829;
+  --lc-border: 2.5px solid var(--lc-ink);
+  --lc-shadow: 3px 3px 0 var(--lc-ink);
+  --lc-shadow-lg: 4px 4px 0 var(--lc-ink);
+}
 
-/* The race's own start bulbs, as #lights draws them in styles.css, sized with --bulb. */
+/* A comic panel: the same build as the game's Practice and Multiplayer buttons. */
+.lc-panel {
+  background: var(--lc-cream);
+  color: var(--lc-ink);
+  border: var(--lc-border);
+  border-radius: 10px;
+  box-shadow: var(--lc-shadow-lg);
+  padding: 14px 16px;
+}
+
+/* A speech balloon: paper, inked, its tail pointing at the speaker (an inked triangle under a paper one). */
+.lc-balloon {
+  position: relative;
+  background: var(--lc-paper);
+  color: var(--lc-ink);
+  border: var(--lc-border);
+  border-radius: 18px;
+  box-shadow: var(--lc-shadow);
+  padding: 10px 14px;
+  font:
+    600 16px/1.3 'Geist',
+    system-ui,
+    sans-serif;
+}
+.lc-balloon::before,
+.lc-balloon::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 0;
+  border-style: solid;
+}
+.lc-balloon[data-tail='left']::before {
+  left: -14px;
+  top: 14px;
+  border-width: 7px 14px 7px 0;
+  border-color: transparent var(--lc-ink) transparent transparent;
+}
+.lc-balloon[data-tail='left']::after {
+  left: -9.5px;
+  top: 16.5px;
+  border-width: 4.5px 10px 4.5px 0;
+  border-color: transparent var(--lc-paper) transparent transparent;
+}
+.lc-balloon[data-tail='right']::before {
+  right: -14px;
+  top: 14px;
+  border-width: 7px 0 7px 14px;
+  border-color: transparent transparent transparent var(--lc-ink);
+}
+.lc-balloon[data-tail='right']::after {
+  right: -9.5px;
+  top: 16.5px;
+  border-width: 4.5px 0 4.5px 10px;
+  border-color: transparent transparent transparent var(--lc-paper);
+}
+.lc-balloon[data-tail='down']::before {
+  left: 22px;
+  bottom: -14px;
+  border-width: 14px 9px 0 0;
+  border-color: var(--lc-ink) transparent transparent transparent;
+}
+.lc-balloon[data-tail='down']::after {
+  left: 24.5px;
+  bottom: -9px;
+  border-width: 10px 6px 0 0;
+  border-color: var(--lc-paper) transparent transparent transparent;
+}
+
+/* Gus speaking: portrait, then the balloon pointing at him. */
+.lc-says {
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;
+}
+.lc-says > svg {
+  flex: none;
+}
+.lc-says .lc-balloon {
+  min-width: 0;
+}
+
+/* Narration: a rectangular caption box in mono caps. */
+.lc-caption {
+  display: inline-block;
+  background: var(--lc-cream);
+  color: var(--lc-ink);
+  border: var(--lc-border);
+  box-shadow: var(--lc-shadow);
+  padding: 6px 10px;
+  font:
+    600 12px/1.2 'Geist Mono',
+    ui-monospace,
+    monospace;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+/* The start lights: inked discs on a cream rail. Lit is flat red with ink rays; no glow. Size with --bulb. */
 .bulbs {
-  --bulb: 30px;
+  --bulb: 34px;
   display: inline-flex;
-  gap: calc(var(--bulb) / 3);
-  background: #111;
-  padding: calc(var(--bulb) / 3) calc(var(--bulb) / 2.1);
-  border-radius: calc(var(--bulb) / 2.5);
-  box-shadow: 0 4px 20px #0008;
+  gap: calc(var(--bulb) / 6);
+  background: var(--lc-cream);
+  border: var(--lc-border);
+  border-radius: 10px;
+  box-shadow: var(--lc-shadow);
+  padding: calc(var(--bulb) / 8) calc(var(--bulb) / 5);
 }
 .bulbs i {
+  display: block;
   width: var(--bulb);
   height: var(--bulb);
-  border-radius: 50%;
-  background: #330a0a;
-  display: block;
-  border: calc(var(--bulb) / 15) solid #000;
-  box-sizing: border-box;
 }
-.bulbs i.on {
-  background: #ff2020;
-  box-shadow: 0 0 calc(var(--bulb) / 2.1) #ff3030;
+.bulbs svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.bulbs .disc {
+  fill: var(--lc-wash);
+}
+.bulbs .hi,
+.bulbs .rays {
+  display: none;
+}
+.bulbs i.on .disc {
+  fill: var(--lc-red);
+}
+.bulbs i.on .hi {
+  display: inline;
+  fill: var(--lc-paper);
+}
+.bulbs i.on .rays {
+  display: inline;
 }
 
-/* A pass: the position rolls like a timing tower, and one white streak shoots in from the left. */
+/* A pass: the position rolls in an ink badge like the race's own, and one ink streak shoots in from the left. */
 .proll {
   position: relative;
   display: inline-flex;
@@ -34,7 +160,10 @@
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.04em;
   line-height: 1;
-  color: #f2f4f7;
+  color: var(--lc-paper);
+  background: var(--lc-ink);
+  border-radius: 0.3em;
+  padding: 0.08em 0.22em 0.1em 0.18em;
 }
 .proll-win {
   display: inline-block;
@@ -48,6 +177,7 @@
 .proll-reel > span {
   display: block;
   height: 1em;
+  text-align: right;
 }
 .proll[data-dir='down'] .proll-reel {
   transform: translateY(-1em);
@@ -58,17 +188,14 @@
 .proll.play[data-dir='down'] .proll-reel {
   animation: proll-down 420ms cubic-bezier(0.2, 0.8, 0.2, 1) 90ms both;
 }
-.proll.play[data-dir='down'] {
-  color: #9aa1aa;
-}
 .proll-streak {
   position: absolute;
   right: 100%;
   top: 0.42em;
   width: 1.8em;
-  height: 0.07em;
-  margin-right: 0.12em;
-  background: #f2f4f7;
+  height: 0.08em;
+  margin-right: 0.16em;
+  background: var(--lc-ink);
   clip-path: polygon(0 45%, 100% 0, 100% 100%, 0 55%);
   opacity: 0;
   transform-origin: right center;
@@ -114,7 +241,7 @@
   font-style: italic;
   letter-spacing: -0.04em;
   line-height: 0.92;
-  color: #f2f4f7;
+  color: var(--lc-ink);
 }
 .power em {
   font-style: italic;
