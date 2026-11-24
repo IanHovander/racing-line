@@ -22,7 +22,7 @@
   },
   "overrides": [
     {
-      "files": ["src/main.ts"],
+      "files": ["src/main.ts", "src/art/index.ts"],
       "rules": { "import/no-unassigned-import": "off" }
     }
   ],

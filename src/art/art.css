@@ -1,0 +1,128 @@
+/* The art kit's moments (src/art/moments.ts). The story layer: black, white, one red; Geist and Geist Mono. */
+
+/* The race's own start bulbs, as #lights draws them in styles.css, sized with --bulb. */
+.bulbs {
+  --bulb: 30px;
+  display: inline-flex;
+  gap: calc(var(--bulb) / 3);
+  background: #111;
+  padding: calc(var(--bulb) / 3) calc(var(--bulb) / 2.1);
+  border-radius: calc(var(--bulb) / 2.5);
+  box-shadow: 0 4px 20px #0008;
+}
+.bulbs i {
+  width: var(--bulb);
+  height: var(--bulb);
+  border-radius: 50%;
+  background: #330a0a;
+  display: block;
+  border: calc(var(--bulb) / 15) solid #000;
+  box-sizing: border-box;
+}
+.bulbs i.on {
+  background: #ff2020;
+  box-shadow: 0 0 calc(var(--bulb) / 2.1) #ff3030;
+}
+
+/* A pass: the position rolls like a timing tower, and one white streak shoots in from the left. */
+.proll {
+  position: relative;
+  display: inline-flex;
+  align-items: flex-end;
+  font-family: 'Geist Mono', ui-monospace, monospace;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  color: #f2f4f7;
+}
+.proll-win {
+  display: inline-block;
+  height: 1em;
+  overflow: hidden;
+}
+.proll-reel {
+  display: flex;
+  flex-direction: column;
+}
+.proll-reel > span {
+  display: block;
+  height: 1em;
+}
+.proll[data-dir='down'] .proll-reel {
+  transform: translateY(-1em);
+}
+.proll.play[data-dir='up'] .proll-reel {
+  animation: proll-up 420ms cubic-bezier(0.2, 0.8, 0.2, 1) 90ms both;
+}
+.proll.play[data-dir='down'] .proll-reel {
+  animation: proll-down 420ms cubic-bezier(0.2, 0.8, 0.2, 1) 90ms both;
+}
+.proll.play[data-dir='down'] {
+  color: #9aa1aa;
+}
+.proll-streak {
+  position: absolute;
+  right: 100%;
+  top: 0.42em;
+  width: 1.8em;
+  height: 0.07em;
+  margin-right: 0.12em;
+  background: #f2f4f7;
+  clip-path: polygon(0 45%, 100% 0, 100% 100%, 0 55%);
+  opacity: 0;
+  transform-origin: right center;
+}
+.proll.play[data-dir='up'] .proll-streak {
+  animation: proll-streak 620ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+@keyframes proll-up {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-1em);
+  }
+}
+@keyframes proll-down {
+  from {
+    transform: translateY(-1em);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+@keyframes proll-streak {
+  0% {
+    opacity: 0;
+    transform: translateX(-0.8em) scaleX(0.2);
+  }
+  25% {
+    opacity: 1;
+    transform: translateX(0) scaleX(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(0.3em) scaleX(1);
+  }
+}
+
+/* Words of power: the logo's face. */
+.power {
+  font-family: 'Geist', system-ui, sans-serif;
+  font-weight: 800;
+  font-style: italic;
+  letter-spacing: -0.04em;
+  line-height: 0.92;
+  color: #f2f4f7;
+}
+.power em {
+  font-style: italic;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .proll.play .proll-reel,
+  .proll.play .proll-streak {
+    animation-duration: 1ms;
+  }
+}

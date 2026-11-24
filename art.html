@@ -97,21 +97,23 @@
         align-items: flex-start;
         min-width: 0;
       }
-      figure canvas {
-        display: block;
-        image-rendering: pixelated;
+      figure .art {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 72px;
+        padding: 12px;
         background: var(--panel);
         border: 1px solid var(--rule);
-        border-radius: 8px;
+        border-radius: 12px;
         max-width: 100%;
+      }
+      figure.tap {
+        cursor: pointer;
       }
       figcaption {
         font-size: 11.5px;
         color: var(--muted);
-      }
-      .stage canvas {
-        width: 100%;
-        height: auto;
       }
     </style>
   </head>
@@ -120,13 +122,14 @@
     <main id="gallery">
       <header>
         <p class="eyebrow">Racing Line · art kit</p>
-        <h1>Drawn in code, pixel by pixel.</h1>
+        <h1>Black, white, <span style="color: #e0232b">one red.</span></h1>
         <p class="muted">
-          Every sprite here is painted at its true size from a palette and a grid or a few shapes in
-          <code>src/art/</code>, then scaled up crisp. Liveries are slots, so each drawing serves every team.
+          The story layer's art, drawn in code as flat vector in <code>src/art/</code>: two or three tones a
+          face, lit from the top left, Geist and Geist Mono. Colour belongs to racing.
         </p>
       </header>
     </main>
+    <link rel="stylesheet" href="./assets/art.css" />
     <script type="module" src="./assets/art.js"></script>
   </body>
 </html>
