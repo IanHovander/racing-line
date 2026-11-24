@@ -97,5 +97,10 @@ export interface State {
   musNext: any;
   cheerT: any;
   NICK: any;
+  /**
+   * The intro (src/intro/) while it plays over the game, else null: `hold` keeps the simulation still, `camera` runs
+   * first in updateCamera (true when it has placed the camera itself), `after` draws over a finished frame.
+   */
+  INTRO: null | { hold: boolean; camera: (dt: number) => boolean; after: () => void };
 }
 export const GS = {} as State;

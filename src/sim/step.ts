@@ -118,6 +118,7 @@ export function spawn(x, y, z, col, life, sp) {
  */
 export const CATCHUP = { grip: 0.05, full: 1000 };
 export function step(dt) {
+  if (GS.INTRO?.hold) return; // the intro holds the cars still until its lights go out
   if (GS.state === 'countdown') {
     GS.cdT += dt;
     if (GS.cdT >= goAt) {

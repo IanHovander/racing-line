@@ -10,6 +10,7 @@ GS.cC = 1;
 GS.OX = 0;
 GS.OY = 0;
 export function updateCamera(dt) {
+  if (GS.INTRO?.camera(dt)) return; // the intro's helicopter
   const c = cars[Math.max(0, GS.ctrl)];
   if (!c) return;
   const look = Math.min(c.v * 0.38, 32);

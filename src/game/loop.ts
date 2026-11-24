@@ -74,6 +74,7 @@ export function frame(now) {
   updateCamera(GS.state === 'paused' ? 0 : dt);
   const renderStart = perfEnabled ? performance.now() : 0;
   render();
+  GS.INTRO?.after();
   if (perfEnabled) recordPerf('render', performance.now() - renderStart);
   const hudStart = perfEnabled ? performance.now() : 0;
   hud(dt);
