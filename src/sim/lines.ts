@@ -18,6 +18,7 @@ import { attract, cars, opts } from '../game/race';
 import { pursuit } from './ai';
 import { BPROF, BRK, GRIP, VCAP, VMAX } from './car-model';
 import { create } from './dynline';
+import { PS } from './passing';
 import { PROF, buildProfile, setLineCurv } from './profile';
 import { MP, hostPeer } from '../net/multiplayer';
 import { TEAM_STATS } from '../teams/team-stats';
@@ -292,7 +293,7 @@ export function dynObstacles(c) {
     if (d < -GS.L / 2) d += GS.L;
     else if (d > GS.L / 2) d -= GS.L;
     if (d < -30 || d > 220) continue;
-    OBS.push({ d, lat: o.lat, v: o.v, x: o.x, y: o.y, h: o.h, out: !!o.out });
+    OBS.push({ d, lat: o.lat, v: o.v, x: o.x, y: o.y, h: o.h, out: !!o.out, tgt: o === PS.car });
   }
   return OBS;
 }
@@ -308,6 +309,7 @@ export function dynAheadCap(c): number {
     if (d < -GS.L / 2) d += GS.L;
     else if (d > GS.L / 2) d -= GS.L;
     if (d <= 0 || d > look) continue;
+    if (o === PS.car && (c.lat - o.lat) * PS.side > 0.6) continue; // a committed pass, pulled out beside it: the plan goes by (sim/passing.ts)
     const tl = p.lat[clamp(k0 + Math.round(d / GS.SEG), 0, p.n - 1)]; // where the plan puts this car when it reaches the other one
     if (Math.abs(o.lat - tl) > 2.3 && (d > 9 || Math.abs(o.lat - c.lat) > 2.0)) continue;
     cap = Math.min(cap, Math.sqrt(Math.max(0, o.v * o.v + 2 * BPROF * WETB() * 0.8 * Math.max(0, d - 5.5))));

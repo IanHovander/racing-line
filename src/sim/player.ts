@@ -6,6 +6,7 @@ import { aheadCap, laneSafe, passGap, passTarget, pursuit, pursuitLane, renderLa
 import { GRIP, VMAX } from './car-model';
 import { AIL, DYN, dynAheadCap, dynObstacles, dynOn } from './lines';
 import { PROF, rejoin } from './profile';
+import { passIdle, passUpdate } from './passing';
 import { NEUTRAL } from '../teams/team-stats';
 import { WETG } from '../track/track';
 export function controlPlayer(c, dt) {
@@ -16,12 +17,14 @@ export function controlPlayer(c, dt) {
   // steering
   const dyn = opts.steer === 0 && dynOn(c); // the planner drives this car (sim/lines.ts)
   if (dyn) {
-    const u = DYN.control(c, dynObstacles(c), { attack: !!input.thr }, dt);
+    const pass = passUpdate(c, dt, !!input.thr); // the Passing style: a committed pass round the car ahead, or null (sim/passing.ts)
+    const u = DYN.control(c, dynObstacles(c), { attack: !!input.thr, pass }, dt);
     k = u.k;
     safe = u.safe;
     c.hold = null;
     c.lane = clamp(c.lat - (AIL[c.team] || GS.off)[c.idx], -GS.HW, GS.HW); // kept up to date for when the AI takes the car over
   } else if (opts.steer === 0) {
+    passIdle(c);
     const t = traffic(c);
     const free = t[2] === 0 && t[0] === 0;
     const tg = free ? rejoin(c) : ((c.hold = null), t[0]);

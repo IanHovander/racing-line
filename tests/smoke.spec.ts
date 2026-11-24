@@ -156,3 +156,56 @@ test('the planner drives the car on a ready-made racing line; the line is shown 
   expect(r.aiLines).toBe(5); // every team's AI has its line
   expect(errors).toEqual([]);
 });
+
+test('each Passing style commits passes from the back of the grid, and no pass is left hanging', async ({
+  page,
+}) => {
+  const errors = await open(page);
+  await page.waitForFunction(() => window.DYNLINES && Object.keys(window.DYNLINES).length > 0);
+  const out = await page.evaluate(() => {
+    const w = window,
+      res: any[] = [];
+    for (const mode of [1, 2, 3]) {
+      Object.assign(w.opts, { steer: 0, dynlv: 3, team: 0, rain: 0, diff: 2, laps: 3, pass: mode });
+      w.WX.rain = 0;
+      w.PRACTICE = false;
+      w.buildTrack(w.TRACKS[1]); // Lone Star
+      w.setupRace(false);
+      w.state = 'race';
+      const me = w.cars[w.ctrl],
+        grid = me.grid,
+        b: any = {};
+      let cue = 0,
+        longest = 0;
+      // the one-button bot; with Slingshot it taps the gas (a short lift) as soon as the slingshot is ready
+      for (let i = 0; i < 120 * 150 && w.state === 'race'; i++) {
+        let hold = w.START.done && me.v < (me.safeV || 0) - 0.2;
+        if (w.PS.ready && !(b.tapT > 0) && !b.tapped) {
+          b.tapT = 0.12;
+          b.tapped = true;
+        }
+        if (!w.PS.ready) b.tapped = false;
+        if (b.tapT > 0) {
+          b.tapT -= w.STEP;
+          hold = false;
+        }
+        w.input.thr = hold;
+        w.step(w.STEP);
+        if (w.PS.cand || w.PS.car) cue++;
+        if (w.PS.car) longest = Math.max(longest, w.PS.t);
+      }
+      w.input.thr = false;
+      res.push({ mode, grid, tried: w.PS.n, made: w.PS.ok, cue: cue / 120, longest });
+    }
+    w.opts.pass = 1;
+    return res;
+  });
+  for (const r of out) {
+    expect(r.grid, 'you start last').toBe(9);
+    expect(r.cue, 'mode ' + r.mode + ': a cue was shown').toBeGreaterThan(0);
+    expect(r.tried, 'mode ' + r.mode + ': passes committed').toBeGreaterThan(0);
+    expect(r.longest, 'mode ' + r.mode + ': a committed pass ends').toBeLessThan(6);
+  }
+  expect(out.reduce((a, r) => a + r.made, 0)).toBeGreaterThan(1);
+  expect(errors).toEqual([]);
+});

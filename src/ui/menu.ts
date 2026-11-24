@@ -6,6 +6,7 @@ import { cars, opts, setupRace } from '../game/race';
 import { MP, leaveRoom, mpOn, mpPresence, showLobby } from '../net/multiplayer';
 import { renderLobby } from '../net/lobby';
 import { renderLaneInd } from '../sim/ai';
+import { PASS_NOTE, setPassMode } from '../sim/passing';
 import { dynPrepare, lineSave, setDynLevel } from '../sim/lines';
 import { buildProfile } from '../sim/profile';
 import { DRIVER_STATS } from '../teams/drivers';
@@ -186,6 +187,22 @@ export function init(): void {
   initCircuitPicker();
   $('sTeam').addEventListener('click', () => setTimeout(showTeamStats, 0));
   showTeamStats();
+  // Passing: how you get past the car ahead (sim/passing.ts); also in the pause menu, to compare them in a race
+  const passSync = () => {
+    for (const id of ['passNote', 'pPassNote']) $(id).textContent = PASS_NOTE[opts.pass | 0];
+  };
+  for (const id of ['sPass', 'pPass']) {
+    segInit(id, 'pass', Number);
+    $(id).addEventListener('click', e => {
+      if (!(e.target as HTMLElement).closest('button')) return;
+      setTimeout(() => {
+        setPassMode(opts.pass);
+        passSync();
+        syncAllSegs();
+      }, 0);
+    });
+  }
+  passSync();
   segInit('sSteer', 'steer', Number);
   $('sSteer').addEventListener('click', () => setTimeout(syncCtrlMenu, 0));
   syncCtrlMenu();

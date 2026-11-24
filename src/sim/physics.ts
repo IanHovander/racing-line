@@ -4,6 +4,7 @@ import { cars, opts } from '../game/race';
 import { BRK, GEARTOP, GRIP, VMAX, autoGear, gearEff, isManual } from './car-model';
 import { NEUTRAL } from '../teams/team-stats';
 import { WETB } from '../track/track';
+import { SLING } from './passing';
 // slipstream: a car 5-45 m ahead, roughly in line, cuts drag (higher top speed, more pull)
 export function towTarget(c) {
   if (c.v < 28) return 0;
@@ -47,7 +48,8 @@ export function physics(c, dt, thr, brk, kd) {
   const v = c.v;
   // DRS and slipstream strength (Rules settings): 1 is the normal effect, 0.5 half, 2 double…
   const dr = c.drs ? opts.drsPow || 1 : 0,
-    tw = c.tow * (opts.tow || 0);
+    tw = c.tow * (opts.tow || 0),
+    bo = c.boost || 0; // slingshot boost (sim/passing.ts SLING)
   if (c.boostT > 0) c.boostT -= dt; // launch boost after a quick start
   let a =
     thr *
@@ -57,10 +59,13 @@ export function physics(c, dt, thr, brk, kd) {
       (1 + 0.06 * dr) *
       gE *
       (1 - 0.25 * c.dmg) *
-      Math.max(0, 1 - (v / (VMAX * st.top * (1 + 0.075 * tw + 0.055 * dr) * (1 - 0.12 * c.dmg))) ** 2) +
-      0.9 * tw * (gE > 0 ? 1 : 0));
+      Math.max(
+        0,
+        1 - (v / (VMAX * st.top * (1 + 0.075 * tw + 0.055 * dr + SLING.top * bo) * (1 - 0.12 * c.dmg))) ** 2,
+      ) +
+      (0.9 * tw + SLING.pull * bo) * (gE > 0 ? 1 : 0));
   if (thr < 0.05) a -= 2.5 + v * 0.02 + (man ? 2.2 * Math.min(1, v / GEARTOP[c.gear]) : 0); // engine braking is stronger in a lower gear
-  a -= brk * [BRK, 38, 18, 10, 30, 22][surf] * st.brk * (0.6 + 0.4 * c.gm) * WETB();
+  a -= brk * [BRK, 38, 18, 10, 30, 22][surf] * st.brk * (c.brkX || 1) * (0.6 + 0.4 * c.gm) * WETB(); // brkX: a dive's extra bite (sim/passing.ts)
   a -= 9.81 * (GS.SL[c.idx] || 0);
   if (surf === 2) a -= 1.6 + v * 0.08 + v * v * 0.0018;
   else if (surf === 3) a -= 4 + v * 0.22;

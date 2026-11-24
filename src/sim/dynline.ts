@@ -36,9 +36,15 @@
 //          car        the game's car object, read-only here: { x, y, h, v, idx, lat, s, gm, surf, dirt, ... }
 //                     x,y world position; h heading (rad); v speed (m/s); idx nearest centreline sample;
 //                     lat signed lateral offset from the centreline; s arc position (m); gm grip multiplier (1)
-//          obstacles  other cars near the player: [{ d, lat, v, x, y, h, out }]
-//                     d = distance ahead along the track in metres (negative = behind), out = retired/crawling
-//          opts       { attack }   attack = the player is holding the gas right now
+//          obstacles  other cars near the player: [{ d, lat, v, x, y, h, out, tgt }]
+//                     d = distance ahead along the track in metres (negative = behind), out = retired/crawling,
+//                     tgt = the car a committed pass (opts.pass) goes round
+//          opts       { attack, pass }   attack = the player is holding the gas right now
+//                     pass = { side, brk } (optional): the game has committed the car to pass the obstacle marked
+//                     tgt on that side (+1 = positive lat). Only lanes round that car on that side are planned while
+//                     one of them can be driven (the car is taken to give room on that side); if none can, the usual
+//                     choice. Moving cars are then part of the plan (otherwise only stopped ones are). brk: the car's
+//                     brakes bite this many times harder for now (the game's physics does the same).
 //          returns    k     curvature command (1/m, same sign convention as the game's pursuit()); may exceed the
 //                           tyre limit on purpose (a skid) to shed speed
 //                     safe  speed (m/s) the auto-brake holds the car to when the player lifts
@@ -668,8 +674,10 @@ export function create(geom, car, cfg?) {
     oOff = new Float64Array(MAXO),
     oR = new Float64Array(MAXO),
     oS = new Float64Array(MAXO),
-    oVn = new Float64Array(MAXO);
-  let nO = 0;
+    oVn = new Float64Array(MAXO),
+    oT = new Uint8Array(MAXO); // 1 = the car a committed pass goes round
+  let nO = 0,
+    passSide = 0; // the side of a committed pass (opts.pass), 0 = none
   const Wc = cfg.Wc,
     Wp = cfg.Wp; // centre-to-centre room needed beside a car; the offset a pass aims for
   const refLat = geom.refLat,
@@ -871,6 +879,7 @@ export function create(geom, car, cfg?) {
             lm = lat[kk + 1],
             dl = lm > lo ? lm - lo : lo - lm; // this path's lateral gap to the car, where the car is
           if (dl >= Wc) continue;
+          if (oT[j] && (lm - lo) * passSide > 0.6) continue; // the car being passed gives room on the side the pass takes
           if (gap > 5.5) {
             const vc = oVn[j] + (gap - 8) * 0.6;
             if (vn > vc) vn = vc > vbr ? vc : vbr;
@@ -907,8 +916,8 @@ export function create(geom, car, cfg?) {
       f = sI - fl,
       i1 = (i0 + 1) % N,
       gm = (c.gm || 1) * (1 - 0.2 * (c.dirt || 0)),
-      bw = 0.6 + 0.4 * (c.gm || 1),
-      v0 = c.v; // a damaged car has less grip, and the game's brakes fade with it
+      bw = (0.6 + 0.4 * (c.gm || 1)) * ((opts && opts.pass && opts.pass.brk) || 1),
+      v0 = c.v; // a damaged car has less grip, and the game's brakes fade with it (and bite harder on a dive: opts.pass.brk)
     // the car's state relative to the centreline: offset, slope and second derivative (from the last steering command)
     const tX = tx[i0] + (tx[i1] - tx[i0]) * f,
       tY = ty[i0] + (ty[i1] - ty[i0]) * f,
@@ -950,12 +959,15 @@ export function create(geom, car, cfg?) {
       H = n * SEG - 6,
       wasFeas = bestFeas,
       fresh = !have;
+    const P = opts && opts.pass;
+    passSide = P ? P.side : 0;
     nO = 0;
     if (obstacles)
       for (let j = 0; j < obstacles.length && nO < MAXO; j++) {
         const o = obstacles[j];
         if (o.d < -8 || o.d > H) continue;
-        if (!cfg.passing && !(o.out || o.v < 15)) continue; // moving cars do not bend the path: the game's contact assist brakes for them
+        if (!cfg.passing && !P && !(o.out || o.v < 15)) continue; // moving cars do not bend the path: the game's contact assist brakes for them
+        oT[nO] = P && o.tgt ? 1 : 0;
         const io = (((i0 + Math.round(f + o.d / SEG)) % N) + N) % N;
         oD[nO] = o.d;
         oV[nO] = o.v;
@@ -970,8 +982,58 @@ export function create(geom, car, cfg?) {
           have = false;
           break;
         }
+    D[0] = Math.min(H, Math.max(14, 0.55 * v0));
+    D[1] = Math.min(H, Math.max(22, 1.0 * v0));
+    D[2] = Math.min(H, Math.max(36, 1.8 * v0));
+    D[3] = Math.min(H, Math.max(60, 3.0 * v0));
+    // a lane that pulls out to `side` of car j, goes by and comes back (into tmp); a = 1 pulls out sooner
+    const passLane = (j, side, a) => {
+      const closing = Math.max(v0 - oV[j], 3),
+        tReach = Math.max(0, oD[j] - 9) / closing,
+        tPass = (oD[j] + 16) / closing;
+      tmp.kind = 1;
+      tmp.isPass = true;
+      tmp.side = side;
+      tmp.gT = 1;
+      tmp.tOff = oOff[j] + side * Wp;
+      tmp.Sg = Sabs;
+      tmp.D1 = Math.min(
+        Math.max(v0 * tReach * (a ? 0.55 : 1), Math.max(10, 0.4 * v0)),
+        Math.max(30, 1.6 * v0),
+      );
+      tmp.Dh = Math.min(Math.max(v0 * tPass - tmp.D1, 20), Math.max(20, H - tmp.D1 - 25));
+      tmp.D2 = Math.max(10, Math.min(Math.max(25, v0), H - tmp.D1 - tmp.Dh));
+      setR(tmp, D[a ? 0 : 1]);
+    };
+    // 0. a committed pass (opts.pass): only lanes round that car on that side, as long as one of them can be
+    //    driven; otherwise the usual choice below. Nothing else is weighed, so the car goes where the game said.
+    let forced = false;
+    if (P) {
+      let jT = -1;
+      for (let j = 0; j < nO; j++) if (oT[j]) jT = j;
+      if (jT >= 0) {
+        if (have && act.isPass && act.side === P.side) {
+          const cost = evalCand(act, i0, f, v0, gm, bw);
+          const el = c.lat - (W.lat[1] + (W.lat[2] - W.lat[1]) * f);
+          if ((el < 0 ? -el : el) < 0.7) take(act, cost - cfg.hystTraffic);
+        }
+        for (let a = 0; a < 2; a++) {
+          passLane(jT, P.side, a);
+          const cost = evalCand(tmp, i0, f, v0, gm, bw);
+          if (cost < best) {
+            take(tmp, cost);
+            switched = true;
+          }
+        }
+        if (best < 1e17 && bestF && !bestOff) forced = true;
+        else {
+          best = 1e18;
+          switched = false;
+        }
+      }
+    }
     // 1. the path being driven, unchanged (valid only while the car is still on it)
-    if (have) {
+    if (have && !forced) {
       const cost = evalCand(act, i0, f, v0, gm, bw);
       const el = c.lat - (W.lat[1] + (W.lat[2] - W.lat[1]) * f);
       // it keeps a small head start over fresh paths, so the line does not dither
@@ -980,11 +1042,7 @@ export function create(geom, car, cfg?) {
     // 2. fresh paths from the car's real state that simply merge back onto the line.
     //    With other cars about, changes of mind are only considered every fourth plan (15 a second): deciding more
     //    often made the car dither between lanes. The path being driven is still re-timed on every plan.
-    const full = fresh || best > 1e17 || !nO || (planN & 3) === 0;
-    D[0] = Math.min(H, Math.max(14, 0.55 * v0));
-    D[1] = Math.min(H, Math.max(22, 1.0 * v0));
-    D[2] = Math.min(H, Math.max(36, 1.8 * v0));
-    D[3] = Math.min(H, Math.max(60, 3.0 * v0));
+    const full = !forced && (fresh || best > 1e17 || !nO || (planN & 3) === 0);
     if (full)
       for (let a = 0; a < 4; a++) {
         tmp.kind = 0;
@@ -1048,34 +1106,25 @@ export function create(geom, car, cfg?) {
           let j = -1,
             bd = 1e9;
           for (let q = 0; q < nO; q++)
-            if ((all || oR[q] < 0) && oD[q] > 4 && oD[q] < 130 && oD[q] < bd && oD[q] > lastD + 1) {
+            if (
+              (all || oR[q] < 0 || oT[q]) &&
+              oD[q] > (oT[q] ? -6 : 4) &&
+              oD[q] < 130 &&
+              oD[q] < bd &&
+              oD[q] > lastD + 1
+            ) {
               bd = oD[q];
               j = q;
             }
           if (j < 0) break;
           lastD = bd;
-          if (v0 < oV[j] - 3) continue;
+          if (oT[j] || v0 < oV[j] - 3) continue; // the car of a committed pass that cannot be driven: just follow it
           tried++;
-          const closing = Math.max(v0 - oV[j], 3),
-            tReach = Math.max(0, oD[j] - 9) / closing,
-            tPass = (oD[j] + 16) / closing;
           const io = (((i0 + Math.round(f + oD[j] / SEG)) % N) + N) % N;
           for (let side = -1; side <= 1; side += 2) {
             if (Math.abs(refS[io] + oOff[j] + side * Wp) > limE) continue; // no room on that side of it
             for (let a = 0; a < 2; a++) {
-              tmp.kind = 1;
-              tmp.isPass = true;
-              tmp.side = side;
-              tmp.gT = 1;
-              tmp.tOff = oOff[j] + side * Wp;
-              tmp.Sg = Sabs;
-              tmp.D1 = Math.min(
-                Math.max(v0 * tReach * (a ? 0.55 : 1), Math.max(10, 0.4 * v0)),
-                Math.max(30, 1.6 * v0),
-              );
-              tmp.Dh = Math.min(Math.max(v0 * tPass - tmp.D1, 20), Math.max(20, H - tmp.D1 - 25));
-              tmp.D2 = Math.max(10, Math.min(Math.max(25, v0), H - tmp.D1 - tmp.Dh));
-              setR(tmp, D[a ? 0 : 1]);
+              passLane(j, side, a);
               const cost = evalCand(tmp, i0, f, v0, gm, bw);
               if (cost < best) {
                 take(tmp, cost);
@@ -1088,7 +1137,7 @@ export function create(geom, car, cfg?) {
     }
     // 3. if none of those can be driven at this speed, try leaning towards either edge (wider or tighter arcs).
     //    This is the big set: all of it at once when a plan first fails, then one side of the road on every other plan.
-    if (!bestF && (fresh || wasFeas || (nO ? full : (planN & 1) === 0))) {
+    if (!forced && !bestF && (fresh || wasFeas || (nO ? full : (planN & 1) === 0))) {
       const d1a = Math.max(15, 0.6 * v0),
         d1b = Math.max(30, 1.4 * v0),
         d2a = Math.max(25, v0),

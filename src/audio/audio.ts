@@ -233,6 +233,68 @@ export function env(g, t, peak, dec, att?) {
   g.gain.linearRampToValueAtTime(peak, t + (att || 0.003));
   g.gain.exponentialRampToValueAtTime(0.0001, t + dec);
 }
+/**
+ * Passing moments (sim/passing.ts): 'sling' a rising whoosh, 'dive' a short tyre chirp and low thump, 'pressure' a
+ * long screech (the other car locking up), 'done' a bright two-note chime when the pass is made.
+ */
+export function passSnd(kind: string) {
+  try {
+    if (!AC || !sfxG || !opts.sound) return;
+    const t = AC.currentTime;
+    if (kind === 'done') {
+      for (const [k, m] of [
+        [0, 79],
+        [0.09, 86],
+      ]) {
+        const o = AC.createOscillator();
+        o.type = 'triangle';
+        o.frequency.setValueAtTime(mf(m), t + k);
+        const g = AC.createGain();
+        env(g, t + k, 0.09, 0.35, 0.005);
+        o.connect(g);
+        g.connect(sfxG);
+        o.start(t + k);
+        o.stop(t + k + 0.4);
+      }
+      return;
+    }
+    const sling = kind === 'sling',
+      dur = sling ? 0.9 : kind === 'pressure' ? 0.7 : 0.28;
+    const n = noiseSrc();
+    const f = AC.createBiquadFilter();
+    f.type = 'bandpass';
+    f.Q.value = sling ? 1.2 : 6;
+    if (sling) {
+      f.frequency.setValueAtTime(300, t);
+      f.frequency.exponentialRampToValueAtTime(2600, t + 0.55);
+      f.frequency.exponentialRampToValueAtTime(900, t + dur);
+    } else {
+      f.frequency.setValueAtTime(kind === 'pressure' ? 1500 : 2200, t);
+      f.frequency.exponentialRampToValueAtTime(kind === 'pressure' ? 900 : 1600, t + dur);
+    }
+    const g = AC.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(sling ? 0.32 : 0.16, t + (sling ? 0.35 : 0.02));
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    n.connect(f);
+    f.connect(g);
+    g.connect(sfxG);
+    n.start(t, Math.random() * 1.2);
+    n.stop(t + dur + 0.05);
+    if (kind === 'dive') {
+      const o = AC.createOscillator();
+      o.type = 'sine';
+      o.frequency.setValueAtTime(90, t);
+      o.frequency.exponentialRampToValueAtTime(45, t + 0.2);
+      const g2 = AC.createGain();
+      env(g2, t, 0.25, 0.22);
+      o.connect(g2);
+      g2.connect(sfxG);
+      o.start(t);
+      o.stop(t + 0.25);
+    }
+  } catch (e) {}
+}
 export function crashSnd(intensity, x, y) {
   if (!AC || !opts.sound) return;
   const c = cars[GS.ctrl];

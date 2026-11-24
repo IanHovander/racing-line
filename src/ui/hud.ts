@@ -4,6 +4,7 @@ import { $, clamp } from '../core/dom';
 import { attract, cars, goAt, opts } from '../game/race';
 import { mpOn } from '../net/multiplayer';
 import { GEARTOP, autoGear, isManual } from '../sim/car-model';
+import { PS } from '../sim/passing';
 import { inYellow, standings } from '../sim/step';
 import { gapT, progress } from '../sim/timing';
 import { teamLogo } from '../teams/teams';
@@ -113,6 +114,19 @@ export function hud(dt) {
     for (let k = 0; k < 4; k++) {
       const on = c.tow > 0.12 + k * 0.2;
       if (ch[k].classList.contains('on') !== on) ch[k].classList.toggle('on', on);
+    }
+    // Passing: the slipstream chevrons turn blue when a slingshot is ready; the GAS pad says what the gas will do
+    const sl = (opts.pass | 0) === 3 && (PS.ready || c.boost > 0);
+    if ($('tow').classList.contains('ready') !== sl) $('tow').classList.toggle('ready', sl);
+    const m = opts.pass | 0,
+      lab = m === 3 && PS.ready ? 'TAP' : m === 1 && (PS.armed || PS.kind === 'dive') ? 'DIVE' : 'GAS',
+      cue = lab === 'TAP' ? 'tap' : lab === 'DIVE' ? 'dive' : '';
+    const pad = $('pThr') as HTMLElement & { _c?: string };
+    if (pad._c !== cue) {
+      pad._c = cue;
+      pad.textContent = lab;
+      pad.classList.toggle('cueTap', cue === 'tap');
+      pad.classList.toggle('cueDive', cue === 'dive');
     }
   }
   {

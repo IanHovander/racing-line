@@ -517,6 +517,29 @@ body #pThr.big {
   opacity: 1;
   text-shadow: 0 0 6px #bfe9ff;
 }
+/* Passing: Slingshot ready (or boosting): the slipstream chevrons go blue */
+#tow.ready i {
+  opacity: 1;
+  color: #4da3ff;
+  text-shadow: 0 0 8px #4da3ff;
+}
+/* Passing: what the gas does now. DIVE: keep it on, you are going up the inside. TAP: lift and press to slingshot */
+#pThr.cueDive {
+  border-color: #ffe066;
+  color: #ffe066;
+}
+#pThr.cueTap {
+  border-color: #4da3ff;
+  animation: cueTap 0.3s ease-in-out infinite alternate;
+}
+@keyframes cueTap {
+  from {
+    background: rgba(40, 110, 230, 0.45);
+  }
+  to {
+    background: rgba(77, 163, 255, 0.85);
+  }
+}
 #btns {
   position: fixed;
   top: 10px;

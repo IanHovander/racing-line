@@ -5,6 +5,7 @@ import { BPROF, VCAP } from './car-model';
 import { AIK, AIL, AIV, AIZ, DYN_AIB, aiSteer } from './lines';
 import { PROF, laneProfile } from './profile';
 import { inYellow } from './step';
+import { passAI } from './passing';
 import { DRV } from '../teams/drivers';
 import { NEUTRAL } from '../teams/team-stats';
 import { WETB, nextCorner } from '../track/track';
@@ -250,7 +251,15 @@ export function controlAI(c, dt, factor) {
     const sv = clamp((LN[c.idx] + c.lane) / (GS.HW - 1.7), -1, 1);
     defV = laneSafe(c, sv, 3, PV);
   }
-  const r = dt * (3 + urg * 3);
+  // being passed (give room on the passing side) or cracking under pressure (run wide): sim/passing.ts
+  const PY = passAI(c, dt);
+  let r = dt * (3 + urg * 3);
+  if (PY) {
+    const jL = (c.idx + Math.round((7 + c.v * 0.32) / GS.SEG)) % GS.N;
+    des = clamp(des, PY.lo - LN[jL], PY.hi - LN[jL]);
+    r = Math.max(r, dt * 4);
+    c.def = null;
+  }
   c.lane += clamp(des - c.lane, -r, r);
   let vp = (PV || PROF[c.team] || GS.vf)[(c.idx + (PV ? AI_TUNE.look : 3)) % GS.N];
   if (PV) {
@@ -292,6 +301,7 @@ export function controlAI(c, dt, factor) {
   );
   if (c.drs && vp >= VCAP * (c.st || NEUTRAL).top - 1)
     vt = Math.min(cap, vt * (1 + 0.06 * (opts.drsPow || 1)));
+  if (PY) vt = Math.min(vt * PY.slow, Math.max(PY.cap, vt * 0.6)); // letting a car by costs at most 40% of the pace
   if (inYellow(c)) vt = Math.min(vt, vp * 0.72);
   vt = Math.min(vt, defV * factor);
   if (c.slipT > 0) vt += 3.5;

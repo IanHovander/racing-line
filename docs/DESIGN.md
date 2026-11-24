@@ -585,3 +585,73 @@ Reported from two phones: opening the connection "is very inconsistent and often
   relay (`iceTransportPolicy: 'relay'`, like phones on mobile data); `?tls=1` uses only the relay over TLS on port 443.
 - **Lobby:** the host measures how each guest is connected (`linkType`, from the WebRTC stats' selected candidate
   pair, again after 3 s) and puts it in that guest's presence (`link`); a relayed player's row says "Ready · Relay".
+
+## v17.20 — Passing: three ways to get past (`src/sim/passing.ts`)
+
+**The problem.** With Steering: Auto on a dynamic line the planner drives your car along the racing line and ignores
+moving cars, and the contact assist brakes you behind anyone in the way. Passes happened only when the other car's
+line happened to leave room. Measured with the one-button bot from the back of the grid against Hard opponents (6
+grids, Lone Star, 3 laps): about 20–26 s of a 165 s race with the gas held while the assist held the car back, and a
+sloppy bot (`jitter0.15`) bumped other cars 3 to 9 times a race. You could not make a pass happen; they happened to you.
+
+**What was tried before** (MatthewTorgerson's repository, from its commit history, all rolled back on 21 Nov 2026 to
+just after the catch-up sliders): DRS passes planned by the planner while DRS was open; DRS removed and an automatic
+pass in the tow (`towPass()`, 250 m of straight, after lap 1); a pass on a blip of the throttle with a 2 s slingshot
+("TAP TO PASS" on the pad, blue chevron); Attack Mode with automatic passing again; a control and overtaking rework
+(v2, v3). The Lanes and Overtake steering modes (tap a side to pass) are older still. The lesson the planner already
+carried: a path that plans round moving cars is hard to predict.
+
+**One mechanism, three ways in.** Each style is a different answer to "how do I start a pass"; they share how a pass
+is carried out:
+
+- **A committed pass** (`PS.car`, `PS.side`): once started, the planner plans only lanes round that one car on that
+  one side (`opts.pass` in `dynline.ts`'s `control()`), as long as one can be driven; it then goes back to its own line
+  once your car is a metre ahead (`PS.ahead`). Done when the other car is 5.5 m behind; given up if it gets 25–35 m
+  ahead or after 5 s. So the car goes where the cue showed, and nowhere else.
+- **The other car gives room** (`passAI()`, used by `controlAI`): within 30 m it keeps its centre 3.6 m in from the
+  edge on the passing side (a lane for you), keeps a car's width from you once you have pulled out beside it, and once
+  your nose is alongside it stays 3 m/s slower than you (never below 60% of its own pace, so two cars cannot slow
+  each other to a stop). The contact assist ignores it once you are on its passing side. It does not defend.
+- **Your car's side**: the side you are already on if you sit a little to one side of it and there is room
+  (≥ 3.2 m from its centre to the edge), else the inside of a corner within reach if there is room, else the side
+  with more road.
+
+The three styles (Settings · Driving · Passing, and the pause menu; `opts.pass`, stored as `hcgp_pass`, default Dive):
+
+1. **Dive — brake later than them.** No new control. With a car in your way within 40 m, your braking zone within
+   2.4 s and the inside of the corner open (room beside it, and you are not on its far side), white chevrons show the
+   inside lane and the pad reads DIVE. Still on the gas once that car is on the brakes, within 14 m: you dive (yellow
+   chevrons, "Dive!" and a tyre chirp). Your brakes bite 22% harder until you are alongside, and the planner knows it
+   (`opts.pass.brk`), so the braking point really is later; the other car lifts to 94% of its pace.
+2. **Pressure — stay on their gearbox.** No new control. Within 0.6 s of the car ahead a ring round it fills (full
+   rate at 0.25 s or closer, 1.7× in corners and braking zones, about 3 to 5 s in all), white to orange to red, and
+   drains slowly when you drop back. Full, and you within 12 m: the driver cracks ("Sato cracks!", a screech, tyre
+   smoke): for 1.5 s it lifts to 86% and drifts wide at 2.6 m/s, and you take the other side.
+3. **Slingshot — tap in the tow.** Within 18 m in the tow (`c.tow` > 0.4) the charge fills in 0.9 s (a blue ring).
+   Ready when charged, on a straight with at least 120 m (or 2.2 s) before the next braking zone, and the car ahead
+   not pulling away: blue chevrons show the lane, the slipstream chevrons in the HUD turn blue and the pad flashes
+   TAP. A tap (a lift of at most 0.4 s after holding the gas 0.2 s) fires it: 2.2 s of boost, +16% top speed and
+   +4 m/s² (`c.boost` in `physics()`), a whoosh and white streaks.
+
+A pass that works: "Past Sato at T5!", a two-note chime and a short white streak along your car. The coaching's own
+"Nice move" is not shown for it twice. A reminder of the style shows just after lights out.
+
+**Starting last.** Single-player races put you at the back of the grid (your team-mate lands where the shuffle puts
+it), so there is a field to get past. MatthewTorgerson's repository made the same change on 22 Nov 2026.
+
+**Measured** (`node tools/pass-bench.cjs --seeds 1,2,3,4,5,6 --laps 3 --diff 2`, Lone Star, Cautious Expert, from P10):
+
+| Bot `perfect` | place | passes | lost | committed / worked | your contacts | held back (s) |
+| ------------- | ----- | ------ | ---- | ------------------ | ------------- | ------------- |
+| Off           | 1.0   | 5.2    | 0.0  | —                  | 1.0           | 26.2          |
+| Dive          | 2.5   | 4.7    | 0.8  | 3.3 / 2.3          | 1.0           | 16.2          |
+| Pressure      | 2.0   | 5.2    | 1.2  | 3.2 / 2.5          | 3.2           | 15.2          |
+| Slingshot     | 1.7   | 4.7    | 0.3  | 2.3 / 1.3          | 1.8           | 15.2          |
+
+The perfect bot is far quicker than Hard opponents and wins from the back with no help at all, so places are not the
+point here; time held back fell by about 40% and most committed passes work. The bot does not choose its moments as a
+player would (it dives whenever the conditions are met), so how each style feels has to be judged by playing.
+
+**Not covered:** the Classic line and the other steering modes (passing styles need Steering: Auto on a Novice to
+Perfect Expert line). Online, only cars your machine drives can be passed this way, since only they can be made to
+give room: the host can use the styles on the AI; a guest, and anyone racing another player, cannot.

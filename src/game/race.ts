@@ -9,6 +9,7 @@ import { flagFrames, flagImg } from '../render/scenery';
 import { renderLaneInd } from '../sim/ai';
 import { dynPrepare, lineLoad } from '../sim/lines';
 import { locate } from '../sim/physics';
+import { passReset } from '../sim/passing';
 import { TEAM_STATS } from '../teams/team-stats';
 import { TEAMS } from '../teams/teams';
 import { parts, skids } from '../track/active';
@@ -79,6 +80,11 @@ export function setupRace(isAttract, mpGrid?) {
       const j = Math.floor(Math.random() * (i + 1));
       [order[i], order[j]] = [order[j], order[i]];
     }
+  // in a single-player race you start last, with the whole field to get past (your team-mate stays where it lands)
+  if (!mpGrid && !isAttract && !GS.PRACTICE) {
+    const k = order.findIndex(([t, d]) => t === opts.team && d === 0);
+    if (k >= 0) order.push(order.splice(k, 1)[0]);
+  }
   order.forEach(([t, d], g) => {
     const sDist = GS.L - 10 - g * 7.5;
     let idx = Math.round(sDist / GS.SEG) % GS.N;
@@ -155,6 +161,7 @@ export function setupRace(isAttract, mpGrid?) {
     GS.mateIdx = cars.findIndex(c => c.mine && c.drv === 1);
   }
   if (isAttract) GS.PRACTICE = false;
+  passReset();
   dynPrepare(); // racing lines for this circuit, weather, Opponents level and the car you drive (now that the grid is known)
   lineLoad(); // whether the line is drawn: practice and races each remember their own choice
   if (isAttract) {
@@ -192,6 +199,8 @@ export function init(): void {
     drsPow: clamp(+store.get('drsPow', 1) || 1, 1, 50),
     /** catch-up grip for cars behind the leader: 0 off, 1 normal, up to 5 (sim/step.ts CATCHUP) */
     cgrip: clamp(+store.get('cgrip', 1) || 0, 0, 50),
+    /** how you pass the car ahead: 0 Off, 1 Dive, 2 Pressure, 3 Slingshot (sim/passing.ts) */
+    pass: clamp(store.get('pass', 1) | 0, 0, 3),
     turns: store.get('turns', 1),
     gears: store.get('defv4', 0) ? store.get('gears', 0) : (store.set('gears', 0), store.set('defv4', 1), 0),
     sound: store.get('sound', true),

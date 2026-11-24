@@ -22,6 +22,7 @@ import { laneOff } from '../sim/ai';
 import { dynOn, hardMask } from '../sim/lines';
 import { PROF, liveZone, profileFor } from '../sim/profile';
 import { drawDynLine } from './line';
+import { drawPassCues } from './passing';
 import { clearTime } from '../sim/step';
 import { TEAMS } from '../teams/teams';
 import { parts, skids } from '../track/active';
@@ -477,6 +478,7 @@ export function render() {
     ctx.stroke();
     ctx.setLineDash([]);
   }
+  drawPassCues(z); // the Passing style's markings on the road (render/passing.ts)
   // barriers: solid walls with a face, a top and (on some stretches) sponsor boards; catch fences where the circuit has them
   drawWalls(z);
   drawTunnelFloor(z);

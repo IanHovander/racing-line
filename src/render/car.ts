@@ -345,9 +345,9 @@ export function drawCar0(c, isMe, isMate) {
   });
   if (fd > 0) rearWing();
   else frontWing();
-  if (c.tow > 0.2) {
-    const tw = c.tow,
-      tm = performance.now() / 1000;
+  const tw = Math.max(c.tow, c.boost || 0, (c.streakT || 0) * 1.4); // slipstream, a slingshot, a pass just made (sim/passing.ts)
+  if (tw > 0.2) {
+    const tm = performance.now() / 1000;
     ctx.lineCap = 'round';
     const vis = Math.min(1, tw * 0.9);
     for (let k = 0; k < (isMe ? 9 : 5); k++) {

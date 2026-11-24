@@ -51,6 +51,10 @@ A bot only presses and releases the gas, like a player on Space. It waits for th
   beside another car, just hit, over the line's speed, its braking error). Prints the share of race time off
   the tarmac; `--list` prints each excursion. `--set 'AI_TIMING.early=[0,0,0];AI_LANE.slow=0'` turns the early
   aim and the lane caution off for comparison.
+- `pass-bench.cjs`: the Passing styles side by side (`--modes 0,1,2,3`), one process each, over several grids from the
+  back of the field: place, places gained, passes made and lost, passes committed and completed, contacts, and seconds
+  with the gas held while the contact assist held the car back. `bench.cjs --pass 1..3` drives one style (with
+  Slingshot the bot taps the gas as soon as the slingshot is ready).
 - `mp-test.cjs`: a two-player online race with no network, two copies of the game joined by a fake room. Checks
   both players' lines, the host's AI, what the guest sees, and that both sides agree on the result.
 

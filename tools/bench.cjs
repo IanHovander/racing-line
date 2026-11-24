@@ -1,6 +1,8 @@
 // One-button bot benchmark, run headless.
 //   node tools/bench.cjs [--level 0..4] [--bot perfect|late0.2|early|jitter0.15|eager1.5|flat] [--laps 4]
-//                       [--race] [--diff 1] [--seed 1] [--team 0] [--track 1] [--cfg '{...}'] [--json]
+//                       [--race] [--diff 1] [--seed 1] [--team 0] [--track 1] [--pass 0..3] [--cfg '{...}'] [--json]
+// --pass: the Passing style (0 Off, 1 Dive, 2 Pressure, 3 Slingshot; sim/passing.ts). With Slingshot the bot taps the
+//         gas as soon as the slingshot is ready.
 // --level: 0 = the classic fixed line, 1..4 = the dynamic line at Novice / Intermediate / Cautious Expert / Perfect Expert (default 2).
 //          (--mode classic is the same as --level 0.)
 // The bot only ever presses/releases the gas (Steer: Auto), like a player on Space.
@@ -44,7 +46,7 @@ function bench(o) {
   const H = load({ seed: +o.seed });
   H.ctx.__o = o;
   if (o.cfg) H.ctx.DYNCFG = typeof o.cfg === 'string' ? JSON.parse(o.cfg) : o.cfg;
-  H.run(`opts.steer=0;opts.team=__o.team|0;opts.diff=__o.diff|0;opts.laps=__o.laps|0;opts.rain=__o.rain|0;WX.rain=opts.rain;opts.damage=0;opts.gears=0;
+  H.run(`opts.steer=0;opts.pass=__o.pass|0;opts.team=__o.team|0;opts.diff=__o.diff|0;opts.laps=__o.laps|0;opts.rain=__o.rain|0;WX.rain=opts.rain;opts.damage=0;opts.gears=0;
     opts.dynlv=__o.level|0;
     trackIdx=__o.track|0;buildTrack(TRACKS[trackIdx]);
     dynPrepare(true);   // build the planner's line synchronously
@@ -70,10 +72,13 @@ function bench(o) {
         if(b.kind==='flat')hold=true;else if(b.kind==='early')hold=c.v<s*0.93;else if(b.kind==='eager')hold=c.v<s+b.x;else hold=c.v<s-0.2;
         if(b.kind==='late'){if(hold)b.t0=-1;else{if(b.t0<0)b.t0=raceTime;if(raceTime-b.t0<b.x)hold=true;}}
         if(b.kind==='jitter'){if(hold!==b.want){b.want=hold;b.due=raceTime+Math.abs(__gauss())*b.x;}if(raceTime>=b.due)b.held=b.want;hold=b.held;}
+        // Passing: Slingshot — tap the gas (a 0.12 s lift) as soon as the slingshot is ready
+        if(PS.ready&&!(b.tapT>0)&&!b.tapped){b.tapT=0.12;b.tapped=true;}if(!PS.ready)b.tapped=false;if(b.tapT>0){b.tapT-=STEP;hold=false;}
         input.thr=hold;}
       const lapsBefore=c?c.cross:0,h0=c?c.h:0;
       step(STEP);
       if(!c||state==='countdown')return;
+      if(state==='race'&&START.done&&!c.finished&&input.thr&&dynOn(c)&&c.v>dynAheadCap(c)-1.5)__m.held=(__m.held||0)+STEP; // gas held but the contact assist holds the car back
       if(!__m.cur)__m.cur={slideT:0,offT:0,wideT:0,wallT:0,jerk:0,n:0,w:0,vmax:0,hold:0};
       const m=__m.cur;const w=wrapA(c.h-h0)/STEP;m.jerk+=Math.abs(w-m.w)/STEP;m.w=w;m.n++;
       if(c.slide>0.05)m.slideT+=STEP;if(c.surf>=2)m.offT+=STEP;if(Math.abs(c.lat)>HW+0.45)m.wideT+=STEP;if(Math.abs(c.lat)>=(c.lat>0?BARR:BARL)[c.idx]-0.02)m.wallT+=STEP;if(c.v>m.vmax)m.vmax=c.v;if(input.thr)m.hold+=STEP;
@@ -123,7 +128,7 @@ function bench(o) {
   if (o.race)
     res.raceStats = JSON.parse(
       H.run(
-        `JSON.stringify({hits:HITS,myHits:cars[ctrl].hits||0,pass:(cars[ctrl].stat||{}).pass||0,lost:(cars[ctrl].stat||{}).lost||0,place:standings().indexOf(cars[ctrl])+1,of:cars.length,out:!!cars[ctrl].out,time:+raceTime.toFixed(2),ai:cars.filter(c=>c!==cars[ctrl]).map(c=>({best:+(c.best||0).toFixed(2),off:+(((c.stat||{}).offT)||0).toFixed(1),hits:c.hits||0,out:!!c.out,laps:Math.max(0,c.cross-1),ghosts:c.ghosts||0}))})`,
+        `JSON.stringify({hits:HITS,myHits:cars[ctrl].hits||0,pass:(cars[ctrl].stat||{}).pass||0,lost:(cars[ctrl].stat||{}).lost||0,place:standings().indexOf(cars[ctrl])+1,grid:cars[ctrl].grid+1,pm:PS.n,pmOk:PS.ok,held:+(__m.held||0).toFixed(1),of:cars.length,out:!!cars[ctrl].out,time:+raceTime.toFixed(2),ai:cars.filter(c=>c!==cars[ctrl]).map(c=>({best:+(c.best||0).toFixed(2),off:+(((c.stat||{}).offT)||0).toFixed(1),hits:c.hits||0,out:!!c.out,laps:Math.max(0,c.cross-1),ghosts:c.ghosts||0}))})`,
       ),
     );
   const ds = H.run('typeof DYNSTAT==="object"&&DYNSTAT?JSON.stringify(DYNSTAT):""');
@@ -146,6 +151,7 @@ if (require.main === module) {
     team: +arg('team', 0),
     track: +arg('track', 1),
     rain: +arg('rain', 0),
+    pass: +arg('pass', 0),
     cfg: arg('cfg', '') || null,
   };
   const r = bench(o);

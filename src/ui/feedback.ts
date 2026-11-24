@@ -1,6 +1,7 @@
 import { GS } from '../state';
 import { cars, opts } from '../game/race';
 import { DYN, dynOn } from '../sim/lines';
+import { PS } from '../sim/passing';
 import { PROF } from '../sim/profile';
 import { standings } from '../sim/step';
 import { gapT, progress } from '../sim/timing';
@@ -97,6 +98,7 @@ export function coach(c, dt) {
   if (c.passPend && c.passPend.length)
     c.passPend = c.passPend.filter(p => {
       if (p.o.gone || progress(p.o) > progress(c)) return false; // repassed (or gone): no praise
+      if (PS.won === p.o && GS.raceTime - PS.wonT < 8) return false; // a Passing move already celebrated (sim/passing.ts)
       if (GS.raceTime - p.t < PASS_HOLD) return true;
       feedback('Nice move on ' + nm(p.o) + (p.at ? ' into ' + p.at : ''), NCOL.best);
       return false;
