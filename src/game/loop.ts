@@ -1,4 +1,5 @@
 import { GS } from '../state';
+import { passHud } from '../ui/pass-hud';
 import { audioStatus } from '../audio/audio';
 import { audio } from '../audio/mixer';
 import { setupRace } from './race';
@@ -77,6 +78,7 @@ export function frame(now) {
   if (perfEnabled) recordPerf('render', performance.now() - renderStart);
   const hudStart = perfEnabled ? performance.now() : 0;
   hud(dt);
+  passHud(); // every frame: the passing cues on the touch pads
   if (perfEnabled) recordPerf('hud', performance.now() - hudStart);
   audio(dt);
   updatePerfPanel(now);

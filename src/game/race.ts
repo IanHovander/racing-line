@@ -7,6 +7,7 @@ import { ISO_A, cam } from '../render/camera';
 import { FW } from '../render/effects';
 import { flagFrames, flagImg } from '../render/scenery';
 import { renderLaneInd } from '../sim/ai';
+import { passReset } from '../sim/pass';
 import { dynPrepare, lineLoad } from '../sim/lines';
 import { locate } from '../sim/physics';
 import { TEAM_STATS } from '../teams/team-stats';
@@ -53,6 +54,7 @@ export function setupRace(isAttract, mpGrid?) {
   setTimeout(renderLaneInd, 0);
   attract = isAttract;
   cars = [];
+  passReset();
   GS.PAIRS = new Map();
   GS.STAT_T = 0;
   GS.FB_LAST = -99;

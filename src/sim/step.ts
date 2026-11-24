@@ -9,6 +9,7 @@ import { FW, startFireworks, updateRain } from '../render/effects';
 import { STEP, controlAI, pursuitLat } from './ai';
 import { locate, physics, towTarget } from './physics';
 import { controlPlayer } from './player';
+import { PASS_TUNE } from './pass';
 import { progress, secDone, statTick, tpRec } from './timing';
 import { NEUTRAL } from '../teams/team-stats';
 import { parts, skids } from '../track/active';
@@ -135,7 +136,12 @@ export function step(dt) {
   }
   if (opts.rain) updateRain(dt);
   for (const c of cars) {
-    const tt = opts.tow ? towTarget(c) : 0;
+    let tt = opts.tow ? towTarget(c) : 0;
+    if (c.sling > 0) {
+      // a charged pass (sim/pass.ts): the slipstream's pull lasts a moment after pulling out of it
+      c.sling -= dt;
+      tt = Math.max(tt, PASS_TUNE.sling);
+    }
     c.tow += (tt - c.tow) * Math.min(1, dt * (tt > c.tow ? 3 : 6));
   }
   // catch-up grip: how far the leader is round the race, to give the cars behind more grip

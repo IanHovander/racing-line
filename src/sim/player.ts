@@ -8,14 +8,22 @@ import { AIL, DYN, dynAheadCap, dynObstacles, dynOn } from './lines';
 import { PROF, rejoin } from './profile';
 import { NEUTRAL } from '../teams/team-stats';
 import { WETG } from '../track/track';
+import { passActive, passDrive, passWatch } from './pass';
 export function controlPlayer(c, dt) {
   let thr = 0,
     brk = 0,
     k = 0,
     safe;
+  passWatch(c, dt);
   // steering
   const dyn = opts.steer === 0 && dynOn(c); // the planner drives this car (sim/lines.ts)
-  if (dyn) {
+  // Auto steering: a pass the player asked for takes the car over from the planner until it is back on the line (sim/pass.ts)
+  const pm = opts.steer === 0 && passActive(c) ? passDrive(c, dt, dyn) : null;
+  if (pm) {
+    k = pm.k;
+    safe = pm.safe;
+    c.hold = null;
+  } else if (dyn) {
     const u = DYN.control(c, dynObstacles(c), { attack: !!input.thr }, dt);
     k = u.k;
     safe = u.safe;
@@ -101,7 +109,7 @@ export function controlPlayer(c, dt) {
     k = c.steer * kmax;
     safe = (PROF[c.team] || GS.vf)[(c.idx + 4) % GS.N] * Math.sqrt(c.gm);
   }
-  if (c.drs && !dyn) safe *= 1 + 0.06 * (opts.drsPow || 1); // the planner works from the real speed of the car, so it needs no DRS allowance
+  if (c.drs && (!dyn || pm)) safe *= 1 + 0.06 * (opts.drsPow || 1); // the planner works from the real speed of the car, so it needs no DRS allowance
   c.safeV = safe;
   // throttle: you hold the gas; lift off and the car brakes itself to the safe speed
   thr = input.thr ? 1 : 0;
@@ -119,7 +127,7 @@ export function controlPlayer(c, dt) {
   }
   // contact assist while the car is steering for you
   if (opts.steer !== 2) {
-    const ah = dyn ? dynAheadCap(c) : aheadCap(c);
+    const ah = pm ? aheadCap(c, pm.LN) : dyn ? dynAheadCap(c) : aheadCap(c);
     if (c.v > ah + 0.5) {
       thr = 0;
       brk = Math.max(brk, clamp((c.v - ah) / 4, 0.25, 1));

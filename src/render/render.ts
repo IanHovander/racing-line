@@ -22,6 +22,7 @@ import { laneOff } from '../sim/ai';
 import { dynOn, hardMask } from '../sim/lines';
 import { PROF, liveZone, profileFor } from '../sim/profile';
 import { drawDynLine } from './line';
+import { drawPassFx, drawPassRoad } from './pass';
 import { clearTime } from '../sim/step';
 import { TEAMS } from '../teams/teams';
 import { parts, skids } from '../track/active';
@@ -459,6 +460,7 @@ export function render() {
       }
     }
   }
+  drawPassRoad(z); // Auto steering: passing (sim/pass.ts)
   if (opts.steer === 1 && !attract && cars[GS.ctrl]) {
     const c = cars[GS.ctrl],
       s = c.lsm || 0,
@@ -652,6 +654,7 @@ export function render() {
   GLOW_FLUSH();
   if (GS.TR.sakura) drawPetals();
   if (FW.on) drawFireworks();
+  drawPassFx();
   if (opts.rain) drawRain();
   if (GS.state !== 'menu') minimap();
 }

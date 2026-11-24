@@ -29,6 +29,8 @@ const options = {
   legalComments: 'none',
   // font files (public/fonts) are copied to dist/ as they are, not bundled
   external: ['*.woff', '*.woff2'],
+  // which way of passing this build uses (sim/pass.ts): PASS_UI=slide|swipe|tap npm run build
+  define: { __PASS_UI__: JSON.stringify(process.env.PASS_UI || 'swipe') },
   logLevel: 'info',
 };
 

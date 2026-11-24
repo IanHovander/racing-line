@@ -10,11 +10,55 @@ Playable build: https://matthewtorgerson.github.io/racing-line/ (GitHub Pages, b
 - **Controls**: you work the throttle only, plus a Steering setting in the menu.
   - **Throttle**: hold the gas (Up / W / Space, or the GAS pad on touch); lift and the car brakes itself to the safe speed for the next corner. There is no brake input. (Until Nov 2026 a Pedals setting also offered Brake only, Throttle + Brake and Auto.)
   - **Steering** (`opts.steer`):
-    - 0 Auto: follows the racing line and steers around traffic (passes on its own).
+    - 0 Auto: follows the racing line and sits behind moving cars (the planner never pulls out on its own). Passing is
+      the player's call, in one of three ways being tried side by side (below, "Passing in Auto steering").
     - 1 Lanes: tap left/right to pick left side / racing line / right side (`pursuitLane()`, `laneProfile()`); HUD LEFT / LINE / RIGHT and a yellow dashed target line.
     - 2 Manual: hold left/right.
     - 3 Overtake: drives the racing line and sits behind the car ahead. The nearest car within 70 m ahead and roughly in your path (`passTarget()`) gets a white ring; the HUD shows ◀ PASS / FOLLOW / PASS ▶ with pulsing side buttons. Tap a side (`passPick()`) to commit: the car moves 3.2 m beside the target until 7.5 m clear, then rejoins the line. Tap the same side to cancel; a pass also ends after 14 s, if the target pulls 90 m ahead or is knocked out. If the chosen side has no room it waits on that side of the gearbox. Stalled/wrecked cars are steered around automatically.
   - With Auto, Lanes or Overtake steering, a contact assist (`aheadCap()`) eases off and brakes rather than rear-end a car directly ahead.
+- **Passing in Auto steering** (Nov 2026, `sim/pass.ts`, cues in `ui/pass-hud.ts` and `render/pass.ts`). Three ways to ask
+  for a pass, built in side by side to be compared on a phone; `PASS_UI=slide|swipe|tap npm run build` picks one (default
+  swipe) and `?pass=…` in the URL overrides it. All three share the cues and the manoeuvre below.
+  - **Slide**: the GAS thumb is a slider. Dragging it across the car's direction of travel moves the car across the road
+    (80 px goes from the line to the edge lane, after a 6 px dead zone). Left alone, the lane holds while the car is
+    alongside another or lined up beside the car ahead, and drifts back to the line (0.9 lane/s after 0.7 s) once the
+    pass is done. A bar across the road ahead shows the line and where the thumb has put the car. Keys: hold ← / →.
+  - **Swipe**: a flick of the GAS thumb (22 px) towards one side of the car commits to passing the car ahead on that side;
+    a flick the other way tucks back in. Two chevrons on the GAS pad, turned to point the two ways to flick. Keys: tap ← / →.
+  - **Tap**: a PASS strip sits above GAS: outlined when a car is ahead, glowing when it is a good moment, filling while
+    you sit in the car's wake (1.3 s, faster with the slipstream's pull), gold when full, solid gold while passing. Slide
+    the thumb up onto it (or tap it; it is also the gas while held): the game takes the better side. A full bar gives a
+    slingshot as the car pulls out: the slipstream's pull (0.85) lasts 1.8 s. Keys: ← / → pass on that side. (A double
+    tap of GAS was tried and dropped: feathering the gas behind a car set it off.)
+  - The camera is isometric, so a car can head up, down or across the screen: touch gestures are read across the car's
+    direction of travel as drawn (`passLatDir()`), so a drag or flick goes the way the player wants the car to go. Keys are
+    the car's own left and right, as in the other steering modes.
+  - **When to go** (`chance()`): for each open side of the car ahead, the slowest the path beside it would be over the next
+    120 m, as a share of the racing line's speed (the other car taken as following its own line). At 0.97 or more it is a
+    good moment: chevrons in the lanes beside the car (and on the GAS pad) turn bright and pulse, and PASS glows; an open
+    but slow side shows a faint chevron. The better side (`pickSide()`, what Tap takes) is the open one with the better
+    chance, then the side the racing line takes past the car.
+  - **The manoeuvre** (`passDrive()`): while it is on, it steers instead of the planner, to an offset from the planner's
+    line (`c.lane`, pursuit steering, as the AI does), and hands the car back once it has eased onto the line again. A
+    committed pass drives the racing line wherever that keeps the car on the chosen side of the other one, and 3.2 m beside
+    it otherwise; it stays on the line until 32 m behind and is fully beside by 17 m. Not yet alongside (4 m) and the
+    side's chance below 0.95, it waits on the line in the slipstream (a calm gold chevron) and goes when the chance comes
+    back. The point steered to moves sideways at 3.5 m/s (2.6 coming back, 4.5 for a slide) plus the line's swing and the
+    other car's own movement towards the goal, never past it. Done 7.5 m clear; given up after 12 s or 35 m behind. It never
+    squeezes into a car alongside, waits at the gearbox when the side has no room, and is off under a yellow flag.
+  - **Speed off the line** (`offSafe()`): the curvature of the path about to be driven (the line's own at that offset,
+    1/(R − e), plus the bend from the offset changing, e″; held inside the road) at the grip the line is built with, less up
+    to 3% off the line, never above the line's speed, with the line's braking for what is coming; easing off at once if the
+    car slides.
+  - Getting past a car pops your new place over your car with a two-note chime.
+  - Measured with `tools/pass-bench.cjs` (Medium opponents, the bot passing when stuck behind a car and the cue says go):
+    see the numbers below the tool's description in `tools/README.md`.
+  - Mistakes on the way: holding the car exactly beside the other one through corners put it on the slow outside;
+    rate-limiting the offset from a line that swings across the road flung the aim past the edge at corner exits (cars
+    ran off); speeds from fixed edge lanes were either far too slow ("the slower of both") or too fast (the path squeezed
+    against the edge is tighter than the line); a 3-point curvature of the path was noisy and planned less grip than the
+    line itself (2% slower in every corner, even on the line); and passing whenever stuck lost to simply following,
+    because beside the other car through the next corners is usually slower: hence the chance cues and the waiting.
 - **Team play** (single player): you run both cars of your team; Tab/C or the Swap button switches control.
   - **Swap transition** (v13, single player only): time slows to 4% while the camera pans over to the other car (smoothstep pan with a slight zoom-out), then ramps back to full speed over the last 20%. Pan length scales with distance (0.7–1.6 s real time; ~0.2 s of race time passes). Disabled online (`mpOn()`), so multiplayer never slows down.
 - **AI defending** (v13, `defend()`): when a car behind (10–28 m back, not slower) pulls out to one side, an AI car may make one move to cover that side, then holds its line once the attacker is within 9 m.

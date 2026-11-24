@@ -307,8 +307,8 @@ export function controlAI(c, dt, factor) {
   else thr = 0.35;
   return [thr, brk, aiSteer(c, LN)];
 }
-// fastest speed that still stops short of the nearest car directly in your path
-export function aheadCap(c) {
+// fastest speed that still stops short of the nearest car directly in your path (LN: the line c.lane is measured from)
+export function aheadCap(c, LN: ArrayLike<number> = GS.off) {
   let cap = 1e9;
   const look = Math.max(14, c.v * 0.9);
   for (const o of cars) {
@@ -317,7 +317,7 @@ export function aheadCap(c) {
     if (d < -GS.L / 2) d += GS.L;
     else if (d > GS.L / 2) d -= GS.L;
     if (d <= 0 || d > look) continue;
-    const tl = GS.off[(c.idx + Math.round(d / GS.SEG)) % GS.N] + c.lane;
+    const tl = LN[(c.idx + Math.round(d / GS.SEG)) % GS.N] + c.lane;
     if (Math.abs(o.lat - c.lat) > 2.1 && Math.abs(o.lat - tl) > 2.1) continue;
     cap = Math.min(cap, Math.sqrt(Math.max(0, o.v * o.v + 2 * BPROF * WETB() * 0.8 * Math.max(0, d - 5.5))));
   }

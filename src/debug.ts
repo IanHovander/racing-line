@@ -53,8 +53,14 @@ import * as m49 from './ui/notify';
 import * as m52 from './sim/lines';
 import * as m54 from './net/joining';
 import * as m53 from './sim/dynline';
+import * as m55 from './sim/pass';
+import * as m56 from './render/pass';
+import * as m57 from './ui/pass-hud';
 
 const MODS: any[] = [
+  m57,
+  m56,
+  m55,
   m54,
   m52,
   m53,

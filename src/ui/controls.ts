@@ -9,6 +9,7 @@ import { renderLaneInd } from '../sim/ai';
 import { GEARTOP, autoGear, isManual } from '../sim/car-model';
 import { DYN, dynEligible, lineSave } from '../sim/lines';
 import { syncAllSegs } from './widgets';
+import { PASS_UI, passCancel, passNote } from '../sim/pass';
 export const STEERS = ['Auto Steering', 'Lane Steering', 'Manual Steering', 'Overtake Steering'];
 export const STEER_NOTE = [
   'The car follows the racing line and steers around traffic.',
@@ -45,6 +46,7 @@ export function swapCar() {
   GS.mateIdx = t;
   const c = cars[GS.ctrl];
   c.lane = 0;
+  passCancel();
   if (DYN) DYN.reset();
   showToast('Now driving: ' + c.name);
   updatePads();
@@ -92,7 +94,7 @@ export function syncCtrlMenu() {
   );
   $('steerNote').textContent =
     opts.steer === 0 && opts.dynlv && dynEligible()
-      ? 'The car follows the racing line of your Line Difficulty. It slows behind moving cars and steers round stopped ones.'
+      ? 'The car follows the racing line of your Line Difficulty and sits behind moving cars. ' + passNote()
       : STEER_NOTE[opts.steer];
 }
 /** H or the Line button: hidden -> difficult turns -> shown. Hiding the line changes nothing about how the car drives. */
@@ -119,6 +121,7 @@ export function resetCar() {
   c.h = Math.atan2(GS.ty[i], GS.tx[i]);
   c.v = 0;
   c.lane = 0;
+  passCancel();
   if (DYN) DYN.reset();
   if (GS.state === 'paused') togglePause();
 }
@@ -150,6 +153,7 @@ export function updatePads() {
   $('pDRS').classList.toggle('hide', !show || opts.drs !== 1 || (mpOn() && false));
   $('pDn').classList.toggle('hide', !show || opts.gears !== 1);
   $('pR').classList.toggle('hide', !show || opts.steer === 0);
+  $('pPass').classList.toggle('hide', !show || opts.steer !== 0 || PASS_UI !== 'tap');
   $('bSteer').textContent = ['Steer: Auto', 'Steer: Lanes', 'Steer: Manual', 'Steer: Overtake'][opts.steer];
   $('laneInd').classList.toggle('hide', (opts.steer !== 1 && opts.steer !== 3) || attract);
   renderLaneInd();
@@ -180,11 +184,24 @@ export function layoutPads() {
     spd.style.width = w + 'px';
     spd.style.transform = 'none';
     spd.classList.add('compact');
+    // PASS (tap passing): a strip right above GAS, so the thumb slides up onto it
+    let gTop = g.top;
+    const ps = $('pPass');
+    ps.style.cssText = '';
+    if (vis('pPass')) {
+      const ph = H > W ? 54 : 46;
+      ps.style.left = g.left + 'px';
+      ps.style.right = 'auto';
+      ps.style.width = g.width + 'px';
+      ps.style.height = ph + 'px';
+      ps.style.bottom = H - g.top + 8 + 'px';
+      gTop = g.top - 8 - ph;
+    }
     let pb: number; // speed panel bottom
     if (H > W) {
       // portrait: centred on the screen, above GAS and Swap
       spd.style.left = Math.round((W - w) / 2) + 'px';
-      pb = H - g.top + 10;
+      pb = H - gTop + 10;
     } else {
       // landscape: above GAS would cover the car, so on the bottom edge, centred unless that reaches Swap
       spd.style.left = Math.round(Math.max(10, Math.min((W - w) / 2, swL - 12 - w))) + 'px';
@@ -204,6 +221,20 @@ export function layoutPads() {
   const right = ['pThr'].filter(vis).map(id => $(id).getBoundingClientRect());
   const W = innerWidth,
     H = innerHeight;
+  {
+    // PASS (tap passing) with the gear / DRS pads up: above GAS, left of the column of small pads
+    const ps = $('pPass');
+    ps.style.cssText = '';
+    if (vis('pPass') && vis('pThr')) {
+      const g = $('pThr').getBoundingClientRect(),
+        col = ['pUp', 'pDRS'].some(vis) ? 94 : 0;
+      ps.style.left = g.left + 'px';
+      ps.style.right = 'auto';
+      ps.style.width = Math.max(90, g.width - col) + 'px';
+      ps.style.height = '54px';
+      ps.style.bottom = H - g.top + 8 + 'px';
+    }
+  }
   if (right.length) {
     const padL = Math.min(...right.map(r => r.left)),
       padTop = Math.min(...right.map(r => r.top)),

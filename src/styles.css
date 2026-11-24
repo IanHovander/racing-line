@@ -2280,3 +2280,125 @@ html.joining #mwFill {
     flex-direction: column-reverse;
   }
 }
+
+/* ---- passing in Auto steering (sim/pass.ts, ui/pass-hud.ts) ---- */
+#pThr .pc {
+  display: none;
+}
+/* swipe and slide: a chevron for each side of your car, placed and turned by ui/pass-hud.ts to point the way to flick or drag */
+body[data-pass='swipe'] #pThr .pc,
+body[data-pass='slide'] #pThr .pc {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 24px;
+  height: 32px;
+  margin: -17px 0 0 -12px;
+  font-size: 32px;
+  font-weight: 400;
+  line-height: 1;
+  color: rgba(255, 255, 255, 0.22);
+  transition: color 0.15s;
+  pointer-events: none;
+}
+body[data-pass='swipe'] #pThr .pc.open,
+body[data-pass='slide'] #pThr .pc.open {
+  color: rgba(255, 255, 255, 0.45);
+}
+body[data-pass='swipe'] #pThr .pc.good,
+body[data-pass='slide'] #pThr .pc.good {
+  color: #fff;
+  animation: pcue 0.7s ease-in-out infinite alternate;
+}
+body[data-pass='swipe'] #pThr .pc.chosen,
+body[data-pass='slide'] #pThr .pc.chosen {
+  color: #ffe066;
+  animation: none;
+}
+@keyframes pcue {
+  from {
+    opacity: 0.5;
+  }
+  to {
+    opacity: 1;
+  }
+}
+/* tap: the PASS strip above GAS */
+#pPass {
+  right: 10px;
+  bottom: 120px;
+  width: min(52vw, 210px);
+  height: 54px;
+  border-radius: 27px;
+  overflow: hidden;
+  font-size: 15px;
+  letter-spacing: 1px;
+  color: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(10, 12, 18, 0.4);
+  transition:
+    color 0.15s,
+    border-color 0.15s,
+    background 0.15s;
+}
+#pPass .fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: calc(var(--f, 0) * 100%);
+  background: rgba(255, 255, 255, 0.16);
+  transition: width 0.12s linear;
+}
+#pPass .lb {
+  position: relative;
+  font-family: var(--sans);
+}
+#pPass.live {
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.85);
+}
+#pPass.good {
+  animation: pgood 0.7s ease-in-out infinite alternate;
+}
+#pPass.full {
+  color: #ffe066;
+  border-color: #ffe066;
+}
+#pPass.full.good {
+  animation: pfull 0.55s ease-in-out infinite alternate;
+}
+#pPass.full .fill {
+  background: rgba(255, 224, 102, 0.28);
+}
+#pPass.going {
+  color: #111;
+  border-color: #ffe066;
+  background: #ffe066;
+  animation: none;
+}
+#pPass.going .fill {
+  background: transparent;
+}
+#pPass.on {
+  transform: scale(0.96);
+}
+@keyframes pgood {
+  from {
+    box-shadow: 0 0 0 rgba(255, 255, 255, 0);
+  }
+  to {
+    box-shadow: 0 0 16px rgba(255, 255, 255, 0.55);
+  }
+}
+@keyframes pfull {
+  from {
+    box-shadow: 0 0 0 rgba(255, 224, 102, 0);
+  }
+  to {
+    box-shadow: 0 0 18px rgba(255, 224, 102, 0.75);
+  }
+}

@@ -51,6 +51,14 @@ A bot only presses and releases the gas, like a player on Space. It waits for th
   beside another car, just hit, over the line's speed, its braking error). Prints the share of race time off
   the tarmac; `--list` prints each excursion. `--set 'AI_TIMING.early=[0,0,0];AI_LANE.slow=0'` turns the early
   aim and the lane caution off for comparison.
+- `pass-bench.cjs`: passing in Auto steering (`src/sim/pass.ts`). Races of the bot with a simple player who asks for a
+  pass when stuck behind a car (close, on its line, for 0.5 s) and the cues show a good moment, in each of the three ways, against the same grids with
+  no passing. Prints place, passes made and lost, contacts, time off the tarmac and how each pass ended (`--styles
+  none,slide,swipe,tap --seeds 1,2,3 --tracks 1,3,6 --diff 1`). Nov 2026, 9 races each (Lone Star, Monte Porto,
+  Ardennes; Medium opponents; Cautious Expert line): no passing P1.2, 1.6 contacts, 0.04 s off; tap P2.2, 1.4, 0.04 s;
+  swipe P2.7, 1.3, 0 s; slide P4.9, 2.4, 0.05 s. On Medium the planner's line already gets past most cars by itself, so
+  the bot's passes (taken at the first good chance, again and again on the same car) cost a little; slide's bot keeps
+  its lane too long. What this guards is that passing is safe: no extra contacts or time off the road.
 - `mp-test.cjs`: a two-player online race with no network, two copies of the game joined by a fake room. Checks
   both players' lines, the host's AI, what the guest sees, and that both sides agree on the result.
 

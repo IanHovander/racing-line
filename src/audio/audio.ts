@@ -228,6 +228,36 @@ export function setMusic(on) {
   $('bMus').style.opacity = on ? 1 : 0.6;
 }
 export const mf = m => 440 * Math.pow(2, (m - 69) / 12);
+/** passing (sim/pass.ts): 'go' pulling out, 'sling' a charged pass, 'back' tucking in again, 'done' got past a car */
+export function sfxPass(kind: 'go' | 'sling' | 'back' | 'done') {
+  try {
+    if (!AC || !sfxG || !opts.sound) return;
+    const t = AC.currentTime;
+    const tone = (type: OscillatorType, f0: number, f1: number, at: number, len: number, vol: number) => {
+      const o = AC.createOscillator(),
+        g = AC.createGain();
+      o.type = type;
+      o.frequency.setValueAtTime(f0, t + at);
+      o.frequency.exponentialRampToValueAtTime(f1, t + at + len * 0.6);
+      g.gain.setValueAtTime(0.0001, t + at);
+      g.gain.exponentialRampToValueAtTime(vol, t + at + 0.012);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + at + len);
+      o.connect(g);
+      g.connect(sfxG);
+      o.start(t + at);
+      o.stop(t + at + len + 0.02);
+    };
+    if (kind === 'go') tone('sine', 440, 700, 0, 0.13, 0.05);
+    else if (kind === 'sling') {
+      tone('triangle', 330, 1050, 0, 0.3, 0.06);
+      tone('sine', 660, 1400, 0.05, 0.25, 0.03);
+    } else if (kind === 'back') tone('sine', 560, 380, 0, 0.12, 0.035);
+    else {
+      tone('triangle', 784, 784, 0, 0.28, 0.055);
+      tone('triangle', 1175, 1175, 0.09, 0.38, 0.05);
+    }
+  } catch (e) {}
+}
 export function env(g, t, peak, dec, att?) {
   g.gain.setValueAtTime(0.0001, t);
   g.gain.linearRampToValueAtTime(peak, t + (att || 0.003));

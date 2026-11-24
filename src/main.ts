@@ -16,6 +16,7 @@ import { init as init12 } from './game/loop';
 import { init as initHome } from './ui/home';
 import { init as initControls } from './ui/controls';
 import { init as initLines } from './sim/lines';
+import { init as initPass } from './sim/pass';
 import { installDebug } from './debug';
 
 // Run every module's start-up code in the original order.
@@ -35,6 +36,7 @@ init11(); // ui/wizard
 initHome(); // ui/home
 initControls(); // ui/controls
 initLines(); // sim/lines: the ready-made racing lines
+initPass(); // sim/pass: which way of passing this build uses
 init12(); // game/loop
 
 if (
