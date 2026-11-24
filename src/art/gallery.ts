@@ -43,12 +43,12 @@ const FACE_NOTE = {
 export function init() {
   let row = section(
     'Gus Marlow',
-    'Flat greys lit from the top left, one red mark. He changes only his brows and mouth, and blinks.',
+    'Flat greys lit from the top left, one red mark, a stopwatch on a lanyard: he lost a title by 0.040 s. He acts with his brows, eyes and mouth.',
   );
   for (const f of GUS_FACES) show(row, gusSVG(f, { size: 112 }), FACE_NOTE[f]);
   show(row, gusSVG('stern', { size: 44 }), 'dialogue size');
 
-  row = section('You', 'Helmet on, visor down, your number on the shell.');
+  row = section('You', 'Helmet on, visor down, your number on the side of the shell under Gus’s red.');
   show(row, youSVG(27, { size: 112 }), 'car 27');
   show(row, youSVG(7, { size: 112 }), 'car 7');
   show(row, youSVG(27, { size: 44 }), 'dialogue size');
@@ -65,9 +65,20 @@ export function init() {
   for (const [t, m] of marks) show(row, medalSVG(t, m, 72), `tier ${t} · ${m} s`);
   for (const [t, m] of marks) show(row, medalSVG(t, m, 32), '32 px');
 
-  row = section('Licence', 'What you’ve proved, carried into multiplayer.');
-  show(row, licenceSVG({ grade: 'C', name: 'Rookie', num: 27, size: 300 }), 'grade C');
-  show(row, licenceSVG({ grade: 'B', name: 'E. Lindqvist', num: 4, size: 300 }), 'grade B');
+  row = section(
+    'Licence',
+    'What you’ve proved, carried into multiplayer, stamped like a passport at each circuit you reach.',
+  );
+  show(
+    row,
+    licenceSVG({ grade: 'C', name: 'Rookie', num: 27, size: 300, circuits: TRACKS, reached: 1 }),
+    'grade C',
+  );
+  show(
+    row,
+    licenceSVG({ grade: 'B', name: 'E. Lindqvist', num: 4, size: 300, circuits: TRACKS, reached: 3 }),
+    'grade B',
+  );
 
   row = section(
     'Circuit stamps',
