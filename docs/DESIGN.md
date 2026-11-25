@@ -620,13 +620,15 @@ The three styles (Settings · Driving · Passing, and the pause menu; `opts.pass
 
 1. **Dive — brake later than them.** No new control. With a car in your way within 40 m, your braking zone within
    2.4 s and the inside of the corner open (room beside it, and you are not on its far side), white chevrons show the
-   inside lane and the pad reads DIVE. Still on the gas once that car is on the brakes, within 14 m: you dive (yellow
+   inside lane and the pad reads DIVE. Still on the gas once that car is on the brakes, within 14 m: you dive (bold white
    chevrons, "Dive!" and a tyre chirp). Your brakes bite 22% harder until you are alongside, and the planner knows it
    (`opts.pass.brk`), so the braking point really is later; the other car lifts to 94% of its pace.
 2. **Pressure — stay on their gearbox.** No new control. Within 0.6 s of the car ahead a ring round it fills (full
    rate at 0.25 s or closer, 1.7× in corners and braking zones, about 3 to 5 s in all), white to orange to red, and
    drains slowly when you drop back. Full, and you within 12 m: the driver cracks ("Sato cracks!", a screech, tyre
-   smoke): for 1.5 s it lifts to 86% and drifts wide at 2.6 m/s, and you take the other side.
+   smoke): it locks up, down to 70% of its pace for 1 s and 86% until 1.6 s, drifting wide at 2.6 m/s, and you
+   take the other side. (A lift to 86% alone was not enough on the street circuits: on Monte Porto, 6 grids, the
+   lock-up took the average finish from P4.8 to P3.7.)
 3. **Slingshot — tap in the tow.** Within 18 m in the tow (`c.tow` > 0.4) the charge fills in 0.9 s (a blue ring).
    Ready when charged, on a straight with at least 120 m (or 2.2 s) before the next braking zone, and the car ahead
    not pulling away: blue chevrons show the lane, the slipstream chevrons in the HUD turn blue and the pad flashes

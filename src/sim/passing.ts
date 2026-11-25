@@ -49,7 +49,8 @@ export const DIVE = { look: 40, lat: 3.2, armT: 2.4, commitGap: 14, brake: 1.22,
 /**
  * Pressure: a car within gapT s ahead fills the ring at `fill` a second (full rate at `near` s or closer, `corner`
  * times as fast in corners and braking zones); it drains at `decay`. A full ring cracks the driver once you are
- * within `strike` m: for crackT s it lifts to `slow` of its speed and drifts `wide` m/s towards the outside.
+ * within `strike` m: it locks up, down to `lock` of its pace for the first `lockT` s, then `slow` until crackT s, and
+ * drifts `wide` m/s towards the outside.
  */
 export const PRESS = {
   gapT: 0.6,
@@ -58,7 +59,9 @@ export const PRESS = {
   corner: 1.7,
   decay: 0.12,
   strike: 12,
-  crackT: 1.5,
+  crackT: 1.6,
+  lockT: 1,
+  lock: 0.7,
   slow: 0.86,
   wide: 2.6,
   away: 30,
@@ -249,7 +252,7 @@ function commit(c: Car, o: Car, side: number, kind: string): void {
   if (attract) return;
   passSnd(kind);
   if (kind === 'dive')
-    notify('Dive!', NCOL.slow, { sub: 'Up the inside of ' + nm(o), ttl: 1.6, key: 'pass', pri: PRI.drs });
+    notify('Dive!', NCOL.warn, { sub: 'Up the inside of ' + nm(o), ttl: 1.6, key: 'pass', pri: PRI.drs });
   else if (kind === 'pressure')
     notify(nm(o) + ' cracks!', NCOL.lost, {
       sub: 'Locks up under pressure',
@@ -423,7 +426,7 @@ export function passAI(c: Car, dt: number) {
   if (c.crackT > 0) {
     // cracked: locked brakes and a run wide
     c.crackT -= dt;
-    slow = PRESS.slow;
+    slow = c.crackT > PRESS.crackT - PRESS.lockT ? PRESS.lock : PRESS.slow;
     const w = c.crackSide * PRESS.wide * dt;
     if (c.crackSide > 0) lo = Math.min(GS.HW - 0.6, c.lat + w);
     else hi = Math.max(-GS.HW + 0.6, c.lat + w);

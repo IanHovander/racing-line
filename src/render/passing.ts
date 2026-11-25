@@ -1,7 +1,8 @@
 // What the Passing styles draw on the road (sim/passing.ts): quiet markings in the style of the racing line, colour
 // only where it means something.
-//  - the side a pass would take: a row of chevrons on the road beside the car ahead. White = on offer (Dive), blue =
-//    Slingshot ready, yellow = committed (as the old Overtake steering drew its pass).
+//  - the side a pass would take: a row of chevrons on the road beside the car ahead, white like road paint: faint when
+//    on offer (Dive), bright and bolder once committed; blue when a Slingshot is ready (blue is the game's boost
+//    colour, as DRS). Not yellow: yellow already means the yellow flag, "slower" and your own car's marker.
 //  - Pressure: a thin ring round the car ahead that fills as you stay close, white to orange to red.
 import { GS } from '../state';
 import { clamp, ctx } from '../core/dom';
@@ -10,14 +11,13 @@ import { cam } from './camera';
 import { PS } from '../sim/passing';
 import type { Car } from '../types';
 
-const YEL = '255,224,102',
-  WHT = '255,255,255',
+const WHT = '242,244,247',
   BLU = '77,163,255';
 /** chevrons pointing down the road at lateral offset `side` beside car o, from its tail to about 30 m ahead of it */
-function chevrons(o: Car, side: number, rgb: string, a: number, z: number) {
+function chevrons(o: Car, side: number, rgb: string, a: number, z: number, w = 0.45) {
   const lat = clamp(o.lat + side * 3.3, -(GS.HW - 0.9), GS.HW - 0.9);
   const t = performance.now() / 1000;
-  ctx.lineWidth = Math.max(3, 0.45 * z);
+  ctx.lineWidth = Math.max(3, w * z);
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
   for (let k = 0; k < 5; k++) {
@@ -69,13 +69,13 @@ export function drawPassCues(z: number) {
   if (!me || me.finished) return;
   // a committed pass: the side it takes, in yellow, until your car is by
   if (PS.car && !PS.car.gone) {
-    if (!PS.ahead) chevrons(PS.car, PS.side, YEL, 0.9, z);
+    if (!PS.ahead) chevrons(PS.car, PS.side, PS.kind === 'sling' ? BLU : WHT, 1, z, 0.65);
     return;
   }
   const o = PS.cand;
   if (!o || o.gone) return;
   const m = opts.pass | 0;
-  if (m === 1 && PS.armed) chevrons(o, PS.candSide, WHT, 0.75, z);
+  if (m === 1 && PS.armed) chevrons(o, PS.candSide, WHT, 0.6, z);
   else if (m === 2 && PS.meter > 0.02) {
     // white to orange to red as it fills
     const f = PS.meter,

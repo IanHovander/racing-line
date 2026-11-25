@@ -525,8 +525,8 @@ body #pThr.big {
 }
 /* Passing: what the gas does now. DIVE: keep it on, you are going up the inside. TAP: lift and press to slingshot */
 #pThr.cueDive {
-  border-color: #ffe066;
-  color: #ffe066;
+  border-color: #f2f4f7;
+  border-width: 4px;
 }
 #pThr.cueTap {
   border-color: #4da3ff;
