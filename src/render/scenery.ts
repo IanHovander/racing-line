@@ -15,6 +15,23 @@ export function drawTree0(t) {
   const g = P(t.x, t.y, 0);
   const R = t.r * cam.zoom;
   if (!onScr(g[0], g[1], R * 3 + 60)) return;
+  if (R < 2) {
+    // a speck from far away (only the intro's flyover is this far out): one square of the tree's colour
+    const tp = P(t.x, t.y, t.h * 0.6);
+    ctx.fillStyle = t.pine
+      ? t.c < 0.5
+        ? '#1f4d2c'
+        : '#245533'
+      : t.palm
+        ? '#3f7a2e'
+        : t.sak
+          ? '#e88fb2'
+          : t.c < 0.5
+            ? '#1f5a25'
+            : '#2a6b2a';
+    ctx.fillRect(tp[0] - R, tp[1] - R, 2 * R + 0.5, 2 * R + 0.5);
+    return;
+  }
   if (t.pine) {
     ctx.fillStyle = 'rgba(0,0,0,0.25)';
     ctx.beginPath();

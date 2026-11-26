@@ -879,6 +879,10 @@ img.logo {
 .rules .seg {
   flex: 1;
 }
+/* Intro: On / Off, then Play Now, three even buttons */
+.rules #sIntro {
+  flex: 2;
+}
 #cond {
   margin-top: 4px;
   font-size: 11.5px;
@@ -1291,6 +1295,7 @@ body.touch #spd {
   content: '';
   position: absolute;
   inset: 0;
+  opacity: var(--shade, 1);
   background: linear-gradient(
     180deg,
     rgba(10, 12, 16, 0.55) 0%,
@@ -1302,6 +1307,22 @@ body.touch #spd {
 }
 #home.hide {
   display: none;
+}
+/* the opening titles (intro/intro.ts): its canvas sits over the race and under the main screen, which it brings up
+   under the logo; until then the main screen is hidden and can't be tapped */
+#introC {
+  z-index: 8;
+  display: none;
+}
+#introC.on {
+  display: block;
+}
+#home.intro > * {
+  opacity: 0;
+}
+#home.intro,
+#home.intro * {
+  pointer-events: none !important;
 }
 #home > * {
   pointer-events: auto;

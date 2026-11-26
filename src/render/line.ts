@@ -16,7 +16,7 @@ import { DYN, hardMask } from '../sim/lines';
 import { onScr } from './primitives';
 
 // by zone: 0 gas, 1 brake, 2 hold, 3 brake with a skid
-const COLS = [
+export const LINE_COLS = [
   'rgba(110,255,120,0.75)',
   'rgba(255,70,60,0.9)',
   'rgba(255,214,10,0.75)',
@@ -52,7 +52,7 @@ export function drawDynLine(z: number): void {
       open = any = true;
     }
     if (!any) continue;
-    ctx.strokeStyle = COLS[zc];
+    ctx.strokeStyle = LINE_COLS[zc];
     ctx.stroke();
   }
   ctx.lineCap = 'butt';

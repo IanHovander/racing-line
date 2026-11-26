@@ -22,6 +22,7 @@ import { laneOff } from '../sim/ai';
 import { dynOn, hardMask } from '../sim/lines';
 import { PROF, liveZone, profileFor } from '../sim/profile';
 import { drawDynLine } from './line';
+import { introLine } from '../intro/intro';
 import { clearTime } from '../sim/step';
 import { TEAMS } from '../teams/teams';
 import { parts, skids } from '../track/active';
@@ -103,8 +104,7 @@ export function render() {
       gp.moveTo(GS.TSX[i] + GS.NSX[i] * a1, GS.TSY[i] + GS.NSY[i] * a1);
       gp.lineTo(GS.TSX[j] + GS.NSX[j] * a1, GS.TSY[j] + GS.NSY[j] * a1);
       gp.lineTo(GS.TSX[j] + GS.NSX[j] * b2, GS.TSY[j] + GS.NSY[j] * b2);
-      gp.lineTo(GS.TSX[i] + GS.NSX[i] * b1, GS.TSY[i] + GS.NSY[i] * b1);
-      gp.closePath();
+      gp.lineTo(GS.TSX[i] + GS.NSX[i] * b1, GS.TSY[i] + GS.NSY[i] * b1); // fill() closes it (closePath() is slow on long paths)
     }
     ctx.fillStyle = '#cbb68a';
     ctx.fill(gp);
@@ -358,6 +358,7 @@ export function render() {
   const pc = cars[GS.ctrl],
     dynLine = opts.line && !attract && !!pc && !pc.finished && !pc.out && opts.steer === 0 && dynOn(pc);
   if (dynLine) drawDynLine(z);
+  introLine(z);
   if (opts.line && !attract && !dynLine && cars[GS.ctrl] && GS.PZONE.team !== cars[GS.ctrl].team) {
     GS.PZONE = new Uint8Array(GS.N);
     GS.PZONE.team = cars[GS.ctrl].team;

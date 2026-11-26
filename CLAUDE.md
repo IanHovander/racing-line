@@ -51,6 +51,7 @@ and commits the result, for when there's no local Node to run them.
 | `net/`    | multiplayer: transport (claude.ai room or PeerJS), lobby, netcode (state sync, smoothing, shared race clock), QR codes                                                                                                                                                                                                                                               |
 | `vendor/` | third-party QR code generator                                                                                                                                                                                                                                                                                                                                        |
 | `game/`   | race setup (`setupRace`, options, race state) and the main loop                                                                                                                                                                                                                                                                                                      |
+| `intro/`  | the opening titles: `intro.ts` (the director: clock, shots, words over the race, skip, hand-over to the main screen) and `score.ts` (its music, cut to the same beats)                                                                                                                                                                                               |
 
 ### State and start-up — read before adding code
 
@@ -75,6 +76,9 @@ field on `window`, readable and writable: in the console you can do `opts.laps =
 `step(STEP)`, `cars[ctrl].v`, `buildTrack(TRACKS[3])`. The Playwright tests use this to run the
 simulation faster than real time (`for (...) step(STEP)`) instead of waiting. (`__set` in a module is the
 hook that makes its `let` exports writable from there.)
+
+The opening titles (`src/intro/`) play on load in a real browser; automated browsers skip them unless the address has
+`?intro`, and `?intro&at=SECONDS` freezes one moment of them for a screenshot (`?nointro` skips them anywhere).
 
 When you change racing behaviour, measure it: run AI or bot laps through `step()` and compare lap times,
 contacts and time off track before and after, as the existing tests do. `tools/` has a headless harness and

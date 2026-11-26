@@ -16,6 +16,7 @@ import { init as init12 } from './game/loop';
 import { init as initHome } from './ui/home';
 import { init as initControls } from './ui/controls';
 import { init as initLines } from './sim/lines';
+import { init as initIntro } from './intro/intro';
 import { installDebug } from './debug';
 
 // Run every module's start-up code in the original order.
@@ -36,6 +37,7 @@ initHome(); // ui/home
 initControls(); // ui/controls
 initLines(); // sim/lines: the ready-made racing lines
 init12(); // game/loop
+initIntro(); // intro/intro: the opening titles (after the race behind the main screen is set up)
 
 if (
   /[?&]debug\b/.test(location.search) ||

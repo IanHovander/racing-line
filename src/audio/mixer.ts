@@ -1,12 +1,13 @@
 import { GS } from '../state';
 import { AC, cgn, e1, e2, egn, flt, gn, o1, o2, ragn, rflt, rgn, wgn } from './audio';
 import { crowdEvents } from './crowd';
-import { THEMES } from './music';
+import { MUSIC_CUE, THEMES } from './music';
 import { clamp } from '../core/dom';
 import { attract, cars, opts } from '../game/race';
 import { input } from '../input/input';
 import { GEARTOP, autoGear, isManual } from '../sim/car-model';
-export const curTheme = () => THEMES.newbeat;
+import { INTRO_SND } from '../intro/intro';
+export const curTheme = () => MUSIC_CUE.th || THEMES.newbeat;
 export function playStep(s, t) {
   if (!opts.music) return;
   curTheme().play(s, t);
@@ -19,17 +20,29 @@ export function engineNote(v, thr?, g?) {
 }
 export function audio(dt) {
   if (!AC) return;
-  const c = cars[GS.ctrl],
+  // the opening titles: the engine of the car on screen (intro/intro.ts)
+  const ia = INTRO_SND.on ? INTRO_SND : null;
+  const c = (ia && ia.car) || cars[GS.ctrl],
     t = AC.currentTime;
   const racing = GS.state === 'race' || GS.state === 'countdown' || GS.state === 'finished';
-  const live = !attract && racing;
+  const live = ia ? !!ia.car : !attract && racing;
   const rpm =
-    GS.state === 'countdown' ? (input.thr ? 0.85 : 0.3) : engineNote(c.v, 0, isManual(c) ? c.gear : 0);
-  const f = 70 + rpm * 240;
+    ia && ia.rpm >= 0
+      ? ia.rpm
+      : GS.state === 'countdown'
+        ? input.thr
+          ? 0.85
+          : 0.3
+        : engineNote(c.v, 0, isManual(c) ? c.gear : 0);
+  const f = (70 + rpm * 240) * (ia ? ia.pitch : 1);
   o1.frequency.setTargetAtTime(f, t, 0.03);
   o2.frequency.setTargetAtTime(f * 0.502, t, 0.03);
   flt.frequency.setTargetAtTime(500 + rpm * 1500, t, 0.05);
-  gn.gain.setTargetAtTime(live ? 0.03 + 0.05 * (c.thr || input.thr ? 1 : 0.3) : 0, t, 0.05);
+  gn.gain.setTargetAtTime(
+    live ? (0.03 + 0.05 * (ia ? ia.thr : c.thr || input.thr ? 1 : 0.3)) * (ia ? ia.vol : 1) : 0,
+    t,
+    0.05,
+  );
   // nearby cars
   let sum = 0,
     near = null,
@@ -55,7 +68,11 @@ export function audio(dt) {
     e1.frequency.setTargetAtTime(ef * 1.01, t, 0.05);
     e2.frequency.setTargetAtTime(ef * 0.5, t, 0.05);
   }
-  egn.gain.setTargetAtTime(live && GS.state !== 'countdown' ? Math.min(0.06, 0.045 * sum) : 0, t, 0.08);
+  egn.gain.setTargetAtTime(
+    live && GS.state !== 'countdown' ? Math.min(0.06, 0.045 * sum) * (ia ? ia.vol : 1) : 0,
+    t,
+    0.08,
+  );
   wgn.gain.setTargetAtTime(live ? 0.028 * c.tow : 0, t, 0.25);
   // surface rumble
   const sv = clamp(c.v / 40, 0, 1);

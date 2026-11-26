@@ -196,6 +196,8 @@ export function init(): void {
     gears: store.get('defv4', 0) ? store.get('gears', 0) : (store.set('gears', 0), store.set('defv4', 1), 0),
     sound: store.get('sound', true),
     music: store.get('music', true),
+    /** the opening titles when the game loads: 1 on, 0 off (intro/intro.ts) */
+    intro: store.get('intro', 1),
   };
 }
 /** debug/test hook: reassign a module-level binding */

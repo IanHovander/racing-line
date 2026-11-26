@@ -9,6 +9,7 @@ import { render } from '../render/render';
 import { STEP } from '../sim/ai';
 import { step } from '../sim/step';
 import { hud } from '../ui/hud';
+import { introDraw, introFrame } from '../intro/intro';
 export let last = performance.now(),
   acc = 0,
   frameN = 0;
@@ -58,7 +59,9 @@ export function frame(now) {
     ts = u < 0.8 ? 0.04 : 0.04 + 0.96 * Math.min(1, (u - 0.8) / 0.2);
     if (u >= 1 || mpOn()) GS.SWAP = null;
   }
-  if (GS.state !== 'paused') {
+  // the opening titles run the race and the camera themselves while they play (intro/intro.ts)
+  const intro = introFrame(dt);
+  if (!intro && GS.state !== 'paused') {
     const simStart = perfEnabled ? performance.now() : 0;
     acc += dt * ts;
     let n = 0;
@@ -71,9 +74,10 @@ export function frame(now) {
     if (perfEnabled) recordPerf('sim', performance.now() - simStart);
   }
   mpSend(dt);
-  updateCamera(GS.state === 'paused' ? 0 : dt);
+  if (intro !== 1 && intro !== 3) updateCamera(GS.state === 'paused' ? 0 : dt);
   const renderStart = perfEnabled ? performance.now() : 0;
-  render();
+  if (intro !== 3) render();
+  introDraw();
   if (perfEnabled) recordPerf('render', performance.now() - renderStart);
   const hudStart = perfEnabled ? performance.now() : 0;
   hud(dt);

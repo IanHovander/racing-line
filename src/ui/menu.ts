@@ -18,6 +18,8 @@ import { WX } from '../track/track';
 import { CIRCUIT_PLACE, bindTrackMap, drawTrackMap, elevProfile, setMapData } from './circuit-map';
 import { CIRCUIT_COLS, CIRCUIT_FLAG } from './circuits';
 import { showToast, syncCtrlMenu, updatePads } from './controls';
+import { playIntro } from '../intro/intro';
+import { closePanel } from './home';
 import { fmt, updateLights } from './hud';
 import { STRENGTH, STRENGTH_OFF, segInit, sliderInit, syncAllSegs } from './widgets';
 import { WZ, wzHost, wzJoin } from './wizard';
@@ -259,6 +261,11 @@ export function init(): void {
     $(id).addEventListener('click', () => setTimeout(dynPrepare, 0));
   segInit('sSnd', 'sound', v => v === '1');
   segInit('sMus', 'music', v => v === '1');
+  segInit('sIntro', 'intro', Number);
+  $('bIntro').onclick = () => {
+    closePanel();
+    playIntro();
+  };
   $('sSnd').addEventListener('click', () =>
     setTimeout(() => {
       unlockAudio();

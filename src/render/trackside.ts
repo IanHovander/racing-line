@@ -40,7 +40,8 @@ export function drawWalls(z) {
       ctx.lineTo(GS.TSX[j] + GS.NSX[j] * b0, GS.TSY[j] + GS.NSY[j] * b0 - z0 * hz);
       ctx.lineTo(GS.TSX[j] + GS.NSX[j] * b1, GS.TSY[j] + GS.NSY[j] * b1 - z1 * hz);
       ctx.lineTo(GS.TSX[i] + GS.NSX[i] * a1, GS.TSY[i] + GS.NSY[i] * a1 - z1 * hz);
-      ctx.closePath();
+      // no closePath(): fill() closes each quad anyway, and closePath() on a path this long is very slow in
+      // Chrome when a whole circuit is on screen (the intro's flyover: 170 ms a frame)
     }
     ctx.fillStyle = col;
     ctx.fill();

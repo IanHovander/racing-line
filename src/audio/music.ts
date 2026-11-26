@@ -6,6 +6,21 @@ import { curTheme, playStep } from './mixer';
 const MUS: {
   th?: Theme;
 } = {};
+/** a theme playing instead of the usual one (the intro's: intro/score.ts), or null */
+export const MUSIC_CUE: { th: Theme | null } = { th: null };
+/**
+ * Play `th` instead of the usual theme, starting with its step `step` at audio time `at` (the intro starts its
+ * score this way, in time with its pictures, and jumps it to the title on a skip). null goes back to the usual theme.
+ */
+export function cueTheme(th: Theme | null, step = 0, at?: number): void {
+  MUSIC_CUE.th = th;
+  if (!AC) return;
+  const t = curTheme();
+  MUS.th = t;
+  GS.musStep = step;
+  GS.musNext = at ?? AC.currentTime + 0.05;
+  arpDelay.delayTime.setValueAtTime((60 / t.bpm) * 0.75, AC.currentTime);
+}
 export function scheduleMusic() {
   if (!AC || AC.state !== 'running') return;
   if (GS.musNext < AC.currentTime - 0.2) GS.musNext = AC.currentTime + 0.05;

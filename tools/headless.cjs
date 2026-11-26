@@ -114,7 +114,8 @@ function load(o) {
     atob,
     btoa,
     document: stub,
-    navigator: { maxTouchPoints: 0, userAgent: 'node' },
+    // webdriver: an automated browser, so the opening titles (src/intro/) step aside as they do for Playwright
+    navigator: { maxTouchPoints: 0, userAgent: 'node', webdriver: true },
     location: {
       hash: '',
       search: o.search || '',

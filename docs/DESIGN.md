@@ -585,3 +585,49 @@ Reported from two phones: opening the connection "is very inconsistent and often
   relay (`iceTransportPolicy: 'relay'`, like phones on mobile data); `?tls=1` uses only the relay over TLS on port 443.
 - **Lobby:** the host measures how each guest is connected (`linkType`, from the WebRTC stats' selected candidate
   pair, again after 3 s) and puts it in that guest's presence (`link`); a relayed player's row says "Ready · Relay".
+
+## v17.20 — opening titles (`src/intro/`)
+
+A 24-second intro cut to its own music, filmed with the game itself, in the spirit of the FRC game's opening
+(Strategy-Training, `public/team-manager/intro.js`): a first tap starts it with sound (phones only allow sound from a
+tap), a tap skips to the title, a tap on the title ends it, and every cut lands on a beat of the music. It is the
+start of the race behind the main screen, so it ends by landing the real logo where it sits on the main screen while
+the camera settles on that race and the buttons come up.
+
+| Beats          | Seconds      | Shot                                                                                                                                                                                                                                          | Sound                                                                                                              |
+| -------------- | ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| before         |              | Black, the five dark lights, "Tap to start · Sound on"                                                                                                                                                                                        |                                                                                                                    |
+| 0–2            | 0–1.1        | High over the grid, coming down; "Tap to skip"                                                                                                                                                                                                | A low drone; engines idling                                                                                        |
+| 2, 4, 6, 8, 10 | one a second | A light comes on and the picture cuts: the pole sitter nose on ("Pole position · name"), from the back of the grid ("On the grid · 10 cars"), side on ("Two cars each · 5 teams"), straight down, behind the pole sitter closing in           | A thump and a stab a step higher for each light, revs blip; a riser; hats, then claps; 11.5–12 silence             |
+| 12             | 6.4          | Lights out: white flash; the whole grid lurches away from above                                                                                                                                                                               | The drop: crash and sub; kick, claps, acid bass                                                                    |
+| 15–18          |              | Close behind the leader, streaks at the edges                                                                                                                                                                                                 | Bass filter opening                                                                                                |
+| 18–22          |              | Slow motion (0.35×) close on the leader, the leader's card (P1, flag, name, team, number)                                                                                                                                                     | Engine pitch down                                                                                                  |
+| 22–28          |              | The racing line paints itself through the next corner ahead of a car about to brake, in the game's own camera; GAS / HOLD / BRAKE in the line's colours (the zone the car is in, changing on half beats), its speed in km/h, a key at the top |                                                                                                                    |
+| 28–32          |              | The two closest cars, the camera swinging from beside them to behind; "Battle for Pn" card with the gap                                                                                                                                       | A lead line                                                                                                        |
+| 32–36          |              | Flyover out to the whole circuit, turned to fill the screen; the circuit's name typed out with its length                                                                                                                                     | Snare roll and riser                                                                                               |
+| 36–44          | 19.3–23.6    | White flash; speed lines, then the letters wipe in, a glint, the logo glides to its place, the camera flies to the main screen's view (36–39), the shade, buttons and corner icons come up (40–41.5)                                          | Title hit and chord, an arpeggio, the groove comes back gently; at 44 the menu theme carries on from its first bar |
+
+- **Score** (`intro/score.ts`): the menu theme's own intro, same tempo (112 bpm) and key (A minor), played through the
+  music scheduler. `cueTheme()` (`audio/music.ts`) plays a theme from a chosen step at a chosen audio time; the intro
+  cues a silent theme at the tap and its score once the audio is running, in time with the picture. Risers and the
+  drone are cut into one- and two-beat pieces, so a skip stops them. The rolls into the drop and the title are kept
+  under the hits they lead to.
+- **Clock**: the picture runs on its own clock until the music plays, then follows the audio clock minus the output
+  latency. If the audio stops, the picture carries on and the music joins again at the next step.
+- **Race**: `setupRace(true)` and every `step()` run with a seeded random generator (from the circuit's id), so on a
+  circuit the intro films the same race every time. The cars wait on the grid until beat 12; after that the race time
+  follows the score (slow motion 0.35× from 18 to 22). A skip moves the picture on, not the race. The cars each shot
+  films are chosen as the race reaches the shot: the leader; for the line, the car in the top six that starts braking
+  closest to 0.9 s after the cut; for the battle, the smallest gap in the top eight.
+- **Engines** follow the car on screen at half the game's level, so the music carries the reel (`INTRO_SND`, read by
+  `audio/mixer.ts`); on the grid the revs blip with each light and hold at 0.78 for the start.
+- **Words** are drawn on a canvas over the race (`#introC`, under `#home`) in Geist 800 leaning like the logo
+  (skewX −20°) and Geist Mono, white and grey, colour only for meaning (team stripes, the line's zones, the red lights).
+- **When it plays**: on load, unless Settings → Display & Sound → **Intro** is Off (`opts.intro`, `hcgp_intro`), the
+  address has `?nointro`, the page was opened from an invite link, or the browser is automated (Playwright, the
+  `tools/` harness) and the address doesn't ask for it with `?intro`. **Play Now** in the same row plays it again.
+  `?at=SECONDS` freezes one moment (for screenshots; it waits for the ready-made lines so the race is always the same).
+- **Performance**: the flyover put the whole circuit on screen for the first time, which took 190 ms a frame in
+  headless Chrome: `closePath()` on the walls' and gravel's long paths is very slow in Chrome. They only fill, and
+  `fill()` closes each sub-path itself, so the calls are gone (same picture, and cheaper at any zoom). Trees under
+  2 px across are drawn as one square of their colour. The overview now takes about 27 ms; normal play is unchanged.
