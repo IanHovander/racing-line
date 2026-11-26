@@ -261,7 +261,7 @@ export function makeBoard(): Board {
         lit = n;
         setBulbs(bulbs, n);
       }
-      show(bulbs, t < LAND);
+      show(bulbs, t < LAND - 0.3); // dark for a moment, then out of the title's way
       show(skip, t >= 1 && t < OUT && !frozen);
 
       // ---- light 1 ----
