@@ -1,6 +1,6 @@
 // The art kit for the campaign, the intro and the race's moments, after the art bible ("Lights Out", Ligne Claire
 // edition): drawn in code like the game it ships in, a clean-line comic. Ink, paper and cream with one red; one ink
-// outline on every shape, flat fills, hard ink shadows down-right; Geist and Geist Mono.
+// outline on every shape, flat fills, hard ink shadows down-right; Geist only, as in the game.
 //   tokens.ts     the colours, fonts and the arrival easing
 //   portraits.ts  Gus Marlow (five faces) and You, as SVG strings
 //   honours.ts    engraved grey medals and your licence card

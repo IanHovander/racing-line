@@ -1,12 +1,12 @@
 // What the campaign hands out, inked like the rest of the story layer: drill medals and your licence.
 //   medalSVG(tier, mark)  no painted metals: tier 1 is paper with an ink rim, 2 cream with a pencil rim, 3 wash with no
-//                         rim. The mark is the timing error it was won with (0.08 / 0.12 / 0.20) in Geist Mono. Only
+//                         rim. The mark is the timing error it was won with (0.08 / 0.12 / 0.20) in Geist 900. Only
 //                         the top medal carries red: a thin ring in Gus's colour, the one time he hands it to you.
 //   licenceSVG(o)         your licence card: portrait, grade, name and car number, one red mark, and a strip of
 //                         circuit stamps along the bottom, so it reads like a passport stamped at each circuit.
 import { youBody } from './portraits';
 import { circuitPath } from './stamps';
-import { CREAM, INK, LINE, MONO, PAPER, PENCIL, RED, SANS, WASH } from './tokens';
+import { CREAM, INK, LINE, PAPER, PENCIL, RED, SANS, WASH } from './tokens';
 
 export type Tier = 1 | 2 | 3;
 const q = (s: string) => s.replace(/"/g, "'");
@@ -36,7 +36,7 @@ export function medalSVG(
     (tier === 1 ? `<circle cx="24" cy="44" r="12.6" fill="none" stroke="${RED}" stroke-width="1.2"/>` : '') +
     (small
       ? ''
-      : `<text x="24" y="47.6" text-anchor="middle" font-family="${q(MONO)}" font-weight="600" font-size="${fs}" letter-spacing="-.5" fill="${INK}">${mark}</text>`) +
+      : `<text x="24" y="47.8" text-anchor="middle" font-family="${q(SANS)}" font-weight="900" font-size="${fs}" letter-spacing="-.3" style="font-variant-numeric:tabular-nums" fill="${INK}">${mark}</text>`) +
     `</svg>`
   );
 }
@@ -83,13 +83,13 @@ export function licenceSVG(o: LicenceOpts = {}) {
     `<rect width="172" height="${H}" rx="9" fill="${CREAM}" ${O()}/>` +
     `<path d="M0 22h172" stroke="${INK}" stroke-width="1.2"/>` +
     `<rect x="12" y="9" width="12" height="4" rx="2" fill="${RED}"/>` +
-    `<text x="31" y="14.5" font-family="${q(MONO)}" font-size="7.5" font-weight="600" letter-spacing="1.6" fill="${INK}">LICENCE</text>` +
+    `<text x="31" y="14.6" font-family="${q(SANS)}" font-size="7.5" font-weight="800" letter-spacing=".9" fill="${INK}">LICENCE</text>` +
     `<svg x="12" y="32" width="56" height="56" viewBox="0 0 64 64"><clipPath id="lcp"><rect width="64" height="64" rx="14"/></clipPath><g clip-path="url(#lcp)">${youBody(num)}</g></svg>` +
-    // grade (a word of power) and car number (a number, in mono) on one baseline
-    `<text x="80" y="42" font-family="${q(MONO)}" font-size="6.5" letter-spacing="1.2" fill="${PENCIL}">GRADE</text>` +
-    `<text x="124" y="42" font-family="${q(MONO)}" font-size="6.5" letter-spacing="1.2" fill="${PENCIL}">CAR</text>` +
+    // grade (a word of power, Geist 800 italic) and car number (Geist 900, tabular) on one baseline
+    `<text x="80" y="42" font-family="${q(SANS)}" font-size="6.2" font-weight="800" letter-spacing=".7" fill="${PENCIL}">GRADE</text>` +
+    `<text x="124" y="42" font-family="${q(SANS)}" font-size="6.2" font-weight="800" letter-spacing=".7" fill="${PENCIL}">CAR</text>` +
     `<text x="78" y="74" font-family="${q(SANS)}" font-size="38" font-weight="800" font-style="italic" letter-spacing="-1.5" fill="${INK}">${grade}</text>` +
-    `<text x="124" y="74" font-family="${q(MONO)}" font-size="22" font-weight="600" letter-spacing="-1" fill="${INK}">${num}</text>` +
+    `<text x="124" y="74" font-family="${q(SANS)}" font-size="24" font-weight="900" letter-spacing="-.6" style="font-variant-numeric:tabular-nums" fill="${INK}">${num}</text>` +
     `<text x="80" y="88" font-family="${q(SANS)}" font-size="${name.length > 12 ? 8 : 9.5}" font-weight="600" fill="${INK}">${name}</text>` +
     (circuits.length ? `<path d="M12 95.5h148" stroke="${PENCIL}"/>` + strip : '') +
     `</svg>`

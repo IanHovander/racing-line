@@ -30,7 +30,9 @@ export const SHADOW = '3px 3px 0 ' + INK;
 export const SHADOW_LG = '4px 4px 0 ' + INK;
 
 export const SANS = "Geist, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif";
-export const MONO = "'Geist Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace";
+/** Geist only, as in the game: hero numbers in 900 with tabular figures, captions and labels in 800 caps */
+export const NUM_STYLE = 'font-weight:900;font-variant-numeric:tabular-nums;letter-spacing:-0.02em';
+export const LABEL_STYLE = 'font-weight:800;text-transform:uppercase;letter-spacing:0.1em';
 /** the bible's arrival: ease out, fast */
 export const EASE_OUT = 'cubic-bezier(.2,.8,.2,1)';
 /** the grade before lights out: the world as an uncoloured comic page (a CSS filter for the game canvas) */

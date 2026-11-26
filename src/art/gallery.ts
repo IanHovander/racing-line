@@ -55,20 +55,21 @@ export function init() {
     'Panels',
     'Story panels are comic panels, built like the game’s own buttons. Gus speaks in balloons; narration goes in a caption.',
   );
-  show(row, captionHTML('Final round · Lap 71'), 'caption');
+  show(row, captionHTML('Final round · Lap 71'), 'caption', 'bare');
   show(
     row,
     gusSays('stern', 'Ninth. You gave away four tenths at Turn 1, every lap.', 64),
     'Gus speaks',
-    'wide',
+    'wide bare',
   );
-  show(row, gusSays('doubt', 'It felt fast?', 64), 'unconvinced', 'wide');
+  show(row, gusSays('doubt', 'It felt fast?', 64), 'unconvinced', 'wide bare');
   show(
     row,
     panelHTML(
-      `<span style="font:600 12px/1.4 'Geist Mono',monospace;letter-spacing:.12em">TURN 1 · LIFT POINT</span><br><b style="font:900 19px Geist">Attempt 4</b>`,
+      `${captionHTML('Turn 1 · Lift point')}<b style="font:900 19px Geist;display:block;margin-top:4px">Attempt 4</b>`,
     ),
     'panel',
+    'bare',
   );
 
   row = section('You', 'Helmet on, visor down, your number on the side of the shell under Gus’s red.');

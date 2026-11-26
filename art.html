@@ -10,11 +10,6 @@
         src: url('./fonts/Geist-Variable.woff2') format('woff2');
         font-weight: 100 900;
       }
-      @font-face {
-        font-family: 'Geist Mono';
-        src: url('./fonts/GeistMono-Variable.woff2') format('woff2');
-        font-weight: 100 900;
-      }
       :root {
         --bg: #faf4e4;
         --panel: #fffdf7;
@@ -22,7 +17,7 @@
         --ink: #141418;
         --muted: #5f5c55;
         --sans: 'Geist', system-ui, -apple-system, sans-serif;
-        --mono: 'Geist Mono', ui-monospace, Menlo, monospace;
+        --mono: 'Geist', system-ui, sans-serif;
         color-scheme: light;
       }
       * {
@@ -117,6 +112,13 @@
         justify-content: flex-start;
         width: 100%;
       }
+      figure.bare .art {
+        background: none;
+        border: 0;
+        box-shadow: none;
+        padding: 0;
+        justify-content: flex-start;
+      }
       figure.tap {
         cursor: pointer;
       }
@@ -134,8 +136,8 @@
         <h1>Ink, paper, <span style="color: #d93829">one red.</span></h1>
         <p class="muted">
           The story layer's art, drawn in code in <code>src/art/</code> like the game it ships in: one ink
-          line round every shape, flat fills, hard shadows down-right, Geist and Geist Mono. Before lights out
-          the world is an uncoloured comic page; colour belongs to racing.
+          line round every shape, flat fills, hard shadows down-right, Geist only. Before lights out the world
+          is an uncoloured comic page; colour belongs to racing.
         </p>
       </header>
     </main>

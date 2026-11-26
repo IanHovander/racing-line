@@ -2,7 +2,7 @@
 // corners, flat fills, one uniform ink outline, no modelling, and one red, the mark on Gus's cap.
 // Gus animates by swapping brows, eyes and mouth (and a small turn of the head when he doubts you); nothing else moves.
 // He wears a stopwatch on a lanyard: the man who lost a title by 0.040 s carries the clock.
-import { CREAM, INK, LINE, MONO, PAPER, PENCIL, RED } from './tokens';
+import { CREAM, INK, LINE, PAPER, PENCIL, RED, SANS } from './tokens';
 
 export type GusFace = 'stern' | 'doubt' | 'smile' | 'count' | 'blink';
 export const GUS_FACES: GusFace[] = ['stern', 'doubt', 'smile', 'count', 'blink'];
@@ -53,7 +53,7 @@ const O = `stroke="${INK}" stroke-width="${LINE}" stroke-linejoin="round"`;
 const FRAME = `<rect x="1" y="1" width="62" height="62" rx="13" fill="none" ${O}/>`;
 
 /** Gus: jacket, the stopwatch he wears on a lanyard (he lost a title by 0.040 s), then his head. */
-function gusParts(face: GusFace) {
+function gusParts(face: GusFace, framed = true) {
   const f = FACE[face];
   return (
     `<rect width="64" height="64" fill="${CREAM}"/>` +
@@ -83,7 +83,7 @@ function gusParts(face: GusFace) {
     `<path d="M22.6 42.4c.6-3.4 4-5.4 9.4-5.4s8.8 2 9.4 5.4c-.5 1.1-1.5 1.3-2.4.5-1.9-1.6-4.2-2.3-7-2.3s-5.1.7-7 2.3c-.9.8-1.9.6-2.4-.5z" fill="${PENCIL}" stroke="${INK}" stroke-width="1.4" stroke-linejoin="round"/>` +
     f.mouth +
     `</g>` +
-    FRAME
+    (framed ? FRAME : '')
   );
 }
 
@@ -94,25 +94,27 @@ export interface PortraitOpts {
   rounded?: boolean;
   /** accessible name */
   label?: string;
+  /** draw the portrait's own inked square (default true). Off inside a panel: the panel is its frame. */
+  framed?: boolean;
 }
 function wrap(inner: string, o: PortraitOpts, label: string) {
   const s = o.size ?? 64,
     sz = typeof s === 'number' ? `${s}px` : s;
-  const round = o.rounded === false ? '' : 'border-radius:22%;';
+  const round = o.rounded === false || o.framed === false ? '' : 'border-radius:22%;';
   return `<svg viewBox="0 0 64 64" width="${typeof s === 'number' ? s : 64}" height="${typeof s === 'number' ? s : 64}" style="${round}display:block;width:${sz};height:auto" role="img" aria-label="${o.label || label}">${inner}</svg>`;
 }
 
 /** The inside of Gus's portrait (no <svg> wrapper), for nesting in a bigger drawing. */
-export function gusBody(face: GusFace = 'stern') {
-  return gusParts(face);
+export function gusBody(face: GusFace = 'stern', framed = true) {
+  return gusParts(face, framed);
 }
 /** Gus Marlow, as an inline SVG string. */
 export function gusSVG(face: GusFace = 'stern', o: PortraitOpts = {}) {
-  return wrap(gusBody(face), o, `Gus, ${face}`);
+  return wrap(gusBody(face, o.framed !== false), o, `Gus, ${face}`);
 }
 
 /** The inside of your portrait: helmet on, visor down, your number on the side of the shell. */
-export function youBody(num: number | string = 27) {
+export function youBody(num: number | string = 27, framed = true) {
   return (
     `<rect width="64" height="64" fill="${CREAM}"/>` +
     `<path d="M6 65c2-11 11-16 26-16s24 5 26 16z" fill="${PENCIL}" ${O}/>` +
@@ -122,11 +124,11 @@ export function youBody(num: number | string = 27) {
     `<path d="M29.5 29.2h8.5l-1.6 2.3h-6.9z" fill="${PENCIL}"/>` +
     // the red stripe (you wear Gus's colour) and your number on the side of the shell, below it
     `<path d="M12.5 29c6-4 12-5.5 19-5.5" fill="none" stroke="${RED}" stroke-width="3"/>` +
-    `<text x="19.5" y="38" text-anchor="middle" font-family="${MONO.replace(/"/g, "'")}" font-size="7" font-weight="600" fill="${INK}">${String(num).slice(0, 2)}</text>` +
-    FRAME
+    `<text x="19.5" y="38" text-anchor="middle" font-family="${SANS.replace(/"/g, "'")}" font-size="7.4" font-weight="900" letter-spacing="-.2" style="font-variant-numeric:tabular-nums" fill="${INK}">${String(num).slice(0, 2)}</text>` +
+    (framed ? FRAME : '')
   );
 }
 /** You, as an inline SVG string. */
 export function youSVG(num: number | string = 27, o: PortraitOpts = {}) {
-  return wrap(youBody(num), o, `You, car ${num}`);
+  return wrap(youBody(num, o.framed !== false), o, `You, car ${num}`);
 }
