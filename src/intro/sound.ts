@@ -154,12 +154,17 @@ export class Sound {
     g.gain.setValueAtTime(0, at);
     g.gain.linearRampToValueAtTime(0.12, at + 0.003);
     g.gain.exponentialRampToValueAtTime(0.001, at + 0.07);
-    this.noise(at, at + 0.08).connect(f).connect(g).connect(this.bus);
+    this.noise(at, at + 0.08)
+      .connect(f)
+      .connect(g)
+      .connect(this.bus);
     const t = this.gain();
     t.gain.setValueAtTime(0, at + 0.01);
     t.gain.linearRampToValueAtTime(0.04, at + 0.012);
     t.gain.linearRampToValueAtTime(0, at + 0.045);
-    this.osc('square', 1760, at + 0.01, at + 0.05).connect(t).connect(this.bus);
+    this.osc('square', 1760, at + 0.01, at + 0.05)
+      .connect(t)
+      .connect(this.bus);
   }
   /** Ten engines on the grid: idling from `at`, revs climbing from `rev`, cut dead at `cut`. */
   grid(at: number, rev: number, cut: number): void {
@@ -203,7 +208,10 @@ export class Sound {
     ng.gain.setValueAtTime(0, at);
     ng.gain.linearRampToValueAtTime(0.12, at + 0.02);
     ng.gain.exponentialRampToValueAtTime(0.001, at + 0.5);
-    this.noise(at, at + 0.55).connect(nf).connect(ng).connect(this.bus);
+    this.noise(at, at + 0.55)
+      .connect(nf)
+      .connect(ng)
+      .connect(this.bus);
     const f = this.filter('lowpass', 1200, 1),
       g = this.gain();
     g.gain.setValueAtTime(0, at);
@@ -237,7 +245,10 @@ export class Sound {
     g.gain.setValueAtTime(0.001, at);
     g.gain.exponentialRampToValueAtTime(0.16, at + dur);
     g.gain.linearRampToValueAtTime(0, at + dur + 0.08);
-    this.noise(at, at + dur + 0.1).connect(f).connect(g).connect(this.bus);
+    this.noise(at, at + dur + 0.1)
+      .connect(f)
+      .connect(g)
+      .connect(this.bus);
   }
   setMuted(m: boolean): void {
     this.muted = m;

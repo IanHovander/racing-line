@@ -12,7 +12,7 @@
 //   audio()                    the game's audio context and an output for the intro's own sounds
 import { GS } from '../state';
 import { DPR, H, W, clamp } from '../core/dom';
-import { cars, setupRace } from '../game/race';
+import { cars, opts, setupRace } from '../game/race';
 import { ISO_A, P, cam, updateCamera } from '../render/camera';
 import { buildTrack } from '../track/build';
 import { TRACKS } from '../track/circuits';
@@ -20,7 +20,6 @@ import { STEP } from '../sim/ai';
 import { step } from '../sim/step';
 import { VMAX } from '../sim/car-model';
 import { AC, sfxG, unlockAudio } from '../audio/audio';
-import { opts } from '../game/race';
 import { GO, INK, INKED_PAGE, PAPER, RED } from '../art/index';
 
 /** A helicopter pose: the world point at the middle of the screen, how many pixels a metre is, how far the camera
@@ -51,7 +50,12 @@ export interface Turn1 {
 }
 export let turn1: Turn1 | null = null;
 // the racing line from `from` to `to`, copied when the world is staged (later line updates don't move it)
-let LX: Float64Array, LY: Float64Array, LZ: Float64Array, LV: Float64Array, LT: Float64Array, LOFF: Float64Array;
+let LX: Float64Array,
+  LY: Float64Array,
+  LZ: Float64Array,
+  LV: Float64Array,
+  LT: Float64Array,
+  LOFF: Float64Array;
 let grid: any[] = [];
 let roller: any = null;
 let lineCv: HTMLCanvasElement | null = null;
@@ -72,8 +76,8 @@ function measureTurn1(): Turn1 {
   }
   let lift = apex;
   while (lift > 1 && v[lift - 1] > v[lift] + 0.02) lift--;
-  const from = Math.max(0, lift - 55),
-    to = Math.min(N - 1, apex + 55);
+  const from = Math.max(0, lift - 36),
+    to = Math.min(N - 1, apex + 40);
   return { from, lift, apex, to, vLift: v[lift] * 3.6, vApex: v[apex] * 3.6 };
 }
 function snapshot(T: Turn1) {
@@ -121,6 +125,10 @@ function lerpAt(arr: Float64Array, i: number) {
     b = Math.min(arr.length - 1, a + 1);
   return arr[a] + (arr[b] - arr[a]) * (k - a);
 }
+/** The game's speed (m/s) on Turn 1's racing line at sample index i. */
+export function lineSpeed(i: number): number {
+  return lerpAt(LV, i);
+}
 /** A point of Turn 1's racing line (world metres). */
 export function linePoint(i: number): [number, number, number] {
   return [lerpAt(LX, i), lerpAt(LY, i), lerpAt(LZ, i)];
@@ -147,12 +155,18 @@ export function release(): void {
   lineCv?.remove();
   lineCv = null;
 }
-/** One car on an empty circuit, for the dawn shots. */
-export function showCorner(): void {
-  if (shown === 'corner') return;
-  shown = 'corner';
-  cars.length = 0;
-  cars.push(roller);
+/** An empty circuit for the dawn shots, with or without its one car (when it's out of the shot it waits far off the
+ * map: the game expects at least one car). */
+export function showCorner(withCar: boolean): void {
+  if (shown !== 'corner') {
+    shown = 'corner';
+    cars.length = 0;
+    cars.push(roller);
+  }
+  if (!withCar) {
+    roller.x = roller.y = 1e6;
+    roller.v = 0;
+  }
 }
 /** The ten cars on the grid, held, with the game's own camera settled on them as the home screen has it. */
 export function showGrid(): void {

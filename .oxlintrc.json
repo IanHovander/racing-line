@@ -22,7 +22,7 @@
   },
   "overrides": [
     {
-      "files": ["src/main.ts", "src/art/index.ts"],
+      "files": ["src/main.ts", "src/art/index.ts", "src/intro/board.ts"],
       "rules": { "import/no-unassigned-import": "off" }
     }
   ],

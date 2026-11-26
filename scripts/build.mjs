@@ -19,11 +19,11 @@ function copyStatic() {
 }
 
 const options = {
-  // art.html is the art kit's gallery (src/art/), intro.html the campaign's intro (src/intro/)
+  // art.html is the art kit's gallery (src/art/). The intro (src/intro/) plays over the game: main.ts loads it lazily,
+  // and intro.html only sends old links on to index.html?intro.
   entryPoints: {
     main: path.join(root, 'src/main.ts'),
     art: path.join(root, 'src/art/gallery.ts'),
-    intro: path.join(root, 'src/intro/intro.ts'),
   },
   bundle: true,
   format: 'esm',

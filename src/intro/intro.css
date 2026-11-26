@@ -1,0 +1,265 @@
+/* The intro (src/intro/), drawn over the game while it plays. Every rule is under html.intro or #intro, so nothing
+   here touches the game when the intro isn't playing. Panels, balloons, captions and bulbs are the art kit's. */
+
+/* From the first paint until the board is up: a blank page, so the home screen never flashes first. */
+html.intro body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 59;
+  background: var(--lc-paper);
+}
+html.intro.intro-up body::after {
+  display: none;
+}
+/* The home screen waits under the film; the title and then its buttons arrive at the end (driven from board.ts). */
+html.intro #home::before,
+html.intro .hTop,
+html.intro .hBot {
+  opacity: var(--intro-ui, 0);
+}
+html.intro .hTop,
+html.intro .hBot {
+  transform: translateY(calc((1 - var(--intro-ui, 0)) * 12px));
+}
+html.intro .hLogo {
+  opacity: var(--intro-logo, 0);
+  transform: translateX(var(--intro-logo-x, 0px));
+}
+
+#intro {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  overflow: hidden;
+  cursor: pointer;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  font-family: Geist, system-ui, -apple-system, sans-serif;
+  color: var(--lc-ink);
+}
+#intro p {
+  margin: 0;
+}
+/* the page the story panels sit on: paper, like the inked world */
+#intro .iPage {
+  position: absolute;
+  inset: 0;
+  background: var(--lc-paper);
+}
+#intro .iLine {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+/* the start lights, where the race shows its own */
+#intro .iBulbs {
+  position: absolute;
+  top: calc(64px + env(safe-area-inset-top));
+  left: 50%;
+  transform: translateX(-50%);
+  line-height: 0;
+}
+#intro .iBulbs .bulbs {
+  --bulb: clamp(26px, 8vw, 36px);
+}
+#intro .iBeat {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  padding: 0 16px;
+}
+#intro .iNum {
+  font-weight: 900;
+  font-style: normal;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+#intro .iLabel {
+  font-weight: 800;
+  font-size: 14px;
+  line-height: 1;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* light 1: a caption and the timing tower */
+#intro .iWound .lc-caption {
+  font-size: 14px;
+}
+#intro .iTower {
+  width: min(340px, 86vw);
+  padding: 6px 16px;
+}
+#intro .iRow {
+  display: grid;
+  grid-template-columns: 1.4em 1fr auto;
+  align-items: baseline;
+  padding: 10px 0;
+  font-weight: 800;
+  font-size: 22px;
+  line-height: 1.1;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+#intro .iRow + .iRow {
+  border-top: 2px solid var(--lc-ink);
+}
+#intro .iGap {
+  color: var(--lc-red);
+  letter-spacing: -0.02em;
+}
+/* the close-up: the number like a face */
+#intro .iHeroP {
+  text-align: center;
+  padding: 20px 26px 16px;
+}
+#intro .iBig {
+  margin-top: 10px;
+  font-size: min(22vw, 30vh, 168px);
+  line-height: 0.9;
+  color: var(--lc-red);
+}
+
+/* lights 2 and 3: a place caption, and the word at the lift point */
+#intro .iCorner {
+  position: absolute;
+  left: 16px;
+  bottom: calc(28px + env(safe-area-inset-bottom));
+}
+#intro .iCorner .lc-caption {
+  font-size: 14px;
+}
+#intro .iLift {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+}
+#intro .iLift .power {
+  position: absolute;
+  right: 18px;
+  bottom: 10px;
+  font-size: clamp(38px, 11vw, 56px);
+  white-space: nowrap;
+}
+
+/* light 4: Gus, his line in a balloon pointing at him */
+#intro .iGusP {
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+  gap: 18px;
+  padding: 18px 18px 8px;
+}
+#intro .iFace {
+  width: min(54vw, 30vh, 240px);
+}
+#intro .iFace svg {
+  display: block;
+}
+#intro .iGus .lc-balloon {
+  padding: 12px 22px 14px;
+}
+#intro .iGus .lc-balloon[data-tail='down']::before {
+  left: calc(50% - 8px);
+}
+#intro .iGus .lc-balloon[data-tail='down']::after {
+  left: calc(50% - 5.5px);
+}
+#intro .iGus .power {
+  display: block;
+  font-size: clamp(34px, 10vw, 48px);
+}
+#intro .iW2 {
+  color: var(--lc-red);
+}
+
+/* light 5: your helmet over the grid */
+#intro .iYou {
+  justify-content: flex-start;
+  padding-top: calc(132px + env(safe-area-inset-top));
+}
+#intro .iYouP {
+  width: min(40vw, 24vh, 190px);
+  padding: 8px;
+}
+#intro .iYouP svg {
+  display: block;
+}
+
+@media (orientation: landscape) {
+  #intro .iGusP {
+    flex-direction: row;
+    padding: 16px 22px 16px 12px;
+  }
+  #intro .iFace {
+    width: min(28vw, 46vh, 220px);
+  }
+  #intro .iYou {
+    align-items: flex-start;
+    justify-content: center;
+    padding: 0 0 0 max(24px, env(safe-area-inset-left));
+  }
+  #intro .iYouP {
+    width: min(24vw, 40vh, 190px);
+  }
+  #intro .iBig {
+    font-size: min(18vw, 34vh, 168px);
+  }
+}
+
+/* lights out: the title's streaks trailing it in */
+#intro .iTrail {
+  position: absolute;
+  left: 0;
+  top: 0;
+  pointer-events: none;
+}
+#intro .iTrail svg {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* before the first tap, and the way out */
+#intro .iInvite {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+#intro .iTap {
+  font-weight: 800;
+  font-size: 16px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--lc-ink);
+}
+#intro .iSnd {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--lc-pencil);
+}
+#intro .iSkip {
+  position: absolute;
+  top: calc(20px + env(safe-area-inset-top));
+  right: max(18px, env(safe-area-inset-right));
+  font-weight: 800;
+  font-size: 14px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--lc-pencil);
+}

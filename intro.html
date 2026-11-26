@@ -9,14 +9,13 @@
       body {
         margin: 0;
         height: 100%;
-        background: #0b0e14;
-        color: #f2f4f7;
-        font-family: system-ui, sans-serif;
+        background: #141418;
       }
     </style>
+    <script>
+      // The intro plays over the game itself now: index.html?intro (?at=SECONDS and ?mute are passed along).
+      location.replace('./?intro' + location.search.replace(/^\?/, '&') + location.hash);
+    </script>
   </head>
-  <body>
-    <canvas id="c" width="1" height="1" hidden></canvas>
-    <script type="module" src="./assets/intro.js"></script>
-  </body>
+  <body></body>
 </html>

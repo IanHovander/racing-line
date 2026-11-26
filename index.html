@@ -8,6 +8,19 @@
     <script>
       // Opened from an invite link (#code): put the joining screen up with the first paint, before the game has loaded.
       if (/^#[a-z0-9]{4,8}$/i.test(location.hash)) document.documentElement.classList.add('joining');
+      // The intro (src/intro/): ?intro plays it; otherwise once per browser, on the first visit to the published game.
+      try {
+        var q = location.search;
+        if (
+          /[?&]intro\b/.test(q) ||
+          (!localStorage.getItem('hcgp_introSeen') &&
+            !/^#[a-z0-9]{4,8}$/i.test(location.hash) &&
+            !/[?&]debug\b/.test(q) &&
+            !/^(localhost|127\.0\.0\.1)$/.test(location.hostname) &&
+            !navigator.webdriver)
+        )
+          document.documentElement.classList.add('intro');
+      } catch (e) {}
     </script>
   </head>
   <body>
