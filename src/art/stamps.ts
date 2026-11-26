@@ -1,9 +1,9 @@
 // Circuit stamps: a postage stamp for each circuit, its real shape inked on paper from the circuit's own control points
-// (the same spline the game builds the track from), the circuit's name in Geist Mono caps. Collect them as the
+// (the same spline the game builds the track from), the circuit's name in Geist 800 caps. Collect them as the
 // campaign moves from circuit to circuit. One not reached yet is a pencil silhouette on wash, a tease, with "ROUND n"
 // in place of the name until you arrive.
 //   stampSVG(T, n, locked)   T is a circuit from TRACKS (name, cp, sc, smooth), n its chapter number.
-import { INK, MONO, PAPER, PENCIL, WASH } from './tokens';
+import { INK, PAPER, PENCIL, SANS, WASH } from './tokens';
 
 interface CircuitLike {
   id?: string;
@@ -68,7 +68,7 @@ export function circuitPath(T: CircuitLike, x: number, y: number, w: number, h: 
   return { d, start: s0, dir: Math.atan2(s1[1] - s0[1], s1[0] - s0[0]) };
 }
 
-const mono = MONO.replace(/"/g, "'");
+const sans = SANS.replace(/"/g, "'");
 let uid = 0;
 export function stampSVG(T: CircuitLike, n = 1, locked = false, size: number | string = 96) {
   const W = 64,
@@ -83,8 +83,8 @@ export function stampSVG(T: CircuitLike, n = 1, locked = false, size: number | s
   for (let y = 4; y < H; y += 6)
     holes += `<circle cx="0" cy="${y}" r="1.8"/><circle cx="${W}" cy="${y}" r="1.8"/>`;
   const name = locked ? `ROUND ${n}` : T.name.normalize('NFD').replace(/[̀-ͯ]/g, '').toUpperCase();
-  // Geist Mono is about 0.6 em a character: shrink a long name to fit
-  const fs = Math.min(6.4, (W - 20) / (0.62 * name.length));
+  // Geist 800 caps with a little tracking take about 0.74 em a character: shrink a long name to fit
+  const fs = Math.min(6.2, (W - 18) / (0.74 * name.length));
   const nx = Math.cos(dir + Math.PI / 2) * 3.2,
     ny = Math.sin(dir + Math.PI / 2) * 3.2;
   return (
@@ -93,12 +93,12 @@ export function stampSVG(T: CircuitLike, n = 1, locked = false, size: number | s
     `<g mask="url(#${id})">` +
     `<rect width="${W}" height="${H}" fill="${locked ? WASH : PAPER}"/>` +
     `<rect x="4.5" y="4.5" width="${W - 9}" height="${H - 9}" rx="1.5" fill="none" stroke="${locked ? PENCIL : INK}" stroke-width="1.2"/>` +
-    `<text x="9" y="13" font-family="${mono}" font-size="5.6" letter-spacing=".6" fill="${PENCIL}">${String(n).padStart(2, '0')}</text>` +
+    `<text x="9" y="13" font-family="${sans}" font-size="5.6" font-weight="800" letter-spacing=".4" fill="${PENCIL}">${String(n).padStart(2, '0')}</text>` +
     `<path d="${d}" fill="none" stroke="${locked ? PENCIL : INK}" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>` +
     (locked
       ? ''
       : `<path d="M${(start[0] - nx).toFixed(2)} ${(start[1] - ny).toFixed(2)}L${(start[0] + nx).toFixed(2)} ${(start[1] + ny).toFixed(2)}" stroke="${INK}" stroke-width="1.4"/>`) +
-    `<text x="${W / 2}" y="${H - 11}" text-anchor="middle" font-family="${mono}" font-weight="600" font-size="${fs.toFixed(2)}" letter-spacing=".3" fill="${locked ? PENCIL : INK}">${name}</text>` +
+    `<text x="${W / 2}" y="${H - 11}" text-anchor="middle" font-family="${sans}" font-weight="800" font-size="${fs.toFixed(2)}" letter-spacing="${(fs * 0.08).toFixed(2)}" fill="${locked ? PENCIL : INK}">${name}</text>` +
     `</g></svg>`
   );
 }

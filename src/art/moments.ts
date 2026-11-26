@@ -3,12 +3,13 @@
 //   panelHTML(html)          a comic panel: cream, inked, with the hard shadow, like the game's Practice button
 //   balloonHTML(text, tail)  a speech balloon on paper, its tail pointing at the speaker ('left' | 'right' | 'down')
 //   captionHTML(text)        a narration box: rectangular, mono caps ("FINAL ROUND · LAP 71")
-//   gusSays(face, text)      Gus's portrait with his line in a balloon pointing at him
+//   gusSays(face, text)      a panel with Gus drawn straight into it (no frame of his own) and his line in a balloon
 //   bulbsHTML(lit)           the start lights, five in a row; anything counted to five uses them (a drill streak
 //                            lights one per clean attempt; the fifth is followed by lights out). No glow: a lit bulb is
 //                            a flat red disc with short ink rays, the comic way to draw light.
 //   rollHTML(from, to)       a pass: the position rolls in an ink badge like the race's own position badge
-//                            (P5 -> P4), and one ink speed streak shoots in. playRoll(el) runs it (again).
+//                            (P5 -> P4), tightening to the new number's width, and one ink speed streak shoots in.
+//                            playRoll(el) runs it (again).
 //   streaksSVG()             the logo's speed streaks, for anything that has to look fast
 //   powerHTML(words)         words of power in Geist 800 italic, the starred word in red ("Turn 1. *Again.*")
 import { gusSVG, type GusFace } from './portraits';
@@ -25,9 +26,9 @@ export function balloonHTML(text: string, tail: 'left' | 'right' | 'down' = 'lef
 export function captionHTML(text: string) {
   return `<div class="lc-caption">${esc(text)}</div>`;
 }
-/** Gus speaking: his portrait and his line in a balloon that points at him. */
+/** Gus speaking: a panel with him drawn straight into it and his line in a balloon that points at him. */
 export function gusSays(face: GusFace, text: string, size = 64) {
-  return `<div class="lc-says">${gusSVG(face, { size })}${balloonHTML(text, 'left')}</div>`;
+  return panelHTML(`${gusSVG(face, { size, framed: false })}${balloonHTML(text, 'left')}`, 'lc-says');
 }
 
 const BULB =
@@ -59,7 +60,7 @@ export function rollHTML(from: number, to: number) {
   const up = to < from;
   const reel = up ? [from, to] : [to, from];
   return (
-    `<span class="proll" data-dir="${up ? 'up' : 'down'}" aria-label="P${to}">` +
+    `<span class="proll" data-dir="${up ? 'up' : 'down'}" aria-label="P${to}" style="--w0:${String(from).length}ch;--w1:${String(to).length}ch">` +
     `<i class="proll-streak" aria-hidden="true"></i>` +
     `<span class="proll-p">P</span>` +
     `<span class="proll-win"><span class="proll-reel">${reel.map(n => `<span>${n}</span>`).join('')}</span></span>` +
