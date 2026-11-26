@@ -709,7 +709,15 @@ function lineWords(B: number): void {
   o.font = `600 ${kpx}px ${MONO}`;
   let tw = 0;
   for (const [t] of keys) tw += o.measureText(t).width * 1.16 + 34 * s;
+  tw -= 18 * s;
   let kx = (W - tw) / 2;
+  // on a dark pill, like the main screen's corner buttons, so it reads over sponsor boards
+  roundRect(kx - 14 * s, ky - kpx - 9 * s, tw + 28 * s, kpx + 20 * s, (kpx + 20 * s) / 2);
+  o.fillStyle = 'rgba(12,14,19,0.6)';
+  o.fill();
+  o.strokeStyle = 'rgba(255,255,255,0.18)';
+  o.lineWidth = 1;
+  o.stroke();
   for (const [t, zc] of keys) {
     o.fillStyle = LINE_COLS[zc].replace(/[\d.]+\)$/, '1)');
     o.beginPath();
