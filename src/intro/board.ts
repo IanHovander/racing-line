@@ -190,8 +190,9 @@ export function makeBoard(): Board {
     root.setProperty('--intro-ui', ui.toFixed(3));
   };
 
-  // the helicopter's two poses for the dawn shots, worked out for this screen's shape
-  let poses: [Pose, Pose] | null = null,
+  // the helicopter for the dawn shots, worked out for this screen's shape: high over the circuit, then down onto the
+  // one car and along with it through Turn 1 (light 2); the cut to the whole corner for the line (light 3)
+  let poses: { high: Pose; wide: Pose } | null = null,
     posesFor = '';
   const descent = () => {
     const key = innerWidth + 'x' + innerHeight;
@@ -199,17 +200,18 @@ export function makeBoard(): Board {
       const T = world.turn1,
         pts = [];
       for (let i = T.from; i <= T.to; i += 4) pts.push(world.linePoint(i));
-      const end = world.camera.frame(pts, 0.5, null, 0.08);
-      const start = { ...end, zoom: end.zoom * 0.2, tilt: 0.88, yaw: end.yaw + 0.6 };
-      poses = [start, end];
+      const wide = world.camera.frame(pts, 0.5, null, 0.08);
+      poses = { high: { ...wide, zoom: wide.zoom * 0.2, tilt: 0.88, yaw: wide.yaw + 0.6 }, wide };
       posesFor = key;
     }
     return poses;
   };
-  // the dawn car: where it is at time t (sample index), its speed, and the time it takes
+  // the dawn car: where it is at time t (sample index)
   const T1 = world.turn1;
   const rollStart = world.lineTime(T1.from);
   const rollAt = (t: number) => world.lineAt(rollStart + (t - ROLL_FROM) * ROLL_K);
+  /** how close the helicopter comes to the car, as a multiple of the whole corner's zoom */
+  const CLOSE = 2.1;
 
   let launched = false,
     advanced = false,
@@ -232,12 +234,14 @@ export function makeBoard(): Board {
       let mine = false;
       if (t < L4) {
         world.showCorner(t >= L2 && t < L3);
-        const [a, z] = descent();
-        world.camera.flyTo(a, z, descend(seg(t, L2, L3)));
-        if (t >= L2 && t < L3) {
-          const i = rollAt(t);
+        const { high, wide } = descent();
+        if (t < L3) {
+          // down onto the car, following a moment behind it
+          const i = rollAt(t),
+            [x, y, z] = world.linePoint(rollAt(t - 0.3));
           world.placeCar(i, world.lineSpeed(i) * ROLL_K);
-        }
+          world.camera.flyTo(high, { ...wide, x, y, z, zoom: wide.zoom * CLOSE }, descend(seg(t, L2, L3)));
+        } else world.camera.flyTo(wide, wide, 1);
         mine = true;
       } else world.showGrid();
       if (t >= OUT && !launched) {
@@ -339,7 +343,7 @@ export function makeBoard(): Board {
             at,
             at + (rollEnd - rollFrom),
             sec => world.lineSpeed(rollAt(rollFrom + sec)) * ROLL_K,
-            sec => 0.25 + 0.75 * descend(seg(rollFrom + sec, L2, L3)),
+            sec => 0.2 + 0.8 * descend(seg(rollFrom + sec, L2, L3)),
           ),
       });
       for (const s of SAY) out.push({ t: s - 0.12, play: (snd, at) => snd.radio(at) });

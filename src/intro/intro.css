@@ -198,13 +198,31 @@ html.intro .hLogo {
   display: block;
 }
 
+/* phones held sideways: the lights move up, and the beats sit in the room below them */
+@media (orientation: landscape) and (max-height: 560px) {
+  #intro .iBulbs {
+    top: calc(12px + env(safe-area-inset-top));
+  }
+  #intro .iBulbs .bulbs {
+    --bulb: 28px;
+  }
+  #intro .iBeat {
+    padding-top: calc(66px + env(safe-area-inset-top));
+    padding-bottom: 12px;
+    gap: 12px;
+  }
+  #intro .iRow {
+    padding: 6px 0;
+    font-size: 20px;
+  }
+}
 @media (orientation: landscape) {
   #intro .iGusP {
     flex-direction: row;
     padding: 16px 22px 16px 12px;
   }
   #intro .iFace {
-    width: min(28vw, 46vh, 220px);
+    width: min(28vw, 42vh, 220px);
   }
   #intro .iYou {
     align-items: flex-start;

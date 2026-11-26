@@ -199,6 +199,8 @@ export function playIntro(o: IntroOpts = {}): { stop(): void } {
       press,
       stop: cleanup,
       hold: () => GS.INTRO?.hold,
+      /** hold the cars still with the game's own camera (to compare the last frame with the home screen's first) */
+      freeze: () => (GS.INTRO = { hold: true, camera: () => false, after: () => {} }),
     };
   return handle;
 }
