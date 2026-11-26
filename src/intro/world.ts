@@ -269,6 +269,18 @@ export const camera = {
 };
 
 // ---- the grade ----
+/**
+ * The inked page belongs to the renderer. The kit's INKED_PAGE was tuned for Matthew's outlined renderer (the
+ * Three.js port uses it); on this fork's canvas renderer it turns the painted run-off into black wedges, so this one
+ * is gentler: the same uncoloured page, with the greys kept.
+ */
+export const INKED_CANVAS = 'grayscale(1) brightness(1.5) contrast(1.35) sepia(.12)';
+export const GRADES = { canvas: INKED_CANVAS, outlined: INKED_PAGE };
+/** the grade this renderer uses before lights out */
+const GRADE = GRADES.canvas;
+// each part of the filter, and its value with no grade at all
+const NONE: Record<string, number> = { grayscale: 0, sepia: 0, brightness: 1, contrast: 1, saturate: 1 };
+const PARTS = [...GRADE.matchAll(/([a-z-]+)\(([\d.]+)\)/g)].map(p => [p[1], +p[2]] as [string, number]);
 let gradeNow = -1;
 /** The game canvas's grade: 0 is the inked page (an uncoloured comic page), 1 full colour; between, the flats going in. */
 export function setGrade(mix: number): void {
@@ -278,12 +290,9 @@ export function setGrade(mix: number): void {
   const cv = document.getElementById('c');
   if (!cv) return;
   if (m >= 1) cv.style.filter = '';
-  else if (m <= 0) cv.style.filter = INKED_PAGE;
-  else {
-    // INKED_PAGE is grayscale(1) brightness(1.6) contrast(2.6) sepia(.1): each part eased back to none
-    const r = (a: number, b: number) => (a + (b - a) * m).toFixed(3);
-    cv.style.filter = `grayscale(${r(1, 0)}) brightness(${r(1.6, 1)}) contrast(${r(2.6, 1)}) sepia(${r(0.1, 0)})`;
-  }
+  else if (m <= 0) cv.style.filter = GRADE;
+  else
+    cv.style.filter = PARTS.map(([f, v]) => `${f}(${(v + ((NONE[f] ?? v) - v) * m).toFixed(3)})`).join(' ');
 }
 
 // ---- the racing line, drawn over the frame ----

@@ -14,6 +14,7 @@ import './intro.css';
 import {
   EASE_OUT,
   PAPER,
+  balloonHTML,
   bulbsHTML,
   captionHTML,
   gusSVG,
@@ -125,9 +126,9 @@ export function makeBoard(): Board {
     `<div class="iBeat iHero">${panelHTML(`<p class="iLabel">2 Marlow</p><p class="iNum iBig">+0.040</p>`, 'iHeroP')}</div>` +
     `<div class="iCorner">${captionHTML('Lone Star Circuit · Turn 1')}</div>` +
     `<div class="iLift">${powerHTML('Lift.')}</div>` +
-    `<div class="iBeat iGus">${panelHTML(`<div class="iFace"></div><div class="lc-balloon" data-tail="down"><span class="power"><span class="iW1">Turn 1.</span><br><em class="iW2">Again.</em></span></div>`, 'iGusP')}</div>` +
-    `<div class="iBeat iYou">${panelHTML(youSVG(27, { size: '100%', framed: false }), 'iYouP')}</div>` +
-    `<div class="iTrail">${streaksSVG('100%', PAPER)}</div>` +
+    `<div class="iBeat iGus">${panelHTML(`<div class="iFace"></div>${balloonHTML('Turn 1.\n*Again.*', 'down')}`, 'iGusP')}</div>` +
+    `<div class="iBeat iYou">${panelHTML(`<div class="iHelmet">${youSVG(27, { size: '100%', framed: false })}</div>`, 'iYouP')}</div>` +
+    `<div class="iTrail">${streaksSVG('100%', PAPER, { height: '100%' })}</div>` +
     `<p class="iSkip">Skip</p>`;
   el.insertBefore(world.lineLayer(), el.children[1]);
   document.body.appendChild(el);
@@ -147,12 +148,10 @@ export function makeBoard(): Board {
     gus = q('.iGus'),
     face = q('.iFace'),
     balloon = q('.iGus .lc-balloon'),
-    w1 = q('.iW1'),
-    w2 = q('.iW2'),
+    again = q('.iGus .lc-balloon em'),
     you = q('.iYou'),
     trail = q('.iTrail'),
     skip = q('.iSkip');
-  trail.querySelector('svg')?.setAttribute('preserveAspectRatio', 'none');
   /** reduced motion: the title appears where it lands, without the flight or the streaks */
   const still = !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
   const root = document.documentElement.style;
@@ -210,8 +209,8 @@ export function makeBoard(): Board {
   const T1 = world.turn1;
   const rollStart = world.lineTime(T1.from);
   const rollAt = (t: number) => world.lineAt(rollStart + (t - ROLL_FROM) * ROLL_K);
-  /** how close the helicopter comes to the car, as a multiple of the whole corner's zoom */
-  const CLOSE = 2.1;
+  /** metres of road across the screen's short side at the bottom of the descent: the car about 44 px long on a phone */
+  const ROAD_M = 46;
 
   let launched = false,
     advanced = false,
@@ -240,7 +239,8 @@ export function makeBoard(): Board {
           const i = rollAt(t),
             [x, y, z] = world.linePoint(rollAt(t - 0.3));
           world.placeCar(i, world.lineSpeed(i) * ROLL_K);
-          world.camera.flyTo(high, { ...wide, x, y, z, zoom: wide.zoom * CLOSE }, descend(seg(t, L2, L3)));
+          const close = Math.min(innerWidth, innerHeight) / ROAD_M;
+          world.camera.flyTo(high, { ...wide, x, y, z, zoom: close }, descend(seg(t, L2, L3)));
         } else world.camera.flyTo(wide, wide, 1);
         mine = true;
       } else world.showGrid();
@@ -282,11 +282,32 @@ export function makeBoard(): Board {
       show(lift, false);
       if (t >= L3 && t < L4) {
         const head = world.lineAt((t - LINE_FROM) * LINE_RATE);
+        // the word and the turn to red are one event: it appears on that frame, beside the red segment's start, on
+        // the outside of the bend, like a note in the margin
         if (head >= T1.lift) {
-          const [x, y, z] = world.linePoint(T1.lift),
-            [sx, sy] = world.project(x, y, z);
-          lift.style.transform = `translate(${Math.round(sx)}px, ${Math.round(sy)}px)`;
           show(lift, true);
+          const p = (i: number) => {
+              const [x, y, z] = world.linePoint(i);
+              return world.project(x, y, z);
+            },
+            [sx, sy] = p(T1.lift),
+            [tx, ty] = p(T1.lift + 4),
+            [ax, ay] = p(T1.apex);
+          let nx = sy - ty,
+            ny = tx - sx;
+          const nl = Math.hypot(nx, ny) || 1;
+          nx /= nl;
+          ny /= nl;
+          if (nx * (ax - sx) + ny * (ay - sy) > 0) {
+            nx = -nx;
+            ny = -ny;
+          }
+          const w = lift.offsetWidth,
+            h = lift.offsetHeight,
+            g = 10,
+            px = sx + nx * g - (nx < -0.35 ? w : nx > 0.35 ? 0 : w / 2),
+            py = sy + ny * g - (ny < -0.35 ? h : ny > 0.35 ? 0 : h / 2);
+          lift.style.transform = `translate(${Math.round(px)}px, ${Math.round(py)}px)`;
         }
       }
 
@@ -296,8 +317,7 @@ export function makeBoard(): Board {
         const speaking = SAY.some(s => t >= s && t < s + 0.28);
         setFace(speaking ? 'count' : t >= BLINK && t < BLINK + 0.14 ? 'blink' : 'stern');
         show(balloon, t >= SAY[0]);
-        show(w1, t >= SAY[0]);
-        show(w2, t >= SAY[1]);
+        again.style.visibility = t >= SAY[1] ? '' : 'hidden';
         balloon.dataset.tail = innerWidth > innerHeight ? 'left' : 'down';
       }
 

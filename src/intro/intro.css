@@ -68,6 +68,7 @@ html.intro .hLogo {
 #intro .iBulbs .bulbs {
   --bulb: clamp(26px, 8vw, 36px);
 }
+/* a beat's panels, in the room under the lights, with a 16 px gutter on every side */
 #intro .iBeat {
   position: absolute;
   inset: 0;
@@ -76,7 +77,13 @@ html.intro .hLogo {
   align-items: center;
   justify-content: center;
   gap: 18px;
-  padding: 0 16px;
+  padding: calc(124px + env(safe-area-inset-top)) max(16px, env(safe-area-inset-right))
+    calc(16px + env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+}
+#intro .lc-panel,
+#intro .lc-caption {
+  box-sizing: border-box;
+  max-width: 100%;
 }
 #intro .iNum {
   font-weight: 900;
@@ -97,7 +104,7 @@ html.intro .hLogo {
   font-size: 14px;
 }
 #intro .iTower {
-  width: min(340px, 86vw);
+  width: min(340px, 100%);
   padding: 6px 16px;
 }
 #intro .iRow {
@@ -118,10 +125,15 @@ html.intro .hLogo {
   color: var(--lc-red);
   letter-spacing: -0.02em;
 }
-/* the close-up: the number like a face */
+/* the close-ups (the number, Gus, your helmet) fill the width between the gutters */
+#intro .iHeroP,
+#intro .iGusP,
+#intro .iYouP {
+  width: 100%;
+}
 #intro .iHeroP {
   text-align: center;
-  padding: 20px 26px 16px;
+  padding: 20px 16px 16px;
 }
 #intro .iBig {
   margin-top: 10px;
@@ -130,10 +142,11 @@ html.intro .hLogo {
   color: var(--lc-red);
 }
 
-/* lights 2 and 3: a place caption, and the word at the lift point */
+/* lights 2 and 3: a place caption, and the word beside the line where it turns red */
 #intro .iCorner {
   position: absolute;
-  left: 16px;
+  left: max(16px, env(safe-area-inset-left));
+  right: 16px;
   bottom: calc(28px + env(safe-area-inset-bottom));
 }
 #intro .iCorner .lc-caption {
@@ -143,33 +156,38 @@ html.intro .hLogo {
   position: absolute;
   left: 0;
   top: 0;
-  width: 0;
-  height: 0;
 }
 #intro .iLift .power {
-  position: absolute;
-  right: 18px;
-  bottom: 10px;
-  font-size: clamp(38px, 11vw, 56px);
+  display: block;
+  font-size: clamp(36px, 10vw, 52px);
+  line-height: 0.9;
   white-space: nowrap;
 }
 
-/* light 4: Gus, his line in a balloon pointing at him */
+/* light 4: Gus, his line in a balloon pointing down at him, both inside his panel */
 #intro .iGusP {
   display: flex;
   flex-direction: column-reverse;
   align-items: center;
-  gap: 18px;
-  padding: 18px 18px 8px;
+  gap: 20px;
+  padding: 18px 16px 0;
 }
 #intro .iFace {
-  width: min(54vw, 30vh, 240px);
+  width: min(100%, 480px, calc(100vh - 380px));
 }
 #intro .iFace svg {
   display: block;
 }
 #intro .iGus .lc-balloon {
-  padding: 12px 22px 14px;
+  padding: 12px 24px 14px;
+  font-weight: 800;
+  font-style: italic;
+  font-size: clamp(36px, 11vw, 56px);
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+}
+#intro .iGus .lc-balloon em {
+  font-style: italic;
 }
 #intro .iGus .lc-balloon[data-tail='down']::before {
   left: calc(50% - 8px);
@@ -177,24 +195,20 @@ html.intro .hLogo {
 #intro .iGus .lc-balloon[data-tail='down']::after {
   left: calc(50% - 5.5px);
 }
-#intro .iGus .power {
-  display: block;
-  font-size: clamp(34px, 10vw, 48px);
-}
-#intro .iW2 {
-  color: var(--lc-red);
-}
 
-/* light 5: your helmet over the grid */
+/* light 5: your helmet, below the grid it is about to race */
 #intro .iYou {
-  justify-content: flex-start;
-  padding-top: calc(132px + env(safe-area-inset-top));
+  justify-content: flex-end;
 }
 #intro .iYouP {
-  width: min(40vw, 24vh, 190px);
-  padding: 8px;
+  display: flex;
+  justify-content: center;
+  padding: 12px 16px 0;
 }
-#intro .iYouP svg {
+#intro .iHelmet {
+  width: min(100%, 360px, calc(40vh - 40px));
+}
+#intro .iHelmet svg {
   display: block;
 }
 
@@ -208,7 +222,6 @@ html.intro .hLogo {
   }
   #intro .iBeat {
     padding-top: calc(66px + env(safe-area-inset-top));
-    padding-bottom: 12px;
     gap: 12px;
   }
   #intro .iRow {
@@ -219,18 +232,23 @@ html.intro .hLogo {
 @media (orientation: landscape) {
   #intro .iGusP {
     flex-direction: row;
-    padding: 16px 22px 16px 12px;
+    justify-content: center;
+    gap: 28px;
+    padding: 12px 22px 0 12px;
   }
   #intro .iFace {
-    width: min(28vw, 42vh, 220px);
+    width: min(40vw, calc(100vh - 110px), 420px);
   }
   #intro .iYou {
     align-items: flex-start;
     justify-content: center;
-    padding: 0 0 0 max(24px, env(safe-area-inset-left));
   }
   #intro .iYouP {
-    width: min(24vw, 40vh, 190px);
+    width: auto;
+    padding: 12px 16px 0;
+  }
+  #intro .iHelmet {
+    width: min(40vw, calc(100vh - 110px), 420px);
   }
   #intro .iBig {
     font-size: min(18vw, 34vh, 168px);
@@ -243,10 +261,6 @@ html.intro .hLogo {
   left: 0;
   top: 0;
   pointer-events: none;
-}
-#intro .iTrail svg {
-  width: 100% !important;
-  height: 100% !important;
 }
 
 /* before the first tap, and the way out */

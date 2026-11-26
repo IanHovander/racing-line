@@ -26,24 +26,33 @@ call because the payoff is the real game: what floods into colour is what the pl
 The clock runs on the game's music tempo, 112 bpm (a beat is 0.536 s), so lights out is the first beat of the home
 screen's music, which then simply carries on. Times are from the first tap.
 
-| Time  | Beat              | What happens                                                                                                                                                                                      | Sound                                     |
-| ----- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- |
-| 0.00  | Light 1 The wound | A blank page. The caption FINAL ROUND · LAP 71 types on, then the timing tower: 1 VANCE, 2 MARLOW, and +0.040 in red. At 3.21 s, a hard cut to +0.040 as the close-up, in its own panel.          | the beep, then nothing                    |
-| 4.29  | Light 2 Dawn      | The real renderer, graded as an inked page. The helicopter comes down from high over Lone Star onto the one car on track and follows it into Turn 1. Caption: LONE STAR CIRCUIT · TURN 1.         | beep; dawn air; the one engine, nearer    |
-| 8.57  | Light 3 The line  | Cut to the whole corner, empty. The racing line draws itself at a racing car's pace: paper on the approach, red from the lift point, green from the apex, each inked. "Lift." where it turns red. | beep; air                                 |
-| 12.86 | Light 4 Gus       | Cut to Gus's panel on the page. His balloon: "Turn 1." (13.93), then "Again." in red (15.00). His mouth opens on each line, one blink at 16.34.                                                   | beep; a radio click before each line      |
-| 17.14 | Light 5 You       | Your helmet, car 27, in a panel over the ten cars on the grid (the home screen's own camera, still graded).                                                                                       | beep; engines idle, revs climb from 18.54 |
-| 20.29 | the hush          | Everything holds.                                                                                                                                                                                 | 0.6 s of silence                          |
-| 20.89 | Lights out        | All five bulbs go dark; the grade drops to colour in 120 ms; the cars launch.                                                                                                                     | a low thump, ten engines; the music       |
-| 21.13 | the title         | The dark bulbs make way; RACING LINE flies in from the left (the way its own streaks point), lands at 21.43.                                                                                      | a whoosh                                  |
-| 23.04 | settle            | The home screen's buttons and shading arrive.                                                                                                                                                     | the music plays on                        |
-| 23.57 | hand over         | The intro is gone; the home screen is exactly what was on screen.                                                                                                                                 |                                           |
+| Time  | Beat              | What happens                                                                                                                                                                                                                                                                                        | Sound                                     |
+| ----- | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- |
+| 0.00  | Light 1 The wound | A blank page. The caption FINAL ROUND · LAP 71 types on, then the timing tower: 1 VANCE, 2 MARLOW, and +0.040 in red. At 3.21 s, a hard cut to +0.040 as the close-up, in its own panel.                                                                                                            | the beep, then nothing                    |
+| 4.29  | Light 2 Dawn      | The real renderer, graded as an uncoloured page. The helicopter comes down from high over Lone Star onto the one car, alone at dawn, and follows it into Turn 1: 46 m of road across the screen, the car about 44 px long on a phone. Caption: LONE STAR CIRCUIT · TURN 1.                          | beep; dawn air; the one engine, nearer    |
+| 8.57  | Light 3 The line  | Cut to the whole corner, empty. The racing line draws itself at a racing car's pace: paper on the approach, red from the lift point, green from the apex, each inked. On the frame it turns red, "Lift." is set beside the start of the red, on the outside of the bend, like a note in the margin. | beep; air                                 |
+| 12.86 | Light 4 Gus       | Cut to Gus, close: his panel fills the width between the gutters, his balloon inside it pointing down at him: "Turn 1." (13.93), then "Again." in red (15.00). His mouth opens on each line, one blink at 16.34.                                                                                    | beep; a radio click before each line      |
+| 17.14 | Light 5 You       | Your helmet, car 27, close: a full-width panel under the ten cars on the grid (the home screen's own camera, still graded).                                                                                                                                                                         | beep; engines idle, revs climb from 18.54 |
+| 20.29 | the hush          | Everything holds.                                                                                                                                                                                                                                                                                   | 0.6 s of silence                          |
+| 20.89 | Lights out        | All five bulbs go dark; the grade drops to colour in 120 ms; the cars launch.                                                                                                                                                                                                                       | a low thump, ten engines; the music       |
+| 21.13 | the title         | The dark bulbs make way; RACING LINE flies in from the left (the way its own streaks point), lands at 21.43.                                                                                                                                                                                        | a whoosh                                  |
+| 23.04 | settle            | The home screen's buttons and shading arrive.                                                                                                                                                                                                                                                       | the music plays on                        |
+| 23.57 | hand over         | The intro is gone; the home screen is exactly what was on screen.                                                                                                                                                                                                                                   |                                           |
 
 ### Where the board was refined, and why
 
+- **The grade belongs to the renderer.** The kit's `INKED_PAGE` (`grayscale(1) brightness(1.6) contrast(2.6)
+  sepia(.1)`) was tuned for Matthew's outlined renderer; on this canvas renderer it turns the painted run-off into black
+  wedges and reads like a photocopy. `world.ts` has this renderer's own, `INKED_CANVAS` (`grayscale(1) brightness(1.5)
+  contrast(1.35) sepia(.12)`), and keeps `INKED_PAGE` for the port; `setGrade` eases each part of whichever is in use
+  back to none in 120 ms at lights out.
+- **Close-ups are close.** The +0.040 panel, Gus's panel and your helmet's fill the width between 16 px gutters, the
+  portraits about twice their first size. Every panel keeps a 16 px gutter in both orientations.
+
 - **The close-up on +0.040** (light 1). The bible says numbers are the close-ups; holding on a row of the tower read
   as a table. The number gets its own panel for the last second of the beat, like a face.
-- **Light 2 follows the car down.** Framed on the whole corner the one car is a speck. The helicopter comes down onto
+- **Light 2 follows the car down.** Framed on the whole corner the one car is a speck (and at 60 m of road across the
+  screen it is still only 34 px long; at 46 m it is 44 px). The helicopter comes down onto
   it and follows it into the hairpin, and light 3 cuts to the whole, empty corner for the line. Every light is a panel
   cut, so the cut costs nothing.
 - **A place caption** on light 2 (LONE STAR CIRCUIT · TURN 1): a comic's narration box, so "Turn 1." in Gus's balloon
@@ -81,7 +90,7 @@ sub-pixel edge noise while the game camera settles (checked with a pair of scree
 ## The code
 
 - `world.ts` is the only file that touches the game: Turn 1 measured from the circuit the game built, the
-  helicopter (`camera.flyTo`, `camera.frame`, `camera.track`), the grade (`setGrade`, the kit's `INKED_PAGE` on the
+  helicopter (`camera.flyTo`, `camera.frame`, `camera.track`), the grade (`setGrade`, this renderer's own `INKED_CANVAS` on the
   game canvas), the cars (`showCorner`, `showGrid`, `placeCar`, `carsLaunch`), the line drawn over the frame, and the
   audio output and music. Porting the intro to Matthew's Three.js main means rewriting this file.
 - `board.ts` is the film: the timeline and a function from the clock to the frame (world, overlays) and its sound
@@ -96,7 +105,7 @@ sub-pixel edge noise while the game camera settles (checked with a pair of scree
 
 ## iOS Safari
 
-The grade is a CSS filter on the game canvas (`grayscale(1) brightness(1.6) contrast(2.6) sepia(.1)`); Safari on iOS
+The grade is a CSS filter on the game canvas (`grayscale(1) brightness(1.5) contrast(1.35) sepia(.12)`); Safari on iOS
 applies CSS filters to a canvas, composited on the GPU, and the canvas still redraws every frame under it. If a phone
 struggles, the filter is the first thing to measure. Sound needs a tap and goes through the game's own audio context,
 which already plays with the ringer switch off.
