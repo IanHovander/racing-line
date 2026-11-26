@@ -1,7 +1,8 @@
 // The story layer's moments, as HTML the game and the campaign drop in, drawn like the game's own UI (clean-line
 // comic: a 2.5 px ink border, flat fills, a hard ink shadow offset down-right). Styles are in art.css.
 //   panelHTML(html)          a comic panel: cream, inked, with the hard shadow, like the game's Practice button
-//   balloonHTML(text, tail)  a speech balloon on paper, its tail pointing at the speaker ('left' | 'right' | 'down')
+//   balloonHTML(text, tail)  a speech balloon on paper, its tail pointing at the speaker ('left' | 'right' | 'down' |
+//                            'up'); *stars* set a word in red, as in powerHTML
 //   captionHTML(text)        a narration box: rectangular, mono caps ("FINAL ROUND · LAP 71")
 //   gusSays(face, text)      a panel with Gus drawn straight into it (no frame of his own) and his line in a balloon
 //   bulbsHTML(lit)           the start lights, five in a row; anything counted to five uses them (a drill streak
@@ -10,7 +11,7 @@
 //   rollHTML(from, to)       a pass: the position rolls in an ink badge like the race's own position badge
 //                            (P5 -> P4), tightening to the new number's width, and one ink speed streak shoots in.
 //                            playRoll(el) runs it (again).
-//   streaksSVG()             the logo's speed streaks, for anything that has to look fast
+//   streaksSVG()             the logo's speed streaks, for anything that has to look fast; stretch to fill a box
 //   powerHTML(words)         words of power in Geist 800 italic, the starred word in red ("Turn 1. *Again.*")
 import { gusSVG, type GusFace } from './portraits';
 import { INK, RED } from './tokens';
@@ -20,8 +21,14 @@ const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
 export function panelHTML(html: string, cls = '') {
   return `<div class="lc-panel${cls ? ' ' + cls : ''}">${html}</div>`;
 }
-export function balloonHTML(text: string, tail: 'left' | 'right' | 'down' = 'left') {
-  return `<div class="lc-balloon" data-tail="${tail}">${esc(text)}</div>`;
+/** Wrap a word in *stars* to set it in red ("Turn 1. *Again.*"); new lines with \n. */
+const marked = (text: string) =>
+  esc(text)
+    .split('\n')
+    .map(l => l.replace(/\*([^*]+)\*/g, `<em class="lc-red">$1</em>`))
+    .join('<br>');
+export function balloonHTML(text: string, tail: 'left' | 'right' | 'down' | 'up' = 'left') {
+  return `<div class="lc-balloon" data-tail="${tail}">${marked(text)}</div>`;
 }
 export function captionHTML(text: string) {
   return `<div class="lc-caption">${esc(text)}</div>`;
@@ -76,11 +83,14 @@ export function playRoll(el: Element) {
   r.classList.add('play');
 }
 
-/** The logo's four streaks, tapering to the left. */
-export function streaksSVG(width: number | string = 72, colour = INK) {
-  const w = typeof width === 'number' ? width + 'px' : width;
+/** The logo's four streaks, tapering to the left. stretch: fill the given width and height (a long trail). */
+export function streaksSVG(width: number | string = 72, colour = INK, stretch?: { height: number | string }) {
+  const css = (v: number | string) => (typeof v === 'number' ? v + 'px' : v);
+  const size = stretch
+    ? `width:${css(width)};height:${css(stretch.height)}`
+    : `width:${css(width)};height:auto`;
   return (
-    `<svg class="streaks" viewBox="0 0 40 13" style="display:block;width:${w};height:auto" aria-hidden="true">` +
+    `<svg class="streaks" viewBox="0 0 40 13"${stretch ? ' preserveAspectRatio="none"' : ''} style="display:block;${size}" aria-hidden="true">` +
     `<g transform="translate(4.7 1) skewX(-20)" fill="${colour}">` +
     `<path d="M0 1.8L34 1.3L34 2.3Z"/><path d="M0 4.8L34 4.2L34 5.4Z"/>` +
     `<path d="M0 7.8L34 7.3L34 8.3Z"/><path d="M0 10.8L34 10.2L34 11.4Z"/>` +
@@ -94,7 +104,7 @@ export function powerHTML(words: string) {
     `<span class="power">` +
     esc(words)
       .split('\n')
-      .map(l => l.replace(/\*([^*]+)\*/g, `<em style="color:${RED}">$1</em>`))
+      .map(l => l.replace(/\*([^*]+)\*/g, `<em class="lc-red" style="color:${RED}">$1</em>`))
       .join('<br>') +
     `</span>`
   );

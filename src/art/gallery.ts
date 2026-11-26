@@ -16,6 +16,7 @@ import {
   streaksSVG,
   gusSays,
   captionHTML,
+  balloonHTML,
   panelHTML,
 } from './index';
 
@@ -63,6 +64,7 @@ export function init() {
     'wide bare',
   );
   show(row, gusSays('doubt', 'It felt fast?', 64), 'unconvinced', 'wide bare');
+  show(row, balloonHTML('Turn 1. *Again.*', 'up'), 'a red word, tail up', 'bare');
   show(
     row,
     panelHTML(
@@ -141,6 +143,7 @@ export function init() {
     'The logo’s streaks, and words of power in Geist 800 italic, the last word red.',
   );
   show(row, streaksSVG(160), 'speed streaks');
+  show(row, streaksSVG(240, undefined, { height: 18 }), 'stretched into a trail');
   show(row, `<span style="font-size:44px">${powerHTML('Turn 1.\n*Again.*')}</span>`, 'words of power');
   show(row, `<span style="font-size:44px">${powerHTML('*Lift.*')}</span>`, 'one word');
 }

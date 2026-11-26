@@ -81,6 +81,26 @@
   border-color: var(--lc-paper) transparent transparent transparent;
 }
 
+.lc-balloon[data-tail='up']::before {
+  left: 22px;
+  top: -14px;
+  border-width: 0 9px 14px 0;
+  border-color: transparent transparent var(--lc-ink) transparent;
+}
+.lc-balloon[data-tail='up']::after {
+  left: 24.5px;
+  top: -9px;
+  border-width: 0 6px 10px 0;
+  border-color: transparent transparent var(--lc-paper) transparent;
+}
+.lc-red {
+  color: var(--lc-red);
+  font-style: normal;
+}
+.power .lc-red {
+  font-style: italic;
+}
+
 /* Gus speaking: a panel, him drawn straight into it, then the balloon pointing at him. */
 .lc-panel.lc-says {
   display: flex;
